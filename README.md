@@ -21,7 +21,6 @@ PASO is a production-level real-time communication platform inspired by WhatsApp
 ## Architecture
 
 The application follows a scalable decoupled architecture designed to efficiently manage real-time communication, AI services, and ML-based moderation.
-
 ```mermaid
 graph TD
 
@@ -42,11 +41,21 @@ B1[Express Server]
 B2[REST API Controllers]
 B3[Authentication Service]
 B4[JWT Middleware]
-B5[Socket.io Server]
+
+B5[Socket.io Server Instance 1]
+B10[Socket.io Server Instance 2]
+
 B6[Message Service]
 B7[Group Service]
 B8[User Service]
 B9[Admin Service]
+end
+
+%% ================= REDIS =================
+subgraph REDIS [Realtime Scaling Layer]
+R1[(Redis Server)]
+R2[Socket.io Redis Adapter]
+R3[Pub/Sub Event Sync]
 end
 
 %% ================= DATABASE =================
@@ -90,6 +99,7 @@ end
 %% Frontend to Backend
 A1 -->|HTTP Requests| B1
 A5 -->|WebSocket| B5
+A5 -->|WebSocket| B10
 
 %% Backend internal flow
 B1 --> B2
@@ -103,6 +113,14 @@ B2 --> B9
 
 %% Socket communication
 B5 --> B6
+B10 --> B6
+
+%% Redis Scaling
+B5 --> R2
+B10 --> R2
+
+R2 --> R1
+R1 --> R3
 
 %% Database connections
 B6 --> C3
@@ -190,55 +208,77 @@ F6 --> F3
 
 ## Features
 
-Authentication System
-
-- Secure sign up with full name, email, password
-- Security questions (3-level verification)
+### Authentication & Security
+- Secure signup and login
+- Email/password authentication
+- 3-level security question verification
 - Forgot password with identity verification
 - Email notifications via Brevo
 
-UI and Customization
+---
 
-- Built with DaisyUI and Tailwind CSS
-- Dynamic themes
-- Chat wallpapers
-
-AI Integration
-- AI chatbot powered by Groq API
-
-Messaging System
-
-- One-to-one chat
+### Messaging System
+- One-to-one real-time chat
 - Group chat with admin roles
-
-Features:
-
 - Message status (single/double/blue tick)
-- Reactions
+- Reactions and emoji support
+- Reply to messages
 - Pin messages
-- Reply system
-- Copy text
-- Delete (me / everyone)
+- Copy messages
+- Delete for me / everyone
+- Chat wallpapers and themes
 
+---
 
-Reporting and Moderation
+### AI Integration
+- AI chatbot powered by Groq API
+- AI-assisted conversations
+- Smart interaction flow
+
+---
+
+### Moderation & Reporting
 - Message reporting system
-- ML-based moderation
-- Admin review pipeline
+- ML-based toxicity detection
+- Spam detection
+- Admin moderation pipeline
 
-Search System
+---
 
+### Search Features
 - Global message search
-- Highlighted results
+- Highlighted search results
 
-Calling Features
+---
 
-Voice and video calls (ZegoCloud)
-- Admin Panel
-- Analytics dashboard
+### Calling Features
+- Voice calling
+- Video calling
+- ZegoCloud integration
+
+---
+
+### Scalability & Infrastructure
+- Redis-powered Socket.IO scaling
+- Distributed realtime event synchronization
+- Load testing support for socket infrastructure
+
+---
+
+### Admin Dashboard
 - User management
+- Analytics dashboard
 - Report management
-- CSV export
+- CSV export support
+
+---
+
+### UI & Customization
+- Built with React + Tailwind CSS + DaisyUI
+- Dynamic themes
+- Responsive design
+- Modern chat interface
+
 
 ##  Machine Learning Service
 
@@ -267,6 +307,8 @@ Backend:
 - Node.js
 - Express.js
 - Socket.io
+- Redis
+- @socket.io/redis-adapter
 
 Database:
 
