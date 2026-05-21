@@ -336,21 +336,133 @@ VITE_ZEGO_SERVER_SECRET= (put it in frontend also if not work through backend)
 VITE_BACKEND_URL=http://localhost:5001
 ```
 
-## Installation and Setup
-```bash
-git clone https://github.com/your-username/paso.git
-cd paso
+# Local Development Setup
 
-# Backend
+## Prerequisites
+
+Before running the project locally, make sure you have installed:
+
+- Node.js
+- MongoDB Atlas account or local MongoDB
+- Docker Desktop (required for Redis)
+- Python (for ML service)
+
+---
+
+# 1. Clone Repository
+
+```bash
+git clone https://github.com/CodePlaygroundHub/paso-chat-app.git
+cd paso-chat-app
+```
+
+---
+
+# 2. Start Redis Server (Required)
+
+This project uses Redis for realtime pub/sub communication.
+
+Make sure Docker Desktop is installed and running locally before executing the command below.
+
+Run Redis using Docker:
+
+```bash
+docker run --name redis -p 6379:6379 redis
+```
+
+Keep this terminal running.
+
+---
+
+# 3. Configure Environment Variables
+
+Create `.env` files inside:
+
+```bash
+/backend
+/frontend
+```
+
+Use the provided `.env.example` files as reference.
+
+Important:
+- Add your MongoDB Atlas URI
+- Add your Groq API key
+- Add your Cloudinary credentials
+- Add your ZegoCloud credentials
+
+---
+
+# 4. Allow MongoDB Atlas Network Access
+
+If using MongoDB Atlas:
+
+Go to:
+
+Security → Network Access
+
+Add:
+
+```txt
+0.0.0.0/0
+```
+
+or whitelist your current IP address.
+
+---
+
+# 5. Start Backend Server
+
+Open a new terminal:
+
+```bash
 cd backend
 npm install
 npm run dev
+```
 
-# Frontend
-cd ../frontend
+Expected output:
+
+```bash
+✅ Redis connected
+✅ MongoDB connected
+Server running on port 5001
+```
+
+---
+
+# 6. Start Frontend
+
+Open another terminal:
+
+```bash
+cd frontend
 npm install
 npm run dev
 ```
+
+---
+
+# 7. Start ML Service (Optional but Recommended)
+
+Open another terminal:
+
+```bash
+cd ml-service
+pip install -r requirements.txt
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
+
+---
+
+# Application URLs
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:5001 |
+| ML Service | http://localhost:8000 |
+
 
 ## Documentation
 
