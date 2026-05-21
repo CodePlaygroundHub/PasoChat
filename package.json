@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "artillery": "^2.0.0-38",
+    "artillery-engine-socketio-v3": "^1.2.0"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}
