@@ -4,18 +4,25 @@ import express from "express";
 import Group from "../models/group.model.js";
 import Message from "../models/message.model.js";
 import User from "../models/user.model.js";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { pubClient, subClient } from "./redis.js";
 const app = express();
 const server = http.createServer(app);
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 120000;
 const io = new Server(server, {
   cors: {
-    origin: ["https://chat-app-sooty-mu.vercel.app", "http://localhost:5173"],
+    origin: [
+      "https://chat-app-sooty-mu.vercel.app",
+      "http://localhost:5173",
+    ],
     credentials: true,
   },
   pingTimeout: 60000,
   pingInterval: 25000,
 });
+
+io.adapter(createAdapter(pubClient, subClient));
 const userSocketMap = {};
 const activeCalls = new Set();
 const activeGroupCalls = new Map();

@@ -1,0 +1,38 @@
+config:
+  target: "ws://localhost:5001"
+
+  phases:
+    - duration: 60
+      arrivalRate: 10
+
+  engines:
+    socketio-v3:
+      transports:
+        - websocket
+
+scenarios:
+  - engine: socketio-v3
+
+    flow:
+      - connect:
+          auth:
+            userId: "6814f9f4d92d6a0012345678"
+
+      - emit:
+          channel: "requestOnlineUsers"
+
+      - think: 1
+
+      - emit:
+          channel: "typing"
+          data:
+            to: "6814f9f4d92d6a0099999999"
+
+      - think: 1
+
+      - emit:
+          channel: "stopTyping"
+          data:
+            to: "6814f9f4d92d6a0099999999"
+
+      - think: 2
