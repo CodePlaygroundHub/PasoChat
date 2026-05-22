@@ -14,7 +14,7 @@ subClient.on("error", (err) => {
   console.log("Redis Sub Error:", err);
 });
 
-await pubClient.connect();
-await subClient.connect();
+// await pubClient.connect();
+// await subClient.connect();
 
 console.log("✅ Redis connected");

@@ -19,6 +19,16 @@ import { useChatStore } from "../store/useChatStore";
 import GroupMembersModal from "./GroupMembersModal";
 import { useCallStore } from "../store/useCallStore";
 
+const IconBtn = ({ children, onClick, ...props }) => (
+  <button
+    onClick={onClick}
+    className="btn btn-ghost h-8 w-8 min-h-0 sm:h-9 sm:w-9 btn-circle flex items-center justify-center p-0"
+    {...props}
+  >
+    {children}
+  </button>
+);
+
 const ChatHeader = () => {
   const {
     selectedUser,
@@ -47,20 +57,34 @@ const ChatHeader = () => {
   const [showSearch, setShowSearch] = useState(false);
   const menuRef = useRef(null);
 
-  useEffect(() => {
+ 
+useEffect(() => {
   const handleClickOutside = (e) => {
     if (menuRef.current && !menuRef.current.contains(e.target)) {
       setOpenMenu(false);
     }
-    // ADD THIS:
+
     if (infoRef.current && !infoRef.current.contains(e.target)) {
       setShowInfoPanel(false);
     }
   };
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setShowInfoPanel(false);
+      setOpenMenu(false);       
+    setShowSearch(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  document.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+    document.removeEventListener("keydown", handleKeyDown);
+  };
+}, []);
   if (!selectedUser && !selectedGroup) return null;
 
   const isGroup = selectedChatType === "group";
@@ -117,6 +141,7 @@ const ChatHeader = () => {
     await removeChatWallpaper(chatId);
     setOpenMenu(false);
   };
+  
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-base-300 bg-base-100/90 backdrop-blur supports-[backdrop-filter]:bg-base-100/70">
@@ -432,13 +457,7 @@ const ChatHeader = () => {
   );
 };
 
-const IconBtn = ({ children, onClick }) => (
-  <button
-    onClick={onClick}
-    className="btn btn-ghost h-8 w-8 min-h-0 sm:h-9 sm:w-9 btn-circle flex items-center justify-center p-0"
-  >
-    {children}
-  </button>
-);
+
+
 
 export default ChatHeader;
