@@ -225,24 +225,34 @@ const ChatHeader = () => {
             
             {!isAI && (
   <div ref={infoRef} className="relative">
-    <IconBtn onClick={() => setShowInfoPanel(v => !v)}>
+    
+      <IconBtn onClick={() => setShowInfoPanel(v => !v)} aria-label="Open chat info">
       <Info size={18} />
     </IconBtn>
 
     <AnimatePresence>
       {showInfoPanel && (
+        <>
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 sm:hidden" 
+          onClick={() => setShowInfoPanel(false)}
+        />
         <motion.div
+        
+        
+        
           initial={{ opacity: 0, scale: 0.95, y: 6 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 6 }}
-          className="absolute right-0 mt-2 w-60 bg-base-100 border border-base-300 rounded-2xl shadow-xl z-[60] overflow-hidden"
+          
+          className="absolute right-0 mt-2 w-[min(90vw,16rem)] max-h-[80vh] overflow-y-auto bg-base-100 border border-base-300 rounded-2xl shadow-xl z-[60]"
         >
           {/* Header info */}
           <div className="flex flex-col items-center gap-2 pt-5 pb-3 px-4 border-b border-base-200">
             {isGroup ? (
               <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
                 <span className="font-bold text-primary text-2xl">
-                  {selectedGroup.name[0].toUpperCase()}
+                  {selectedGroup.name[0]?.toUpperCase()}
                 </span>
               </div>
             ) : (
@@ -318,17 +328,11 @@ const ChatHeader = () => {
             )}
           </div>
         </motion.div>
+        </>
       )}
     </AnimatePresence>
   </div>
-)}
-                    
-                      
-                  
-                
-            
-           
-
+            )}
             {/*SEARCH */}
             <div className="relative">
               <IconBtn onClick={() => setShowSearch((s) => !s)}>
@@ -374,8 +378,7 @@ const ChatHeader = () => {
               >
                 <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
-
-              <AnimatePresence>
+<AnimatePresence>
                 {openMenu && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 6 }}
@@ -397,7 +400,6 @@ const ChatHeader = () => {
                       <Image size={18} />
                       Change Wallpaper
                     </button>
-
                     <button
                       onClick={handleRemoveWallpaper}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/10"
@@ -424,7 +426,7 @@ const ChatHeader = () => {
         <GroupMembersModal
           groupId={selectedGroup._id}
           onClose={() => setShowMembers(false)}
-        />
+      />
       )}
     </header>
   );
