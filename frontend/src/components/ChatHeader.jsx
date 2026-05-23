@@ -10,6 +10,7 @@ import {
   Image,
   Trash,
   Search,
+  Users,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +18,16 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import GroupMembersModal from "./GroupMembersModal";
 import { useCallStore } from "../store/useCallStore";
+
+const IconBtn = ({ children, onClick, ...props }) => (
+  <button
+    onClick={onClick}
+    className="btn btn-ghost h-8 w-8 min-h-0 sm:h-9 sm:w-9 btn-circle flex items-center justify-center p-0"
+    {...props}
+  >
+    {children}
+  </button>
+);
 
 const ChatHeader = () => {
   const {
@@ -39,21 +50,41 @@ const ChatHeader = () => {
   const { authUser } = useAuthStore();
   const { startCall, startGroupCall } = useCallStore();
 
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const infoRef = useRef(null);
   const [showMembers, setShowMembers] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpenMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+ 
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (menuRef.current && !menuRef.current.contains(e.target)) {
+      setOpenMenu(false);
+    }
 
+    if (infoRef.current && !infoRef.current.contains(e.target)) {
+      setShowInfoPanel(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Escape") {
+      setShowInfoPanel(false);
+      setOpenMenu(false);       
+    setShowSearch(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  document.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+    document.removeEventListener("keydown", handleKeyDown);
+  };
+}, []);
   if (!selectedUser && !selectedGroup) return null;
 
   const isGroup = selectedChatType === "group";
@@ -110,6 +141,7 @@ const ChatHeader = () => {
     await removeChatWallpaper(chatId);
     setOpenMenu(false);
   };
+  
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-base-300 bg-base-100/90 backdrop-blur supports-[backdrop-filter]:bg-base-100/70">
@@ -215,61 +247,117 @@ const ChatHeader = () => {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            <div className="flex items-center bg-base-200/60 rounded-full p-0.5 sm:p-1 border border-base-300/40 gap-0.5 sm:gap-1">
-              {isGroup ? (
-                <>
-                  <IconBtn onClick={() => setShowMembers(true)}>
-                    <Info size={18} />
-                  </IconBtn>
-                  <IconBtn
-                    onClick={() =>
-                      startGroupCall({
-                        groupId: selectedGroup._id,
-                        callType: "voice",
-                      })
-                    }
-                  >
-                    <Phone size={18} />
-                  </IconBtn>
-                  <IconBtn
-                    onClick={() =>
-                      startGroupCall({
-                        groupId: selectedGroup._id,
-                        callType: "video",
-                      })
-                    }
-                  >
-                    <Video size={18} />
-                  </IconBtn>
-                </>
-              ) : (
-                !isAI && (
-                  <>
-                    <IconBtn
-                      onClick={() =>
-                        startCall({
-                          receiver: selectedUser,
-                          callType: "voice",
-                        })
-                      }
-                    >
-                      <Phone size={18} />
-                    </IconBtn>
-                    <IconBtn
-                      onClick={() =>
-                        startCall({
-                          receiver: selectedUser,
-                          callType: "video",
-                        })
-                      }
-                    >
-                      <Video size={18} />
-                    </IconBtn>
-                  </>
-                )
-              )}
-            </div>
+            
+            {!isAI && (
+  <div ref={infoRef} className="relative">
+    
+      <IconBtn onClick={() => setShowInfoPanel(v => !v)} aria-label="Open chat info">
+      <Info size={18} />
+    </IconBtn>
 
+    <AnimatePresence>
+      {showInfoPanel && (
+        <>
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 sm:hidden" 
+          onClick={() => setShowInfoPanel(false)}
+        />
+        <motion.div
+        
+        
+        
+          initial={{ opacity: 0, scale: 0.95, y: 6 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 6 }}
+          
+          className="absolute right-0 mt-2 w-[min(90vw,16rem)] max-h-[80vh] overflow-y-auto bg-base-100 border border-base-300 rounded-2xl shadow-xl z-[60]"
+        >
+          {/* Header info */}
+          <div className="flex flex-col items-center gap-2 pt-5 pb-3 px-4 border-b border-base-200">
+            {isGroup ? (
+              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                <span className="font-bold text-primary text-2xl">
+                  {selectedGroup.name[0]?.toUpperCase()}
+                </span>
+              </div>
+            ) : (
+              <div className="relative">
+                <img
+                  src={selectedUser?.profilePic || "/avatar.png"}
+                  className="h-14 w-14 rounded-full object-cover ring-2 ring-base-200"
+                />
+                {onlineUsers.includes(selectedUser?._id) && (
+                  <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full bg-success border-2 border-base-100" />
+                )}
+              </div>
+            )}
+            <div className="text-center">
+              <p className="font-bold text-sm">
+                {isGroup ? selectedGroup.name : selectedUser.fullName}
+              </p>
+              <p className="text-xs text-base-content/50 mt-0.5">
+                {isGroup
+                  ? `${selectedGroup.members?.length || 0} members`
+                  : onlineUsers.includes(selectedUser?._id)
+                    ? "Active now"
+                    : "Offline"}
+              </p>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex justify-center gap-6 py-4">
+            <button
+              onClick={() => {
+                setShowInfoPanel(false);
+                isGroup
+                  ? startGroupCall({ groupId: selectedGroup._id, callType: "voice" })
+                  : startCall({ receiver: selectedUser, callType: "voice" });
+              }}
+              className="flex flex-col items-center gap-1"
+            >
+              <span className="btn btn-circle btn-sm bg-base-200 border-none">
+                <Phone size={16} />
+              </span>
+              <span className="text-[10px] text-base-content/60">Voice</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowInfoPanel(false);
+                isGroup
+                  ? startGroupCall({ groupId: selectedGroup._id, callType: "video" })
+                  : startCall({ receiver: selectedUser, callType: "video" });
+              }}
+              className="flex flex-col items-center gap-1"
+            >
+              <span className="btn btn-circle btn-sm bg-base-200 border-none">
+                <Video size={16} />
+              </span>
+              <span className="text-[10px] text-base-content/60">Video</span>
+            </button>
+
+            {isGroup && (
+              <button
+                onClick={() => {
+                  setShowInfoPanel(false);
+                  setShowMembers(true);
+                }}
+                className="flex flex-col items-center gap-1"
+              >
+                <span className="btn btn-circle btn-sm bg-base-200 border-none">
+                  <Users size={16} />
+                </span>
+                <span className="text-[10px] text-base-content/60">Members</span>
+              </button>
+            )}
+          </div>
+        </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  </div>
+            )}
             {/*SEARCH */}
             <div className="relative">
               <IconBtn onClick={() => setShowSearch((s) => !s)}>
@@ -315,8 +403,7 @@ const ChatHeader = () => {
               >
                 <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
-
-              <AnimatePresence>
+<AnimatePresence>
                 {openMenu && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 6 }}
@@ -338,7 +425,6 @@ const ChatHeader = () => {
                       <Image size={18} />
                       Change Wallpaper
                     </button>
-
                     <button
                       onClick={handleRemoveWallpaper}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/10"
@@ -365,19 +451,13 @@ const ChatHeader = () => {
         <GroupMembersModal
           groupId={selectedGroup._id}
           onClose={() => setShowMembers(false)}
-        />
+      />
       )}
     </header>
   );
 };
 
-const IconBtn = ({ children, onClick }) => (
-  <button
-    onClick={onClick}
-    className="btn btn-ghost h-8 w-8 min-h-0 sm:h-9 sm:w-9 btn-circle flex items-center justify-center p-0"
-  >
-    {children}
-  </button>
-);
+
+
 
 export default ChatHeader;
