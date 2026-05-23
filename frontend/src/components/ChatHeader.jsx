@@ -10,7 +10,6 @@ import {
   Image,
   Trash,
   Search,
-  Users,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,16 +17,6 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import GroupMembersModal from "./GroupMembersModal";
 import { useCallStore } from "../store/useCallStore";
-
-const IconBtn = ({ children, onClick, ...props }) => (
-  <button
-    onClick={onClick}
-    className="btn btn-ghost h-8 w-8 min-h-0 sm:h-9 sm:w-9 btn-circle flex items-center justify-center p-0"
-    {...props}
-  >
-    {children}
-  </button>
-);
 
 const ChatHeader = () => {
   const {
@@ -50,41 +39,21 @@ const ChatHeader = () => {
   const { authUser } = useAuthStore();
   const { startCall, startGroupCall } = useCallStore();
 
-  const [showInfoPanel, setShowInfoPanel] = useState(false);
-  const infoRef = useRef(null);
   const [showMembers, setShowMembers] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const menuRef = useRef(null);
 
- 
-useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (menuRef.current && !menuRef.current.contains(e.target)) {
-      setOpenMenu(false);
-    }
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpenMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    if (infoRef.current && !infoRef.current.contains(e.target)) {
-      setShowInfoPanel(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
-      setShowInfoPanel(false);
-      setOpenMenu(false);       
-    setShowSearch(false);
-    }
-  };
-
-  document.addEventListener("mousedown", handleClickOutside);
-  document.addEventListener("keydown", handleKeyDown);
-
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-    document.removeEventListener("keydown", handleKeyDown);
-  };
-}, []);
   if (!selectedUser && !selectedGroup) return null;
 
   const isGroup = selectedChatType === "group";
@@ -141,7 +110,6 @@ useEffect(() => {
     await removeChatWallpaper(chatId);
     setOpenMenu(false);
   };
-  
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-base-300 bg-base-100/90 backdrop-blur supports-[backdrop-filter]:bg-base-100/70">
@@ -312,61 +280,7 @@ useEffect(() => {
                 )
               )}
             </div>
-          </div>
 
-          {/* Action buttons */}
-          <div className="flex justify-center gap-6 py-4">
-            <button
-              onClick={() => {
-                setShowInfoPanel(false);
-                isGroup
-                  ? startGroupCall({ groupId: selectedGroup._id, callType: "voice" })
-                  : startCall({ receiver: selectedUser, callType: "voice" });
-              }}
-              className="flex flex-col items-center gap-1"
-            >
-              <span className="btn btn-circle btn-sm bg-base-200 border-none">
-                <Phone size={16} />
-              </span>
-              <span className="text-[10px] text-base-content/60">Voice</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setShowInfoPanel(false);
-                isGroup
-                  ? startGroupCall({ groupId: selectedGroup._id, callType: "video" })
-                  : startCall({ receiver: selectedUser, callType: "video" });
-              }}
-              className="flex flex-col items-center gap-1"
-            >
-              <span className="btn btn-circle btn-sm bg-base-200 border-none">
-                <Video size={16} />
-              </span>
-              <span className="text-[10px] text-base-content/60">Video</span>
-            </button>
-
-            {isGroup && (
-              <button
-                onClick={() => {
-                  setShowInfoPanel(false);
-                  setShowMembers(true);
-                }}
-                className="flex flex-col items-center gap-1"
-              >
-                <span className="btn btn-circle btn-sm bg-base-200 border-none">
-                  <Users size={16} />
-                </span>
-                <span className="text-[10px] text-base-content/60">Members</span>
-              </button>
-            )}
-          </div>
-        </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  </div>
-            )}
             {/*SEARCH */}
             <div className="relative">
               <IconBtn onClick={() => setShowSearch((s) => !s)}>
@@ -412,7 +326,8 @@ useEffect(() => {
               >
                 <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
-<AnimatePresence>
+
+              <AnimatePresence>
                 {openMenu && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95, y: 6 }}
@@ -434,6 +349,7 @@ useEffect(() => {
                       <Image size={18} />
                       Change Wallpaper
                     </button>
+
                     <button
                       onClick={handleRemoveWallpaper}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/10"
@@ -461,7 +377,13 @@ useEffect(() => {
   );
 };
 
-
-
+const IconBtn = ({ children, onClick }) => (
+  <button
+    onClick={onClick}
+    className="btn btn-ghost h-8 w-8 min-h-0 sm:h-9 sm:w-9 btn-circle flex items-center justify-center p-0"
+  >
+    {children}
+  </button>
+);
 
 export default ChatHeader;
