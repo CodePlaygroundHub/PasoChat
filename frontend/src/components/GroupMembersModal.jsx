@@ -78,21 +78,14 @@ const GroupMembersModal = ({ groupId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 mt-[230px]">
+    <>
+    <div className="absolute top-full right-0 mt-3 z-[100] max-sm:fixed max-sm:top-20 max-sm:left-[36.3%] max-sm:-translate-x-1/2">
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className=""
-      />
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: -10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative w-full max-w-md max-h-[80vh]
-          rounded-3xl bg-base-100 shadow-2xl border border-base-300
-          flex flex-col"
+        className="w-[92vw] max-w-sm sm:w-96 max-h-[80vh]
+  rounded-3xl bg-base-100 shadow-2xl border border-base-300
+  flex flex-col overflow-hidden"
       >
         <div className="flex items-center justify-between border-b px-6 py-5">
           <div>
@@ -174,16 +167,16 @@ const GroupMembersModal = ({ groupId, onClose }) => {
         )}
       </motion.div>
 
-      <AnimatePresence>
-        {showAddMember && (
-          <AddMemberModal
-            group={group}
-            onClose={() => setShowAddMember(false)}
-            onAdded={(updatedGroup) => setGroup(updatedGroup)}
-          />
-        )}
-      </AnimatePresence>
+      
     </div>
+    {showAddMember && (
+        <AddMemberModal
+          group={group}
+          onClose={() => setShowAddMember(false)}
+          onAdded={(updatedGroup) => setGroup(updatedGroup)}
+        />
+      )}
+    </>
   );
 };
 

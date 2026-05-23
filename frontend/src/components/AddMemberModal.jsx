@@ -64,15 +64,27 @@ const AddMemberModal = ({ group, onClose, onAdded }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 mt-[230px]">
+    <div className="fixed inset-0 z-[110] flex items-start justify-center pt-24 sm:pt-32 p-2 sm:p-4">
       <div onClick={onClose} className="" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-sm rounded-3xl bg-base-100
-          shadow-2xl border border-base-300 overflow-hidden flex flex-col"
+        className="
+  relative
+  w-[calc(100vw-12px)]
+  max-w-[420px]
+  sm:max-w-sm
+  h-[52vh]
+  sm:h-auto
+  rounded-3xl
+  bg-base-100
+  shadow-2xl
+  border border-base-300
+  overflow-hidden
+  flex flex-col
+"
       >
         <div className="flex items-center justify-between border-b p-5">
           <div>
