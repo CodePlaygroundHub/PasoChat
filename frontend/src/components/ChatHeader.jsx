@@ -247,61 +247,70 @@ useEffect(() => {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-            
-            {!isAI && (
-  <div ref={infoRef} className="relative">
-    
-      <IconBtn onClick={() => setShowInfoPanel(v => !v)} aria-label="Open chat info">
-      <Info size={18} />
-    </IconBtn>
+            <div className="flex items-center bg-base-200/60 rounded-full p-0.5 sm:p-1 border border-base-300/40 gap-0.5 sm:gap-1">
+              {isGroup ? (
+                <>
+                  <div className="relative">
+                    <IconBtn onClick={() => setShowMembers(true)}>
+                      <Info size={18} />
+                    </IconBtn>
 
-    <AnimatePresence>
-      {showInfoPanel && (
-        <>
-        <div 
-          className="fixed inset-0 bg-black/20 z-40 sm:hidden" 
-          onClick={() => setShowInfoPanel(false)}
-        />
-        <motion.div
-        
-        
-        
-          initial={{ opacity: 0, scale: 0.95, y: 6 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 6 }}
-          
-          className="absolute right-0 mt-2 w-[min(90vw,16rem)] max-h-[80vh] overflow-y-auto bg-base-100 border border-base-300 rounded-2xl shadow-xl z-[60]"
-        >
-          {/* Header info */}
-          <div className="flex flex-col items-center gap-2 pt-5 pb-3 px-4 border-b border-base-200">
-            {isGroup ? (
-              <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                <span className="font-bold text-primary text-2xl">
-                  {selectedGroup.name[0]?.toUpperCase()}
-                </span>
-              </div>
-            ) : (
-              <div className="relative">
-                <img
-                  src={selectedUser?.profilePic || "/avatar.png"}
-                  className="h-14 w-14 rounded-full object-cover ring-2 ring-base-200"
-                />
-                {onlineUsers.includes(selectedUser?._id) && (
-                  <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full bg-success border-2 border-base-100" />
-                )}
-              </div>
-            )}
-            <div className="text-center">
-              <p className="font-bold text-sm">
-                {isGroup ? selectedGroup.name : selectedUser.fullName}
-              </p>
-              <p className="text-xs text-base-content/50 mt-0.5">
-                {isGroup
-                  ? `${selectedGroup.members?.length || 0} members`
-                  : onlineUsers.includes(selectedUser?._id)
-                    ? "Active now"
-                    : "Offline"}
-              </p>
+                    <AnimatePresence>
+                      {showMembers && isGroup && (
+                        <GroupMembersModal
+                          groupId={selectedGroup._id}
+                          onClose={() => setShowMembers(false)}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  <IconBtn
+                    onClick={() =>
+                      startGroupCall({
+                        groupId: selectedGroup._id,
+                        callType: "voice",
+                      })
+                    }
+                  >
+                    <Phone size={18} />
+                  </IconBtn>
+                  <IconBtn
+                    onClick={() =>
+                      startGroupCall({
+                        groupId: selectedGroup._id,
+                        callType: "video",
+                      })
+                    }
+                  >
+                    <Video size={18} />
+                  </IconBtn>
+                </>
+              ) : (
+                !isAI && (
+                  <>
+                    <IconBtn
+                      onClick={() =>
+                        startCall({
+                          receiver: selectedUser,
+                          callType: "voice",
+                        })
+                      }
+                    >
+                      <Phone size={18} />
+                    </IconBtn>
+                    <IconBtn
+                      onClick={() =>
+                        startCall({
+                          receiver: selectedUser,
+                          callType: "video",
+                        })
+                      }
+                    >
+                      <Video size={18} />
+                    </IconBtn>
+                  </>
+                )
+              )}
             </div>
           </div>
 
@@ -447,12 +456,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {showMembers && isGroup && (
-        <GroupMembersModal
-          groupId={selectedGroup._id}
-          onClose={() => setShowMembers(false)}
-      />
-      )}
+      
     </header>
   );
 };
