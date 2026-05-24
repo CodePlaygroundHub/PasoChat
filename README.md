@@ -11,6 +11,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/CodePlaygroundHub/paso-chat-app)
 ![GitHub last commit](https://img.shields.io/github/last-commit/CodePlaygroundHub/paso-chat-app)
 ![GitHub repo size](https://img.shields.io/github/repo-size/CodePlaygroundHub/paso-chat-app)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 
 # PASO – AI-Powered Real-Time Chat App (React + Node.js + Socket.io + ML Integration)
 
@@ -26,13 +27,15 @@ graph TD
 
 %% ================= FRONTEND =================
 subgraph FRONTEND [Frontend Layer]
-A1[React App]
-A2[State Management - Zustand]
-A3[UI - Tailwind CSS + DaisyUI]
+A1[React Application]
+A2[Zustand State Management]
+A3[Tailwind CSS + DaisyUI]
 A4[React Router]
 A5[Socket.io Client]
 A6[AI Chat Interface]
-A7[Voice/Video Call UI]
+A7[Voice & Video Call UI]
+A8[Message Search UI]
+A9[Admin Dashboard UI]
 end
 
 %% ================= BACKEND =================
@@ -43,91 +46,120 @@ B3[Authentication Service]
 B4[JWT Middleware]
 
 B5[Socket.io Server Instance 1]
-B10[Socket.io Server Instance 2]
+B6[Socket.io Server Instance 2]
 
-B6[Message Service]
-B7[Group Service]
-B8[User Service]
-B9[Admin Service]
+B7[Message Service]
+B8[Group Service]
+B9[User Service]
+B10[Admin Service]
+B11[Report Service]
+B12[AI Service]
 end
 
 %% ================= REDIS =================
 subgraph REDIS [Realtime Scaling Layer]
 R1[(Redis Server)]
 R2[Socket.io Redis Adapter]
-R3[Pub/Sub Event Sync]
+R3[Pub/Sub Synchronization]
 end
 
 %% ================= DATABASE =================
 subgraph DATABASE [Database Layer]
 C1[(MongoDB)]
-C2[User Collection]
-C3[Message Collection]
-C4[Group Collection]
-C5[Report Collection]
+
+C2[Users Collection]
+C3[Messages Collection]
+C4[Groups Collection]
+C5[Reports Collection]
 C6[Status Collection]
 end
 
 %% ================= ML SERVICE =================
 subgraph ML [ML Moderation Service]
 D1[FastAPI Server]
-D2[Text Analysis Model]
+D2[ML Text Processing]
 D3[Toxicity Detection]
 D4[Spam Detection]
+D5[Smart Reply Suggestions]
 end
 
-%% ================= EXTERNAL =================
+%% ================= EXTERNAL SERVICES =================
 subgraph EXTERNAL [External Services]
-E1[Groq API - AI Chat]
-E2[ZegoCloud - Voice/Video]
-E3[Cloudinary - Media Storage]
-E4[Brevo - Email Service]
+E1[Groq API]
+E2[ZegoCloud]
+E3[Cloudinary]
+E4[Brevo Email Service]
+end
+
+%% ================= TESTING =================
+subgraph TESTING [Backend Testing Infrastructure]
+T1[Jest]
+T2[Supertest]
+T3[MongoDB Memory Server]
+T4[Socket.io Client Testing]
+T5[Integration Testing]
+T6[Authentication Tests]
+T7[Message API Tests]
+T8[Realtime Socket Tests]
 end
 
 %% ================= DEVOPS =================
 subgraph DEVOPS [CI/CD Pipeline]
 F1[GitHub Actions]
-F2[Frontend CI]
-F3[Backend CI]
+
+F2[Frontend CI Pipeline]
+F3[Backend CI Pipeline]
+
 F4[ESLint Validation]
 F5[Production Build Validation]
-F6[Pull Request Validation]
+
+F6[Jest Integration Testing]
+F7[Socket.IO Test Validation]
+F8[Pull Request Validation]
+F9[npm ci Deterministic Install]
 end
 
-%% ================= FLOW =================
-
-%% Frontend to Backend
-A1 -->|HTTP Requests| B1
+%% ================= FRONTEND FLOW =================
+A1 -->|REST API| B1
 A5 -->|WebSocket| B5
-A5 -->|WebSocket| B10
+A5 -->|WebSocket| B6
 
-%% Backend internal flow
+A6 -->|AI Requests| B12
+A7 -->|Call Initialization| E2
+A8 -->|Search Requests| B7
+A9 -->|Admin Controls| B10
+
+%% ================= BACKEND FLOW =================
 B1 --> B2
+
 B2 --> B3
 B3 --> B4
 
-B2 --> B6
 B2 --> B7
 B2 --> B8
 B2 --> B9
+B2 --> B10
+B2 --> B11
+B2 --> B12
 
-%% Socket communication
-B5 --> B6
-B10 --> B6
+%% ================= SOCKET FLOW =================
+B5 --> B7
+B6 --> B7
 
-%% Redis Scaling
+%% ================= REDIS SCALING =================
 B5 --> R2
-B10 --> R2
+B6 --> R2
 
 R2 --> R1
 R1 --> R3
 
-%% Database connections
-B6 --> C3
-B6 --> C6
-B7 --> C4
-B8 --> C2
-B9 --> C5
+%% ================= DATABASE FLOW =================
+B7 --> C3
+B7 --> C6
+
+B8 --> C4
+B9 --> C2
+B10 --> C5
 
 C1 --> C2
 C1 --> C3
@@ -135,34 +167,37 @@ C1 --> C4
 C1 --> C5
 C1 --> C6
 
-%% ML Service
-B6 -->|Analyze Message| D1
+%% ================= ML FLOW =================
+B7 -->|Analyze Message| D1
+
 D1 --> D2
 D2 --> D3
 D2 --> D4
+D2 --> D5
 
-%% External APIs
-B6 --> E1
-B6 --> E2
-B6 --> E3
+%% ================= EXTERNAL SERVICES FLOW =================
+B12 --> E1
+B7 --> E2
+B7 --> E3
 B3 --> E4
 
-%% AI Chat
-A6 -->|AI Request| B6
-B6 --> E1
+%% ================= MEDIA FLOW =================
+A1 -->|Upload Media| B7
+B7 --> E3
 
-%% Calling Feature
-A7 -->|Initialize Call| E2
+%% ================= EMAIL FLOW =================
+B3 -->|Send Emails| E4
 
-%% Media Upload
-A1 -->|Upload Media| B6
-B6 --> E3
+%% ================= TESTING FLOW =================
+T1 --> T5
+T2 --> T5
+T3 --> T5
+T4 --> T8
 
-%% Email Flow
-B3 -->|Send Email| E4
+T5 --> T6
+T5 --> T7
 
-%% ================= CI/CD FLOW =================
-
+%% ================= DEVOPS FLOW =================
 F1 --> F2
 F1 --> F3
 
@@ -170,12 +205,23 @@ F2 --> F4
 F2 --> F5
 
 F3 --> F4
+F3 --> F6
+F3 --> F7
+F3 --> F9
 
+F8 --> F2
+F8 --> F3
+
+%% ================= DEPLOYMENT FLOW =================
 F2 --> A1
 F3 --> B1
 
-F6 --> F2
-F6 --> F3
+%% ================= TEST VALIDATION =================
+F6 --> T1
+F6 --> T2
+F6 --> T3
+
+F7 --> T4
 ```
 
 ## Screenshots
@@ -335,8 +381,35 @@ Services:
 - GitHub Actions powered CI workflows
 - Automated frontend lint + production build validation
 - Automated backend lint validation
+- Automated backend integration testing with Jest
+- Socket.IO realtime connection testing
+- MongoDB in-memory test environment
 - Pull request validation before merge
 - npm ci based deterministic installs
+
+## Backend Testing
+
+PASO includes production-style backend testing infrastructure using:
+
+- Jest
+- Supertest
+- MongoDB Memory Server
+- Socket.IO Client Testing
+
+### Covered Tests
+
+- Authentication API testing
+- Protected route testing
+- Message API integration testing
+- Socket.IO realtime connection testing
+- Validation and error handling tests
+
+### Run Backend Tests
+
+```bash
+cd backend
+npm test
+```
 
 ## Environment Variables
 
