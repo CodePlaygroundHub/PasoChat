@@ -74,4 +74,90 @@ describe("Auth Signup", () => {
 
     expect(userInDB).not.toBeNull();
   });
+
+  it("should reject duplicate email", async () => {
+    await request(app)
+      .post("/api/auth/signup")
+      .send({
+        fullName: "First User",
+        email: "duplicate@test.com",
+        password: "password123",
+
+        securityQuestions: [
+          { question: "Q1", answer: "A1" },
+          { question: "Q2", answer: "A2" },
+          { question: "Q3", answer: "A3" },
+        ],
+      });
+
+    const response = await request(app)
+      .post("/api/auth/signup")
+      .send({
+        fullName: "Second User",
+        email: "duplicate@test.com",
+        password: "password123",
+
+        securityQuestions: [
+          { question: "Q1", answer: "A1" },
+          { question: "Q2", answer: "A2" },
+          { question: "Q3", answer: "A3" },
+        ],
+      });
+
+    expect(response.statusCode).toBe(400);
+
+    expect(response.body.message).toBe("Email already exists");
+  });
+
+  it("should reject short password", async () => {
+    const response = await request(app)
+      .post("/api/auth/signup")
+      .send({
+        fullName: "Weak Password User",
+        email: "weak@test.com",
+        password: "123",
+
+        securityQuestions: [
+          { question: "Q1", answer: "A1" },
+          { question: "Q2", answer: "A2" },
+          { question: "Q3", answer: "A3" },
+        ],
+      });
+
+    expect(response.statusCode).toBe(400);
+
+    expect(response.body.message).toBe(
+      "Password must be at least 6 characters"
+    );
+  });
+
+  it("should reject missing required fields", async () => {
+    const response = await request(app)
+      .post("/api/auth/signup")
+      .send({
+        email: "missing@test.com",
+      });
+
+    expect(response.statusCode).toBe(400);
+
+    expect(response.body.message).toBe(
+      "All fields are required"
+    );
+  });
+
+  it("should reject missing security questions", async () => {
+    const response = await request(app)
+      .post("/api/auth/signup")
+      .send({
+        fullName: "No Security User",
+        email: "nosecurity@test.com",
+        password: "password123",
+      });
+
+    expect(response.statusCode).toBe(400);
+
+    expect(response.body.message).toBe(
+      "Exactly 3 security questions are required"
+    );
+  });
 });
