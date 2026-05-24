@@ -5,31 +5,28 @@ jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
 }));
 
 import request from "supertest";
-import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
+
+import {
+  connectTestDB,
+  disconnectTestDB,
+} from "../setup.js";
+
+import { cleanupRedis } from "../teardown.js";
 
 const { app } = await import("../../src/index.js");
-const { default: User } = await import("../../src/models/user.model.js");
-const { pubClient, subClient } = await import("../../src/lib/redis.js");
 
-let mongoServer;
+const { default: User } = await import(
+  "../../src/models/user.model.js"
+);
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const uri = mongoServer.getUri();
-
-  await mongoose.connect(uri);
+  await connectTestDB();
 });
 
 afterAll(async () => {
-  await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
+  await disconnectTestDB();
 
-  await mongoServer.stop();
-
-  await pubClient.quit();
-  await subClient.quit();
+  await cleanupRedis();
 });
 
 afterEach(async () => {
@@ -106,7 +103,9 @@ describe("Auth Signup", () => {
 
     expect(response.statusCode).toBe(400);
 
-    expect(response.body.message).toBe("Email already exists");
+    expect(response.body.message).toBe(
+      "Email already exists"
+    );
   });
 
   it("should reject short password", async () => {
