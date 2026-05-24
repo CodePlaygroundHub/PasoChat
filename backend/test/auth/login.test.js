@@ -5,32 +5,29 @@ jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
 }));
 
 import request from "supertest";
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import { MongoMemoryServer } from "mongodb-memory-server";
+
+import {
+  connectTestDB,
+  disconnectTestDB,
+} from "../setup.js";
+
+import { cleanupRedis } from "../teardown.js";
 
 const { app } = await import("../../src/index.js");
-const { default: User } = await import("../../src/models/user.model.js");
-const { pubClient, subClient } = await import("../../src/lib/redis.js");
 
-let mongoServer;
+const { default: User } = await import(
+  "../../src/models/user.model.js"
+);
 
 beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-
-  const uri = mongoServer.getUri();
-
-  await mongoose.connect(uri);
+  await connectTestDB();
 });
 
 afterAll(async () => {
-  await mongoose.connection.dropDatabase();
-  await mongoose.connection.close();
+  await disconnectTestDB();
 
-  await mongoServer.stop();
-
-  await pubClient.quit();
-  await subClient.quit();
+  await cleanupRedis();
 });
 
 afterEach(async () => {
@@ -39,7 +36,10 @@ afterEach(async () => {
 
 describe("Auth Login", () => {
   it("should login successfully with correct credentials", async () => {
-    const hashedPassword = await bcrypt.hash("password123", 10);
+    const hashedPassword = await bcrypt.hash(
+      "password123",
+      10
+    );
 
     await User.create({
       fullName: "Login User",
@@ -65,11 +65,16 @@ describe("Auth Login", () => {
     expect(response.body).toHaveProperty("_id");
     expect(response.body).toHaveProperty("token");
 
-    expect(response.body.email).toBe("login@test.com");
+    expect(response.body.email).toBe(
+      "login@test.com"
+    );
   });
 
   it("should reject invalid password", async () => {
-    const hashedPassword = await bcrypt.hash("password123", 10);
+    const hashedPassword = await bcrypt.hash(
+      "password123",
+      10
+    );
 
     await User.create({
       fullName: "Wrong Password User",
@@ -92,7 +97,9 @@ describe("Auth Login", () => {
 
     expect(response.statusCode).toBe(400);
 
-    expect(response.body.message).toBe("Invalid credentials");
+    expect(response.body.message).toBe(
+      "Invalid credentials"
+    );
   });
 
   it("should reject nonexistent email", async () => {
@@ -105,11 +112,16 @@ describe("Auth Login", () => {
 
     expect(response.statusCode).toBe(400);
 
-    expect(response.body.message).toBe("Invalid credentials");
+    expect(response.body.message).toBe(
+      "Invalid credentials"
+    );
   });
 
   it("should reject banned user", async () => {
-    const hashedPassword = await bcrypt.hash("password123", 10);
+    const hashedPassword = await bcrypt.hash(
+      "password123",
+      10
+    );
 
     await User.create({
       fullName: "Banned User",
