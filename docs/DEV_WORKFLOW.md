@@ -122,7 +122,7 @@ Fixes #123
    npm run format
    ```
 
-3. ✅ **No console.log statements** (except debug code)
+3. **No console.log statements** (except debug code)
 
 4. ✅ **No hardcoded secrets or credentials**
 
