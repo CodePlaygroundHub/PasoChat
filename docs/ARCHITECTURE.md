@@ -268,24 +268,26 @@ Decision:
 
 ### Pattern 1: Send Message (Real-Time)
 
-```
-User A sends message to User B
+```mermaid
+sequenceDiagram
+    autonumber
 
-1. Frontend: POST /api/messages/send/userB
-   └─ Validates token, sanitizes content
+    participant A as User A
+    participant FE as Frontend
+    participant API as Express API
+    participant DB as MongoDB
+    participant RT as Socket.IO
+    participant B as User B
 
-2. Backend:
-   ├─ Create message in MongoDB
-   ├─ Queue for ML moderation (async)
-   └─ Broadcast to Socket.IO room
+    A->>FE: Send Message
+    FE->>API: POST /api/messages/send
+    API->>API: Validate JWT & sanitize content
+    API->>DB: Store message
+    API->>RT: Broadcast event
+    RT->>B: Emit newMessage
+    B->>FE: Display message instantly
 
-3. Real-Time (Socket.IO):
-   └─ Emit 'newMessage' to User B's socket
-
-4. Frontend (User B):
-   └─ Receive event, display message
-
-Total Latency: <50ms (P95)
+    Note over API,RT: P95 Latency < 50ms
 ```
 
 ### Pattern 2: ML Moderation (Async)
