@@ -116,7 +116,7 @@ Fixes #123
    npm test -- --coverage
    ```
 
-2. ✅ **Code style correct**
+2. **Code style correct**
    ```bash
    npm run lint -- --fix
    npm run format
