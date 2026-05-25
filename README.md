@@ -228,12 +228,10 @@ F7 --> T4
 
 ## Chat Interface
 <p align="center">
-    <!-- <img src="https://github.com/user-attachments/assets/f7412938-9575-40c8-a01d-e90540db73ec" width="90%"/> </p>  -->
     <p align="center"><img src="https://github.com/user-attachments/assets/a0a6e650-b7e7-46d5-8187-e2f6aa83e5ab" width="90%"/> </p>
     <p align="center"><img src="https://github.com/user-attachments/assets/56dea4bf-8551-4d2e-adb2-9e4120ec58e7" width="90%"/> </p>
-    <!-- <p align="center"><img src="https://github.com/user-attachments/assets/9da9c528-4690-43d3-a7bd-0924278725e0" width="90%"/> </p> -->
 
-See full gallery → docs/SCREENSHOTS.md
+See full gallery → [docs/SCREENSHOTS.md](https://github.com/CodePlaygroundHub/paso-chat-app/blob/main/docs/SCREENSHOTS.md)
 
 ## Features
 
