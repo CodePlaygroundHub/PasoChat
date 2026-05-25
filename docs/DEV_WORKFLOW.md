@@ -124,7 +124,7 @@ Fixes #123
 
 3. **No console.log statements** (except debug code)
 
-4. ✅ **No hardcoded secrets or credentials**
+4. **No hardcoded secrets or credentials**
 
 5. ✅ **Manual testing completed**
    - Feature works as expected
