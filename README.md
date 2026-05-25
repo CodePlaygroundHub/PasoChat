@@ -112,42 +112,86 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 
 ### Technology Overview
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Frontend Layer                        │
-│  React 18 + Vite | Zustand | Tailwind CSS | Socket.IO       │
-│              Hosted on Vercel (Edge Deployment)              │
-└─────────────────────────────────────────────────────────────┘
-                              ↓↑
-┌─────────────────────────────────────────────────────────────┐
-│                      API Gateway Layer                       │
-│    Express.js Server | JWT Auth | Rate Limiting             │
-│         Running on Node.js 18+ (Containerized)              │
-└─────────────────────────────────────────────────────────────┘
-                              ↓↑
-┌─────────────────────────────────────────────────────────────┐
-│                   Real-time Scaling Layer                    │
-│  Socket.IO Cluster | Redis Pub/Sub | Multi-Node Adapter     │
-│         Enables 100K+ Concurrent Connections               │
-└─────────────────────────────────────────────────────────────┘
-                              ↓↑
-┌─────────────────────────────────────────────────────────────┐
-│                     Data Persistence Layer                   │
-│    MongoDB (Primary DB) | Redis (Cache/Sessions)            │
-│  Supports Horizontal Scaling with Sharding                  │
-└─────────────────────────────────────────────────────────────┘
-                              ↓↑
-┌─────────────────────────────────────────────────────────────┐
-│                   ML/AI Services Layer                       │
-│  FastAPI | Scikit-learn | Async Pipelines                  │
-│  Toxicity, Spam, Intent Detection | Smart Replies           │
-└─────────────────────────────────────────────────────────────┘
-                              ↓↑
-┌─────────────────────────────────────────────────────────────┐
-│                   External Integrations                      │
-│  Groq API (LLM) | ZegoCloud (V2V) | Cloudinary (CDN)       │
-│  Brevo (Email) | Admin Analytics Dashboard                  │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+
+%% =========================
+%% Frontend
+%% =========================
+subgraph FE["Frontend Layer"]
+    FE1["React 18"]
+    FE2["Vite"]
+    FE3["Tailwind CSS"]
+    FE4["Zustand State Management"]
+    FE5["Socket.IO Client"]
+end
+
+%% =========================
+%% API Gateway
+%% =========================
+subgraph API["API Gateway"]
+    API1["Express.js Server"]
+    API2["JWT Authentication"]
+    API3["Rate Limiting"]
+    API4["REST APIs"]
+end
+
+%% =========================
+%% Realtime Layer
+%% =========================
+subgraph RT["Realtime Infrastructure"]
+    RT1["Socket.IO Cluster"]
+    RT2["Redis Pub/Sub"]
+    RT3["Horizontal Scaling"]
+    RT4["100K+ Concurrent Connections"]
+end
+
+%% =========================
+%% Database
+%% =========================
+subgraph DB["Data Persistence"]
+    DB1["MongoDB Primary Database"]
+    DB2["Redis Cache"]
+    DB3["Session Store"]
+    DB4["Sharding & Replication"]
+end
+
+%% =========================
+%% AI/ML Services
+%% =========================
+subgraph AI["AI / ML Services"]
+    AI1["FastAPI Microservices"]
+    AI2["Toxicity Detection"]
+    AI3["Spam Filtering"]
+    AI4["Intent Recognition"]
+    AI5["Smart Reply Suggestions"]
+end
+
+%% =========================
+%% External Services
+%% =========================
+subgraph EXT["External Integrations"]
+    EXT1["Groq API (LLM)"]
+    EXT2["ZegoCloud Video/Voice"]
+    EXT3["Cloudinary CDN"]
+    EXT4["Brevo Email Service"]
+    EXT5["Analytics Dashboard"]
+end
+
+%% =========================
+%% Connections
+%% =========================
+FE --> API
+API --> RT
+RT --> DB
+DB --> AI
+AI --> EXT
+
+%% Additional links
+API --> DB
+API --> AI
+RT --> API
+EXT --> FE
 ```
 
 ### Core Components
