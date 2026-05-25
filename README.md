@@ -357,7 +357,7 @@ Other clients receive update → UI reflects presence
 
 ---
 
-## 📋 Project Structure
+## Project Structure
 
 ```
 PASO/
@@ -404,7 +404,7 @@ PASO/
 
 ---
 
-## ⚡ Quick Start (5 Minutes)
+## Quick Start (5 Minutes)
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -471,7 +471,7 @@ For detailed setup instructions, see [SETUP.md](./docs/SETUP.md).
 
 ---
 
-## 📚 Documentation Guide
+## Documentation Guide
 
 | Document | Purpose |
 |----------|---------|
@@ -493,11 +493,11 @@ For detailed setup instructions, see [SETUP.md](./docs/SETUP.md).
 
 ---
 
-## 🚀 Running in Production
+## Running in Production
 
 ### Recommended Stack
-- **Frontend**: Vercel (edge deployment), CloudFlare CDN
-- **Backend**: Docker on Kubernetes, auto-scaling replicas
+- **Frontend**: Vercel 
+- **Backend**: Render
 - **Database**: MongoDB Atlas (managed), Redis Cloud
 - **ML Service**: Separate container, auto-scaling
 - **Monitoring**: Prometheus, Grafana, Sentry
