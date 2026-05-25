@@ -292,19 +292,22 @@ sequenceDiagram
 
 ### Pattern 2: ML Moderation (Async)
 
-```
-Message queued for moderation
+```mermaid
+flowchart LR
 
-1. Backend: Add to Redis queue
-2. Celery Worker (async):
-   ├─ Pick up from queue
-   ├─ Run ML models
-   └─ Cache results
-3. Backend (next request):
-   ├─ Check cache
-   └─ Take action (deliver/flag/delete)
+A[Message Created] --> B[Redis Queue]
 
-Non-blocking to user experience
+B --> C[Celery Worker]
+
+C --> D[Toxicity Detection]
+C --> E[Spam Detection]
+C --> F[Intent Recognition]
+
+D --> G[Moderation Result Cache]
+E --> G
+F --> G
+
+G --> H[Deliver / Flag / Delete]
 ```
 
 ### Pattern 3: Group Synchronization
