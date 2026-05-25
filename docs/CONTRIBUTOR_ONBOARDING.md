@@ -10,7 +10,7 @@ Welcome to PASO! This guide gets you set up for productive contribution in minut
 - **Python 3.10+** for ML service development
 - **Git** and GitHub account
 - **Docker** (optional, for containerized setup)
-- **A code editor** (VS Code recommended)
+- **A code editor**
 
 ---
 
