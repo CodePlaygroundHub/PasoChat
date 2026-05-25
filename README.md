@@ -1,23 +1,75 @@
-![Banner](./assets/banneer.png)
+<p align="center">
+  <img src="./assets/banneer.png" alt="PASO Banner" width="100%" />
+</p>
 
-<br/>
+<h1 align="center">
+  PASO — AI Powered Realtime Chat Platform
+</h1>
 
-![License](https://img.shields.io/badge/license-MIT-green)
-![Frontend CI](https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg)
-![Backend CI](https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg)
-![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
-![GitHub issues](https://img.shields.io/github/issues/CodePlaygroundHub/paso-chat-app)
-![GitHub contributors](https://img.shields.io/github/contributors/CodePlaygroundHub/paso-chat-app)
-![GitHub last commit](https://img.shields.io/github/last-commit/CodePlaygroundHub/paso-chat-app)
-![GitHub repo size](https://img.shields.io/github/repo-size/CodePlaygroundHub/paso-chat-app)
-![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
+<p align="center">
+  Production-grade realtime communication platform with AI moderation,
+  voice/video calling, Socket.IO scaling, and ML-powered automation.
+</p>
 
-# PASO – AI-Powered Real-Time Chat App (React + Node.js + Socket.io + ML Integration)
+<p align="center">
+  <a href="https://chat-app-sooty-mu.vercel.app">
+    🌐 Live Demo
+  </a>
+  ·
+  <a href="./docs/ARCHITECTURE.md">
+    🏗 Architecture
+  </a>
+  ·
+  <a href="./docs/API.md">
+    📚 API Docs
+  </a>
+  ·
+  <a href="./docs/SCREENSHOTS.md">
+    📸 Screenshots
+  </a>
+</p>
 
-PASO is a production-level real-time communication platform inspired by WhatsApp, enhanced with **Machine Learning capabilities**, **AI automation**, and full multimedia support. It integrates messaging, voice/video communication, intelligent moderation, and admin analytics into a complete chat ecosystem.
+<p align="center">
+
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
+
+  <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg" alt="Frontend CI" />
+
+  <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg" alt="Backend CI" />
+
+  <img src="https://img.shields.io/badge/contributions-welcome-brightgreen" alt="Contributions Welcome" />
+
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome" />
+
+  <img src="https://img.shields.io/github/issues/CodePlaygroundHub/paso-chat-app" alt="GitHub Issues" />
+
+  <img src="https://img.shields.io/github/contributors/CodePlaygroundHub/paso-chat-app" alt="GitHub Contributors" />
+
+  <img src="https://img.shields.io/github/last-commit/CodePlaygroundHub/paso-chat-app" alt="Last Commit" />
+
+  <img src="https://img.shields.io/github/repo-size/CodePlaygroundHub/paso-chat-app" alt="Repo Size" />
+
+  <img src="https://img.shields.io/badge/tests-passing-brightgreen" alt="Tests" />
+
+</p>
+
+<p align="center">
+  Built with React, Node.js, Socket.IO, Redis, MongoDB, FastAPI, Tailwind CSS, and AI/ML integrations.
+</p>
 
 ---
+
+PASO is a production-level realtime communication platform inspired by WhatsApp, enhanced with Machine Learning capabilities, AI automation, and full multimedia support.
+
+It integrates:
+- realtime messaging
+- voice & video communication
+- AI-assisted conversations
+- ML moderation pipelines
+- distributed Socket.IO scaling
+- admin analytics & reporting
+
+into a complete scalable chat ecosystem.
 
 ## Architecture
 
