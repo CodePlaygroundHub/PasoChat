@@ -111,7 +111,7 @@ Fixes #123
 
 ### Before Opening PR
 
-1. ✅ **Tests pass locally**
+1. **Tests pass locally**
    ```bash
    npm test -- --coverage
    ```
