@@ -64,7 +64,7 @@
 
 ---
 
-## 📊 Status & Badges
+## Status & Badges
 
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License: MIT" />
@@ -84,7 +84,7 @@
 
 ---
 
-## 🎯 Why PASO Matters
+## Why PASO Matters
 
 PASO demonstrates **production-grade system design** and **real-world engineering challenges** solved with modern technologies:
 
@@ -207,7 +207,7 @@ EXT --> FE
 
 ---
 
-## 🚀 Engineering Challenges Solved
+## Engineering Challenges Solved
 
 ### 1. **Real-time Synchronization at Scale**
 **Challenge**: Synchronizing user presence, typing status, and messages across 100K+ concurrent users  
@@ -313,7 +313,7 @@ Other clients receive update → UI reflects presence
 
 ---
 
-## 🔑 Core Features
+## Core Features
 
 ### Messaging System
 - ✅ Real-time 1:1 and group messaging
