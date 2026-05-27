@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Group from "../models/group.model.js";
 import Message from "../models/message.model.js";
 import Report from "../models/report.model.js";
+import mongoose from "mongoose";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -48,6 +49,12 @@ export const getAllUsers = async (req, res) => {
 
 export const toggleBanUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -68,6 +75,12 @@ export const toggleBanUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
+
     const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
