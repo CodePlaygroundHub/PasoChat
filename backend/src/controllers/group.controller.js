@@ -26,13 +26,19 @@ export const createGroup = async (req, res) => {
     const { name, members = [], avatar = "" } = req.body;
     const userId = req.user._id;
 
-    if (!name) {
-      return res.status(400).json({ message: "Group name is required" });
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        message: "Group name is required",
+      });
     }
+
+    const filteredMembers = members.filter((id) =>
+      mongoose.Types.ObjectId.isValid(id),
+    );
 
     // remove AI users from members list
     const validUsers = await User.find({
-      _id: { $in: members },
+      _id: { $in: filteredMembers },
       isAI: { $ne: true },
     }).select("_id");
 
@@ -79,7 +85,7 @@ export const getGroupById = async (req, res) => {
     }
 
     const isMember = group.members.some(
-      (m) => m.userId && m.userId._id.toString() === userId.toString()
+      (m) => m.userId && m.userId._id.toString() === userId.toString(),
     );
 
     if (!isMember) {
@@ -241,6 +247,5 @@ export const deleteGroup = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 //adding photo during group creation == FUTURE IMPLEMENTATION

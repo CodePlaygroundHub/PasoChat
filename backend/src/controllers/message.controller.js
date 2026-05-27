@@ -129,6 +129,14 @@ export const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "Invalid receiver id" });
     }
 
+    const receiver = await User.findById(receiverId);
+
+    if (!receiver) {
+      return res.status(404).json({
+        message: "Receiver not found",
+      });
+    }
+
     if (!text && !image && !audio && !file) {
       return res.status(400).json({ message: "Message cannot be empty" });
     }
