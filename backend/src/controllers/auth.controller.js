@@ -19,9 +19,20 @@ export const signup = async (req, res) => {
   try {
     const { fullName, email, password, securityQuestions } = req.body;
 
-    // Validation
     if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        message: "All fields are required",
+      });
+    }
+
+    if (
+      typeof fullName !== "string" ||
+      typeof email !== "string" ||
+      typeof password !== "string"
+    ) {
+      return res.status(400).json({
+        message: "Invalid input types",
+      });
     }
 
     if (!securityQuestions || securityQuestions.length !== 3) {
@@ -38,6 +49,14 @@ export const signup = async (req, res) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Invalid email format",
+      });
+    }
+
     // Check existing user
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
@@ -52,7 +71,7 @@ export const signup = async (req, res) => {
       securityQuestions.map(async (q) => ({
         question: q.question,
         answer: await bcrypt.hash(q.answer.toLowerCase().trim(), 10),
-      }))
+      })),
     );
 
     // Create user (NO verification fields)
@@ -81,13 +100,11 @@ export const signup = async (req, res) => {
       role: newUser.role,
       token,
     });
-
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 //login
 // Get email, password from req.body
@@ -101,7 +118,18 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({
+      message: "Invalid input",
+    });
+  }
+
   try {
+    if (typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({
+        message: "Invalid input types",
+      });
+    }
     const user = await User.findOne({ email: email.toLowerCase() }).select(
       "+password",
     );
@@ -203,7 +231,9 @@ export const updateProfile = async (req, res) => {
 // Return req.user in response
 export const checkAuth = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
+    const user = await User.findById(req.user._id).select(
+      "-password -passwordResetSession"
+    );
 
     if (!user) {
       return res.status(401).json({ message: "User not found" });
@@ -212,6 +242,8 @@ export const checkAuth = async (req, res) => {
     if (user.isBanned) {
       return res.status(403).json({ message: "Account banned" });
     }
+
+    user.securityQuestions = undefined;
 
     res.status(200).json(user);
   } catch (error) {
@@ -348,7 +380,6 @@ export const getSecurityQuestions = async (req, res) => {
     questions: user.securityQuestions.map((q) => q.question),
   });
 };
-
 
 //Future alaning--->
 // export const verifyEmail = async (req, res) => {
