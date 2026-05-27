@@ -8,17 +8,26 @@ const ForgotPasswordPage = () => {
   const navigate = useNavigate();
 
   const {
-    sendOtp,
-    verifyOtp,
-    resetPassword,
-    isSendingOtp,
-    isVerifyingOtp,
-    isResettingPassword,
-  } = useAuthStore();
+  fetchSecurityQuestions,
+  verifySecurityAnswers,
+  sendOtp,
+  verifyOtp,
+  resetPassword,
+  securityQuestions,
+  isFetchingQuestions,
+  isVerifyingSecurity,
+  isSendingOtp,
+  isVerifyingOtp,
+  isResettingPassword,
+} = useAuthStore();
 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [recoveryMethod, setRecoveryMethod] =
+  useState("otp");
+
+const [answers, setAnswers] = useState([]);
   const [cooldown, setCooldown] = useState(0);
   const [passwords, setPasswords] = useState({
     newPassword: "",
@@ -122,73 +131,213 @@ const ForgotPasswordPage = () => {
             </div>
 
             {step === 1 && (
-              <form onSubmit={handleSendOtp} className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">Email Address</span>
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
-                    <input
-                      type="email"
-                      required
-                      placeholder="name@example.com"
-                      className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <button type="submit" disabled={isSendingOtp} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20">
-                  {isSendingOtp ? <Loader2 className="animate-spin" /> : "Send OTP"}
-                </button>
-              </form>
-            )}
+  <form
+    onSubmit={handleSendOtp}
+    className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
+  >
+    <div className="form-control">
+      <label className="label py-1">
+        <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
+          Email Address
+        </span>
+      </label>
 
-            {step === 2 && (
-              <form onSubmit={handleVerifyOtp} className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                <div className="space-y-4">
-                  <div className="form-control">
-                    <label className="label py-1">
-                      <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">Verification Code</span>
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
-                      <input
-                        type="text"
-                        maxLength="6"
-                        required
-                        placeholder="Enter 6-digit OTP"
-                        className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all tracking-[0.25em] text-center font-bold text-lg placeholder:tracking-normal placeholder:text-center"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                      />
-                    </div>
-                  </div>
+      <div className="relative">
+        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
 
-                  <div className="text-center">
-                    {cooldown > 0 ? (
-                      <p className="text-xs text-base-content/40">
-                        Resend OTP in <span className="font-semibold text-primary">{cooldown}s</span>
-                      </p>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleSendOtp}
-                        disabled={isSendingOtp}
-                        className="text-xs font-bold text-primary hover:underline focus:outline-none"
-                      >
-                        Resend OTP
-                      </button>
-                    )}
-                  </div>
-                </div>
+        <input
+          type="email"
+          required
+          placeholder="name@example.com"
+          className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all"
+          value={email}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
+        />
+      </div>
+    </div>
 
-                <button type="submit" disabled={isVerifyingOtp} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20">
-                  {isVerifyingOtp ? <Loader2 className="animate-spin" /> : "Verify OTP"}
-                </button>
-              </form>
-            )}
+    <button
+      type="submit"
+      disabled={isSendingOtp}
+      className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
+    >
+      {isSendingOtp ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        "Send OTP"
+      )}
+    </button>
+
+    <button
+      type="button"
+      disabled={isFetchingQuestions}
+      onClick={async () => {
+        const success =
+          await fetchSecurityQuestions(
+            email
+          );
+
+        if (success) {
+          setRecoveryMethod(
+            "security"
+          );
+
+          setAnswers(
+            new Array(
+              securityQuestions.length
+            ).fill("")
+          );
+
+          setStep(2);
+        }
+      }}
+      className="btn btn-outline w-full"
+    >
+      {isFetchingQuestions ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        "Use Security Questions Instead"
+      )}
+    </button>
+  </form>
+)}
+
+            {step === 2 &&
+  recoveryMethod === "otp" && (
+    <form
+      onSubmit={handleVerifyOtp}
+      className="space-y-6 animate-in fade-in slide-in-from-bottom-2"
+    >
+      <div className="space-y-4">
+        <div className="form-control">
+          <label className="label py-1">
+            <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
+              Verification Code
+            </span>
+          </label>
+
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
+
+            <input
+              type="text"
+              maxLength="6"
+              required
+              placeholder="Enter 6-digit OTP"
+              className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all tracking-[0.25em] text-center font-bold text-lg"
+              value={otp}
+              onChange={(e) =>
+                setOtp(
+                  e.target.value.replace(
+                    /\D/g,
+                    ""
+                  )
+                )
+              }
+            />
+          </div>
+        </div>
+
+        <div className="text-center">
+          {cooldown > 0 ? (
+            <p className="text-xs text-base-content/40">
+              Resend OTP in{" "}
+              <span className="font-semibold text-primary">
+                {cooldown}s
+              </span>
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSendOtp}
+              disabled={isSendingOtp}
+              className="text-xs font-bold text-primary hover:underline focus:outline-none"
+            >
+              Resend OTP
+            </button>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isVerifyingOtp}
+        className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
+      >
+        {isVerifyingOtp ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          "Verify OTP"
+        )}
+      </button>
+    </form>
+  )}
+
+{step === 2 &&
+  recoveryMethod === "security" && (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+
+        const success =
+          await verifySecurityAnswers({
+            email,
+            answers,
+          });
+
+        if (success) {
+          setStep(3);
+        }
+      }}
+      className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
+    >
+      {securityQuestions.map(
+        (question, index) => (
+          <div
+            key={index}
+            className="form-control"
+          >
+            <label className="label py-1">
+              <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
+                {question}
+              </span>
+            </label>
+
+            <input
+              type="text"
+              required
+              className="input input-bordered w-full bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12"
+              value={answers[index]}
+              onChange={(e) => {
+                const updated = [
+                  ...answers,
+                ];
+
+                updated[index] =
+                  e.target.value;
+
+                setAnswers(updated);
+              }}
+            />
+          </div>
+        )
+      )}
+
+      <button
+        type="submit"
+        disabled={isVerifyingSecurity}
+        className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
+      >
+        {isVerifyingSecurity ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          "Verify Answers"
+        )}
+      </button>
+    </form>
+  )}
 
             {step === 3 && (
               <form onSubmit={handleReset} className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
