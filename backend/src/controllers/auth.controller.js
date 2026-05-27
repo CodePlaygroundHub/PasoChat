@@ -2,7 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-import { sendWelcomeEmail } from "../lib/sendEmail.js";
+import { sendWelcomeEmail, sendOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
 
 //signup
@@ -350,7 +350,6 @@ export const getSecurityQuestions = async (req, res) => {
 };
 
 
-//Future alaning--->
 // export const verifyEmail = async (req, res) => {
 //   const { token } = req.params;
 
@@ -371,3 +370,99 @@ export const getSecurityQuestions = async (req, res) => {
 
 //   res.redirect("http://localhost:5173/login");
 // };
+
+export const sendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail }).select("+resetOtpExpiry");
+
+    const genericMessage = "If an account exists, an OTP has been sent.";
+
+    // Do not reveal email existence
+    if (!user) {
+      return res.status(200).json({ message: genericMessage });
+    }
+
+    // Cooldown check (60 seconds)
+    if (user.resetOtpExpiry) {
+      const lastSentTime = new Date(user.resetOtpExpiry).getTime() - 5 * 60 * 1000;
+      const timeSinceLastSent = Date.now() - lastSentTime;
+
+      if (timeSinceLastSent < 60 * 1000) {
+        const secondsRemaining = Math.ceil((60 * 1000 - timeSinceLastSent) / 1000);
+        return res.status(429).json({
+          message: `Please wait ${secondsRemaining} seconds before requesting another OTP.`,
+        });
+      }
+    }
+
+    // Generate 6-digit numeric OTP
+    const otp = crypto.randomInt(100000, 1000000).toString();
+
+    // Hash the OTP
+    const hashedOtp = await bcrypt.hash(otp, 10);
+
+    user.resetOtp = hashedOtp;
+    user.resetOtpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes validity
+    await user.save();
+
+    setImmediate(() => {
+      sendOtpEmail(user.email, otp);
+    });
+
+    res.status(200).json({ message: genericMessage });
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email and OTP are required" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+resetOtp +resetOtpExpiry +passwordResetSession"
+    );
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or OTP" });
+    }
+
+    // Check OTP expiry first
+    if (!user.resetOtp || !user.resetOtpExpiry || user.resetOtpExpiry < new Date()) {
+      return res.status(400).json({ message: "OTP has expired or is invalid" });
+    }
+
+    // Compare bcrypt hash
+    const isOtpCorrect = await bcrypt.compare(otp, user.resetOtp);
+    if (!isOtpCorrect) {
+      return res.status(400).json({ message: "Invalid email or OTP" });
+    }
+
+    // Clear resetOtp and resetOtpExpiry immediately upon successful verification
+    user.resetOtp = null;
+    user.resetOtpExpiry = null;
+
+    // Generate resetToken and save to passwordResetSession
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.passwordResetSession = resetToken;
+    await user.save();
+
+    res.status(200).json({ resetToken });
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

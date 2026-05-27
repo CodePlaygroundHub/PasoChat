@@ -9,10 +9,12 @@ import {
   verifySecurityAnswers,
   resetPassword,
   getSecurityQuestions,
+  sendOtp,
+  verifyOtp,
 } from "../controllers/auth.controller.js";
 
 import { protectRoute } from "../middleware/auth.middleware.js";
-import { forgotPasswordLimiter } from "../middleware/rateLimiter.js";
+import { forgotPasswordLimiter, otpRateLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -27,5 +29,7 @@ router.post("/reset-password", resetPassword);
 router.post("/verify-security", forgotPasswordLimiter, verifySecurityAnswers);
 router.post("/reset-password", forgotPasswordLimiter, resetPassword);
 router.post("/get-security-questions", getSecurityQuestions);
+router.post("/send-otp", otpRateLimiter, sendOtp);
+router.post("/verify-otp", verifyOtp);
 
 export default router;

@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
+  sendOtpEmail: jest.fn(),
 }));
 
 jest.unstable_mockModule("../../src/lib/mlService.js", () => ({

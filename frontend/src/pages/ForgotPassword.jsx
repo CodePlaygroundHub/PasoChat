@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Loader2, Lock, Mail, ArrowLeft, ShieldCheck, KeyRound, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -8,35 +8,48 @@ const ForgotPasswordPage = () => {
   const navigate = useNavigate();
 
   const {
-    fetchSecurityQuestions,
-    verifySecurityAnswers,
+    sendOtp,
+    verifyOtp,
     resetPassword,
-    securityQuestions,
-    isFetchingQuestions,
-    isVerifyingSecurity,
+    isSendingOtp,
+    isVerifyingOtp,
     isResettingPassword,
   } = useAuthStore();
 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [answers, setAnswers] = useState([]);
+  const [otp, setOtp] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   const [passwords, setPasswords] = useState({
     newPassword: "",
     confirmPassword: "",
   });
 
-  const handleFetchQuestions = async (e) => {
-    e.preventDefault();
-    const success = await fetchSecurityQuestions(email);
+  useEffect(() => {
+    let timer;
+    if (cooldown > 0) {
+      timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    const success = await sendOtp(email);
     if (success) {
-      setAnswers(new Array(securityQuestions.length).fill(""));
       setStep(2);
+      setCooldown(60);
     }
   };
 
-  const handleVerify = async (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    const success = await verifySecurityAnswers({ email, answers });
+    if (otp.length !== 6) {
+      return toast.error("Please enter a 6-digit OTP");
+    }
+    const success = await verifyOtp({ email, otp });
     if (success) setStep(3);
   };
 
@@ -92,7 +105,7 @@ const ForgotPasswordPage = () => {
               <h1 className="text-2xl font-black tracking-tight">Account Recovery</h1>
               <p className="text-base-content/50 text-xs mt-1">
                 {step === 1 && "Verify your email to continue"}
-                {step === 2 && "Answer your security questions"}
+                {step === 2 && "Enter the 6-digit OTP sent to your email"}
                 {step === 3 && "Set your new account password"}
               </p>
             </div>
@@ -109,7 +122,7 @@ const ForgotPasswordPage = () => {
             </div>
 
             {step === 1 && (
-              <form onSubmit={handleFetchQuestions} className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+              <form onSubmit={handleSendOtp} className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
                 <div className="form-control">
                   <label className="label py-1">
                     <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">Email Address</span>
@@ -126,45 +139,53 @@ const ForgotPasswordPage = () => {
                     />
                   </div>
                 </div>
-                <button type="submit" disabled={isFetchingQuestions} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20">
-                  {isFetchingQuestions ? <Loader2 className="animate-spin" /> : "Verify Email"}
+                <button type="submit" disabled={isSendingOtp} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20">
+                  {isSendingOtp ? <Loader2 className="animate-spin" /> : "Send OTP"}
                 </button>
               </form>
             )}
 
             {step === 2 && (
-              <form onSubmit={handleVerify} className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                <div className="max-h-[320px] overflow-y-auto pr-1 space-y-5 custom-scrollbar">
-                  {securityQuestions.map((question, index) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-black text-primary bg-primary/10 size-5 flex items-center justify-center rounded-lg uppercase">
-                          Q{index + 1}
-                        </span>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-base-content/40">
-                          Security Question
-                        </label>
-                      </div>
-                      <p className="text-sm font-semibold text-base-content/80 px-1 leading-tight">
-                        {question}
-                      </p>
+              <form onSubmit={handleVerifyOtp} className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+                <div className="space-y-4">
+                  <div className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">Verification Code</span>
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
                       <input
                         type="text"
+                        maxLength="6"
                         required
-                        className="input w-full bg-base-200/50 border-2 border-transparent focus:border-primary/30 focus:bg-base-100 focus:outline-none h-11 text-sm transition-all rounded-xl px-4"
-                        placeholder="Type your answer here..."
-                        value={answers[index] || ""}
-                        onChange={(e) => {
-                          const updated = [...answers];
-                          updated[index] = e.target.value;
-                          setAnswers(updated);
-                        }}
+                        placeholder="Enter 6-digit OTP"
+                        className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all tracking-[0.25em] text-center font-bold text-lg placeholder:tracking-normal placeholder:text-center"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                       />
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="text-center">
+                    {cooldown > 0 ? (
+                      <p className="text-xs text-base-content/40">
+                        Resend OTP in <span className="font-semibold text-primary">{cooldown}s</span>
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={isSendingOtp}
+                        className="text-xs font-bold text-primary hover:underline focus:outline-none"
+                      >
+                        Resend OTP
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <button type="submit" disabled={isVerifyingSecurity} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20">
-                  {isVerifyingSecurity ? <Loader2 className="animate-spin" /> : "Verify Identity"}
+
+                <button type="submit" disabled={isVerifyingOtp} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20">
+                  {isVerifyingOtp ? <Loader2 className="animate-spin" /> : "Verify OTP"}
                 </button>
               </form>
             )}

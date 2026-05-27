@@ -106,6 +106,18 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
+    // OTP-based recovery
+    resetOtp: {
+      type: String,
+      select: false,
+      default: null,
+    },
+
+    resetOtpExpiry: {
+      type: Date,
+      default: null,
+    },
+
     // Future implementation
     // Email Verification
     // isVerified: {
