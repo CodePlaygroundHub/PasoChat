@@ -57,11 +57,21 @@ const messageSchema = new mongoose.Schema(
     },
 
     // Message delivery status
-    status: {
+    deliveryStatus: {
       type: String,
-      enum: ["sent", "delivered", "seen"],
+      enum: ["sent", "delivered", "read"],
       default: "sent",
       index: true,
+    },
+
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+
+    timestamp: {
+      type: Date,
+      default: Date.now,
     },
 
     //for me
