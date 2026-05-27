@@ -16,7 +16,7 @@ import reportRoutes from "./routes/report.routes.js";
 
 dotenv.config();
 
-const PORT = ;
+const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 app.set("trust proxy", 1);
 
