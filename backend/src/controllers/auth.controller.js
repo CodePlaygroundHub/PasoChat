@@ -411,7 +411,7 @@ export const verifySecurityAnswers =
       if (
         !user ||
         user.securityQuestions.length ===
-          0
+        0
       ) {
         return res.status(400).json({
           message: "Invalid request",
@@ -490,7 +490,7 @@ export const resetPassword = async (
     if (
       !user ||
       user.passwordResetSession !==
-        resetToken
+      resetToken
     ) {
       return res.status(400).json({
         message:
@@ -643,15 +643,8 @@ export const sendOtp = async (
         timeSinceLastSent <
         60 * 1000
       ) {
-        const secondsRemaining =
-          Math.ceil(
-            (60 * 1000 -
-              timeSinceLastSent) /
-              1000
-          );
-
-        return res.status(429).json({
-          message: `Please wait ${secondsRemaining} seconds before requesting another OTP.`,
+        return res.status(200).json({
+          message: genericMessage,
         });
       }
     }
@@ -728,7 +721,7 @@ export const verifyOtp = async (
       !user.resetOtp ||
       !user.resetOtpExpiry ||
       user.resetOtpExpiry <
-        new Date()
+      new Date()
     ) {
       return res.status(400).json({
         message:

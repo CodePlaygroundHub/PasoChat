@@ -39,7 +39,7 @@ export const sendWelcomeEmail = async (email, fullName) => {
 };
 
 export const sendOtpEmail = async (email, otp) => {
-  console.log(`[OTP Verification] Sent OTP code: ${otp} to ${email}`);
+  console.log("OTP email sent Successfully");
 
   if (
     !process.env.BREVO_API_KEY ||

@@ -30,6 +30,6 @@ router.post("/verify-security", forgotPasswordLimiter, verifySecurityAnswers);
 router.post("/reset-password", forgotPasswordLimiter, resetPassword);
 router.post("/get-security-questions", getSecurityQuestions);
 router.post("/send-otp", otpRateLimiter, sendOtp);
-router.post("/verify-otp", verifyOtp);
+router.post("/verify-otp", otpRateLimiter,verifyOtp);
 
 export default router;
