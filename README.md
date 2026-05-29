@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">
-  PASO — Enterprise-Grade AI-Powered Realtime Chat Platform
+  PASO - Enterprise-Grade AI-Powered Realtime Chat Platform
 </h1>
 
 <p align="center">
@@ -99,12 +99,12 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 
 ### Why This Project Stands Out
 
-✅ **Complete End-to-End System**: Not just CRUD app—addresses real distributed systems challenges  
-✅ **Production Features**: Scaling, monitoring, deployment automation, CI/CD pipelines  
-✅ **Modern Architecture**: Decoupled services, async processing, event-driven design  
-✅ **ML/AI at the Core**: Not bolted-on—integrated into the moderation pipeline  
-✅ **Enterprise Patterns**: Rate limiting, multi-tenancy concepts, role-based access control  
-✅ **Thoughtful UX**: Real-time presence, typing indicators, message delivery status  
+ **Complete End-to-End System**: Not just CRUD app—addresses real distributed systems challenges  
+ **Production Features**: Scaling, monitoring, deployment automation, CI/CD pipelines  
+ **Modern Architecture**: Decoupled services, async processing, event-driven design  
+ **ML/AI at the Core**: Not bolted-on—integrated into the moderation pipeline  
+ **Enterprise Patterns**: Rate limiting, multi-tenancy concepts, role-based access control  
+ **Thoughtful UX**: Real-time presence, typing indicators, message delivery status  
 
 ---
 
@@ -291,44 +291,44 @@ Other clients receive update → UI reflects presence
 ## Core Features
 
 ### Messaging System
-- ✅ Real-time 1:1 and group messaging
-- ✅ Message search with full-text indexing
-- ✅ Message reactions (emoji) with conflict-free sync
-- ✅ Delete for self / Delete for everyone
-- ✅ Message seen status with per-user tracking
-- ✅ Custom chat wallpapers per conversation
+-  Real-time 1:1 and group messaging
+-  Message search with full-text indexing
+-  Message reactions (emoji) with conflict-free sync
+-  Delete for self / Delete for everyone
+-  Message seen status with per-user tracking
+-  Custom chat wallpapers per conversation
 
 ### Communication Features
-- ✅ Voice calling with ZegoCloud integration
-- ✅ Video calling with HD quality
-- ✅ Typing indicators (real-time)
-- ✅ Online/offline presence
-- ✅ Status system (stories with expiry)
-- ✅ File sharing with CDN delivery
+-  Voice calling with ZegoCloud integration
+-  Video calling with HD quality
+-  Typing indicators (real-time)
+-  Online/offline presence
+-  Status system (stories with expiry)
+-  File sharing with CDN delivery
 
 ### AI & ML Features
-- ✅ Groq API LLM integration for smart replies
-- ✅ Toxicity detection (0-1 confidence score)
-- ✅ Spam classification (bayesian ML)
-- ✅ Intent detection for auto-responses
-- ✅ Smart reply suggestions
-- ✅ Message auto-flagging for moderation
+-  Groq API LLM integration for smart replies
+-  Toxicity detection (0-1 confidence score)
+-  Spam classification (bayesian ML)
+-  Intent detection for auto-responses
+-  Smart reply suggestions
+-  Message auto-flagging for moderation
 
 ### Admin & Moderation
-- ✅ Admin dashboard with analytics
-- ✅ User reports system
-- ✅ Message flagging workflow
-- ✅ User suspension/warnings
-- ✅ Audit logs with IP tracking
-- ✅ Moderation queue visualization
+-  Admin dashboard with analytics
+-  User reports system
+-  Message flagging workflow
+-  User suspension/warnings
+-  Audit logs with IP tracking
+-  Moderation queue visualization
 
 ### Enterprise Features
-- ✅ Role-based access control (Admin/User)
-- ✅ Rate limiting (per-user, per-endpoint)
-- ✅ JWT authentication with refresh tokens
-- ✅ Email verification
-- ✅ Security questions for password reset
-- ✅ Session management with cookie security
+-  Role-based access control (Admin/User)
+-  Rate limiting (per-user, per-endpoint)
+-  JWT authentication with refresh tokens
+-  Email verification
+-  Security questions for password reset
+-  Session management with cookie security
 
 ---
 
@@ -440,7 +440,7 @@ curl http://localhost:5173             # Frontend
 curl http://localhost:5000/health      # ML Service
 ```
 
-✅ **All services running?** Open http://localhost:5173 and sign up!
+ **All services running?** Open http://localhost:5173 and sign up!
 
 For detailed setup instructions, see [SETUP.md](./docs/SETUP.md).
 
@@ -481,14 +481,14 @@ For detailed setup instructions, see [SETUP.md](./docs/SETUP.md).
 See [PRODUCTION_CHECKLIST.md](./docs/PRODUCTION_CHECKLIST.md)
 
 Key steps:
-1. ✅ Environment variable security audit
-2. ✅ SSL/TLS certificate setup
-3. ✅ Database backups & replication
-4. ✅ Rate limiting configuration
-5. ✅ Logging & monitoring setup
-6. ✅ Load testing (see `load-test.js`)
-7. ✅ Security penetration testing
-8. ✅ Disaster recovery plan
+1.  Environment variable security audit
+2.  SSL/TLS certificate setup
+3.  Database backups & replication
+4.  Rate limiting configuration
+5.  Logging & monitoring setup
+6.  Load testing (see `load-test.js`)
+7.  Security penetration testing
+8.  Disaster recovery plan
 
 For complete deployment guide, see [DEPLOYMENT.md](./docs/DEPLOYMENT.md)
 
@@ -534,20 +534,20 @@ For detailed performance tuning, see [PERFORMANCE.md](./docs/PERFORMANCE.md)
 ## 🔐 Security & Compliance
 
 ### Security Features
-✅ JWT authentication with refresh token rotation  
-✅ Rate limiting (100 req/min per user)  
-✅ Input validation & sanitization  
-✅ CORS protection  
-✅ CSRF tokens on state-changing operations  
-✅ SQL injection prevention (Mongoose)  
-✅ XSS protection (React built-in)  
-✅ Password hashing (bcryptjs)  
+ JWT authentication with refresh token rotation  
+ Rate limiting (100 req/min per user)  
+ Input validation & sanitization  
+ CORS protection  
+ CSRF tokens on state-changing operations  
+ SQL injection prevention (Mongoose)  
+ XSS protection (React built-in)  
+ Password hashing (bcryptjs)  
 
 ### Compliance
-✅ GDPR-ready user data export  
-✅ Right to be forgotten (account deletion)  
-✅ Audit logs for admin actions  
-✅ Data encryption at rest & in transit  
+ GDPR-ready user data export  
+ Right to be forgotten (account deletion)  
+ Audit logs for admin actions  
+ Data encryption at rest & in transit  
 
 See [SECURITY_BEST_PRACTICES.md](./docs/SECURITY_BEST_PRACTICES.md) for hardening guide.
 
