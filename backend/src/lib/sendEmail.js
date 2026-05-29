@@ -9,7 +9,7 @@ export const sendWelcomeEmail = async (email, fullName) => {
       body: JSON.stringify({
         sender: {
           name: "PASO",
-          email: "santraakash999@gmail.com",
+          email: process.env.BREVO_EMAIL,
         },
         to: [{ email }],
         subject: "Welcome to PASO - the best chat app",
@@ -59,7 +59,7 @@ export const sendOtpEmail = async (email, otp) => {
       body: JSON.stringify({
         sender: {
           name: "PASO Support",
-          email: "santraakash999@gmail.com",
+          email: process.env.BREVO_EMAIL,
         },
         to: [{ email }],
         subject: "PASO - Password Reset OTP",
