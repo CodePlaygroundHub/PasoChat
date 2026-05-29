@@ -11,16 +11,16 @@ PASO uses a comprehensive testing strategy to ensure reliability at scale with a
 ### Test Pyramid
 
 ```
-           🎯 E2E Tests (10%)
+           E2E Tests (10%)
          /          \
        UI Testing    Integration
        
-      🔄 Integration Tests (30%)
+     Integration Tests (30%)
     /              \
 Component Tests   API Tests
 Socket.IO Tests
 
-   ✅ Unit Tests (60%)
+  Unit Tests (60%)
  /          |          \
 Utils    Models    Services
 ```
