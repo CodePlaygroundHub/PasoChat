@@ -548,31 +548,49 @@ export const resetPassword = async (
 
 export const getSecurityQuestions =
   async (req, res) => {
-    const { email } = req.body;
+    try {
+      const { email } = req.body;
 
-    // console.log("EMAIL RECEIVED:", email);
+      if (typeof email !== "string") {
+        return res.status(400).json({
+          message: "Invalid credentials",
+        });
+      }
 
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-    });
+      // console.log("EMAIL RECEIVED:", email);
 
-    // console.log("USER FOUND:", user);
+      const user = await User.findOne({
+        email: email.toLowerCase(),
+      });
 
-    if (
-      !user ||
-      !user.securityQuestions.length
-    ) {
-      return res.status(400).json({
-        message: "Invalid credentials",
+      // console.log("USER FOUND:", user);
+
+      if (
+        !user ||
+        !user.securityQuestions ||
+        !user.securityQuestions.length
+      ) {
+        return res.status(400).json({
+          message: "Invalid credentials",
+        });
+      }
+
+      res.status(200).json({
+        questions:
+          user.securityQuestions.map(
+            (q) => q.question
+          ),
+      });
+    } catch (error) {
+      console.error(
+        "Get security questions error:",
+        error.message
+      );
+
+      res.status(500).json({
+        message: "Internal Server Error",
       });
     }
-
-    res.status(200).json({
-      questions:
-        user.securityQuestions.map(
-          (q) => q.question
-        ),
-    });
   };
 
 // export const verifyEmail = async (req, res) => {
