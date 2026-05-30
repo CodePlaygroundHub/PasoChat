@@ -1,4 +1,4 @@
-# 🚀 Production Deployment Guide
+# Production Deployment Guide
 
 ## Table of Contents
 
