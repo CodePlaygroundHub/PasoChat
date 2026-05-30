@@ -15,52 +15,17 @@
 
 ## 🌟 Quick Navigation
 
-<table align="center">
-  <tr>
-    <td align="center">
-      <a href="#-why-paso-matters">
-        <strong>📖 Overview</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="./docs/QUICK_START.md">
-        <strong>⚡ Quick Start</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="./docs/ARCHITECTURE.md">
-        <strong>🏗️ Architecture</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://chat-app-sooty-mu.vercel.app">
-        <strong>🌐 Live Demo</strong>
-      </a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <a href="./docs/API.md">
-        <strong>📚 API Docs</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="./docs/DEPLOYMENT.md">
-        <strong>🚀 Deployment</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="./docs/CONTRIBUTOR_ONBOARDING.md">
-        <strong>👨‍💻 Contributing</strong>
-      </a>
-    </td>
-    <td align="center">
-      <a href="./docs/COPILOT_STORY.md">
-        <strong>🤖 Copilot Story</strong>
-      </a>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="#why-paso-matters">Overview</a> •
+  <a href="./docs/QUICK_START.md">Quick Start</a> •
+  <a href="./docs/ARCHITECTURE.md">Architecture</a> •
+  <a href="https://chat-app-sooty-mu.vercel.app">Live Demo</a> •
+  <a href="./docs/API.md">API Docs</a> •
+  <a href="./docs/DEPLOYMENT.md">Deployment</a> •
+  <a href="./docs/CONTRIBUTOR_ONBOARDING.md">Contributing</a> •
+  <a href="./docs/COPILOT_STORY.md">Copilot Story</a>
+</p>
+
 
 ---
 
