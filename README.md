@@ -459,7 +459,7 @@ For complete deployment guide, see [DEPLOYMENT.md](./docs/DEPLOYMENT.md)
 
 ---
 
-## 🤖 GitHub Copilot-Assisted Development
+## GitHub Copilot-Assisted Development
 
 This project was accelerated using GitHub Copilot for:
 
@@ -473,7 +473,7 @@ Read the complete [Copilot Integration Story](./docs/COPILOT_STORY.md) for real 
 
 ---
 
-## 📈 Performance & Scalability Highlights
+## Performance & Scalability Highlights
 
 ### Throughput Metrics
 - **Message Latency**: <50ms end-to-end (p95)
@@ -496,7 +496,7 @@ For detailed performance tuning, see [PERFORMANCE.md](./docs/PERFORMANCE.md)
 
 ---
 
-## 🔐 Security & Compliance
+## Security & Compliance
 
 ### Security Features
  JWT authentication with refresh token rotation  
@@ -518,7 +518,7 @@ See [SECURITY_BEST_PRACTICES.md](./docs/SECURITY_BEST_PRACTICES.md) for hardenin
 
 ---
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### Test Coverage
 - **Backend Unit Tests**: Controllers, middleware, utilities
@@ -538,7 +538,7 @@ Load testing: `npm run load-test` (see [TESTING.md](./docs/TESTING.md))
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! The project is designed for collaborative development.
 
@@ -556,7 +556,7 @@ We welcome contributions! The project is designed for collaborative development.
 
 ---
 
-## 📜 License & Attribution
+## License & Attribution
 
 **MIT License** — Free to use for commercial and personal projects  
 See [LICENSE](./LICENSE) for details
@@ -569,16 +569,16 @@ See [LICENSE](./LICENSE) for details
 
 ---
 
-## 📞 Support & Community
+## Support & Community
 
-- 📖 **Documentation**: Read the [docs](./docs) folder
-- 🐛 **Issues**: Report bugs on [GitHub Issues](https://github.com/CodePlaygroundHub/paso-chat-app/issues)
-- 💬 **Discussions**: Join conversations in [GitHub Discussions](https://github.com/CodePlaygroundHub/paso-chat-app/discussions)
-- 🌐 **Live Demo**: Try it at [chat-app-sooty-mu.vercel.app](https://chat-app-sooty-mu.vercel.app)
+- **Documentation**: Read the [docs](./docs) folder
+- **Issues**: Report bugs on [GitHub Issues](https://github.com/CodePlaygroundHub/paso-chat-app/issues)
+- **Discussions**: Join conversations in [GitHub Discussions](https://github.com/CodePlaygroundHub/paso-chat-app/discussions)
+- **Live Demo**: Try it at [chat-app-sooty-mu.vercel.app](https://chat-app-sooty-mu.vercel.app)
 
 ---
 
-## 🎯 Future Vision
+## Future Vision
 
 PASO is actively maintained with exciting features on the roadmap:
 
