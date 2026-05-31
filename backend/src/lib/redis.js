@@ -3,7 +3,9 @@ import { createClient } from "redis";
 export let pubClient = null;
 export let subClient = null;
 
-if (process.env.REDIS_URL) {
+const isTest = process.env.NODE_ENV === "test";
+
+if (!isTest && process.env.REDIS_URL) {
   pubClient = createClient({
     url: process.env.REDIS_URL,
   });
@@ -21,16 +23,8 @@ if (process.env.REDIS_URL) {
   try {
     await pubClient.connect();
     await subClient.connect();
-
     console.log("✅ Redis connected");
   } catch (error) {
-    console.log(
-      "⚠️ Redis unavailable:",
-      error.message,
-    );
+    console.log("⚠️ Redis unavailable:", error.message);
   }
-} else {
-  console.log(
-    "⚠️ REDIS_URL not provided. Running without Redis."
-  );
 }
