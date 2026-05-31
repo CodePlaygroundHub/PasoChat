@@ -11,10 +11,7 @@ jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
 import request from "supertest";
 import bcrypt from "bcryptjs";
 
-import {
-  connectTestDB,
-  disconnectTestDB,
-} from "../setup.js";
+import { connectTestDB, disconnectTestDB } from "../setup.js";
 
 import { cleanupRedis } from "../teardown.js";
 
@@ -63,7 +60,9 @@ describe("OTP Password Recovery Flow", () => {
       await wait(20);
 
       expect(response.statusCode).toBe(200);
-      expect(response.body.message).toBe("If an account exists, an OTP has been sent.");
+      expect(response.body.message).toBe(
+        "If an account exists, an OTP has been sent.",
+      );
       expect(global.sendOtpEmailMock).not.toHaveBeenCalled();
     });
 
@@ -75,7 +74,9 @@ describe("OTP Password Recovery Flow", () => {
       await wait(20);
 
       expect(response.statusCode).toBe(200);
-      expect(response.body.message).toBe("If an account exists, an OTP has been sent.");
+      expect(response.body.message).toBe(
+        "If an account exists, an OTP has been sent.",
+      );
 
       // Check that OTP email was triggered
       expect(global.sendOtpEmailMock).toHaveBeenCalledTimes(1);
@@ -84,7 +85,9 @@ describe("OTP Password Recovery Flow", () => {
       expect(sentOtp).toMatch(/^\d{6}$/); // 6 digits
 
       // Check DB fields
-      const user = await User.findOne({ email: testEmail }).select("+resetOtp +resetOtpExpiry");
+      const user = await User.findOne({ email: testEmail }).select(
+        "+resetOtp +resetOtpExpiry",
+      );
       expect(user.resetOtp).not.toBeNull();
       // Verify bcrypt hash matches the sent OTP
       const matches = await bcrypt.compare(sentOtp, user.resetOtp);
@@ -94,9 +97,7 @@ describe("OTP Password Recovery Flow", () => {
 
     it("should enforce the 60-second cooldown on resending", async () => {
       // First send
-      await request(app)
-        .post("/api/auth/send-otp")
-        .send({ email: testEmail });
+      await request(app).post("/api/auth/send-otp").send({ email: testEmail });
 
       await wait(20);
 
@@ -105,8 +106,10 @@ describe("OTP Password Recovery Flow", () => {
         .post("/api/auth/send-otp")
         .send({ email: testEmail });
 
-      expect(response.statusCode).toBe(429);
-      expect(response.body.message).toContain("Please wait");
+      expect(response.statusCode).toBe(200);
+      expect(response.body.message).toBe(
+        "If an account exists, an OTP has been sent.",
+      );
       expect(global.sendOtpEmailMock).toHaveBeenCalledTimes(1); // Only first sent
     });
   });
@@ -120,7 +123,7 @@ describe("OTP Password Recovery Flow", () => {
         {
           resetOtp: hashedOtp,
           resetOtpExpiry: new Date(Date.now() - 1000), // 1 second ago
-        }
+        },
       );
 
       const response = await request(app)
@@ -133,9 +136,7 @@ describe("OTP Password Recovery Flow", () => {
 
     it("should reject verification if OTP is incorrect", async () => {
       // Send OTP to populate fields
-      await request(app)
-        .post("/api/auth/send-otp")
-        .send({ email: testEmail });
+      await request(app).post("/api/auth/send-otp").send({ email: testEmail });
 
       await wait(20);
 
@@ -149,9 +150,7 @@ describe("OTP Password Recovery Flow", () => {
 
     it("should verify successfully, clear OTP fields, and return resetToken", async () => {
       // Send OTP to get the code
-      await request(app)
-        .post("/api/auth/send-otp")
-        .send({ email: testEmail });
+      await request(app).post("/api/auth/send-otp").send({ email: testEmail });
 
       await wait(20);
 
@@ -167,7 +166,9 @@ describe("OTP Password Recovery Flow", () => {
       const { resetToken } = response.body;
 
       // Verify DB cleared OTP fields immediately
-      const user = await User.findOne({ email: testEmail }).select("+resetOtp +resetOtpExpiry +passwordResetSession");
+      const user = await User.findOne({ email: testEmail }).select(
+        "+resetOtp +resetOtpExpiry +passwordResetSession",
+      );
       expect(user.resetOtp).toBeNull();
       expect(user.resetOtpExpiry).toBeNull();
       expect(user.passwordResetSession).toBe(resetToken);
@@ -177,9 +178,7 @@ describe("OTP Password Recovery Flow", () => {
   describe("Complete Recovery: Reset Password", () => {
     it("should allow resetting the password with resetToken, then invalidate the token", async () => {
       // 1. Send OTP
-      await request(app)
-        .post("/api/auth/send-otp")
-        .send({ email: testEmail });
+      await request(app).post("/api/auth/send-otp").send({ email: testEmail });
 
       await wait(20);
 
@@ -205,11 +204,16 @@ describe("OTP Password Recovery Flow", () => {
       expect(resetRes.body.message).toBe("Password reset successful");
 
       // Verify the password reset session token was cleared
-      const user = await User.findOne({ email: testEmail }).select("+passwordResetSession +password");
+      const user = await User.findOne({ email: testEmail }).select(
+        "+passwordResetSession +password",
+      );
       expect(user.passwordResetSession).toBeNull();
 
       // Verify the password was hashed and updated
-      const isUpdatedMatch = await bcrypt.compare("newsecurepassword123", user.password);
+      const isUpdatedMatch = await bcrypt.compare(
+        "newsecurepassword123",
+        user.password,
+      );
       expect(isUpdatedMatch).toBe(true);
 
       // 4. Verify the token cannot be reused
