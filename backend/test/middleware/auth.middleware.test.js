@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
+  sendOtpEmail: jest.fn(),
 }));
 
 import {

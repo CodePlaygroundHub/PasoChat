@@ -2,7 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-import { sendWelcomeEmail } from "../lib/sendEmail.js";
+import { sendWelcomeEmail, sendOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
 
 //signup
@@ -58,9 +58,14 @@ export const signup = async (req, res) => {
     }
 
     // Check existing user
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json({
+        message: "Email already exists",
+      });
     }
 
     // Hash password
@@ -70,8 +75,11 @@ export const signup = async (req, res) => {
     const hashedQuestions = await Promise.all(
       securityQuestions.map(async (q) => ({
         question: q.question,
-        answer: await bcrypt.hash(q.answer.toLowerCase().trim(), 10),
-      })),
+        answer: await bcrypt.hash(
+          q.answer.toLowerCase().trim(),
+          10
+        ),
+      }))
     );
 
     // Create user (NO verification fields)
@@ -88,7 +96,10 @@ export const signup = async (req, res) => {
 
     // Send Welcome Email (non-blocking)
     setImmediate(() => {
-      sendWelcomeEmail(newUser.email, newUser.fullName);
+      sendWelcomeEmail(
+        newUser.email,
+        newUser.fullName
+      );
     });
 
     // Send user response
@@ -102,7 +113,10 @@ export const signup = async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -118,24 +132,33 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
-  if (typeof email !== "string" || typeof password !== "string") {
+  if (
+    typeof email !== "string" ||
+    typeof password !== "string"
+  ) {
     return res.status(400).json({
       message: "Invalid input",
     });
   }
 
   try {
-    if (typeof email !== "string" || typeof password !== "string") {
+    if (
+      typeof email !== "string" ||
+      typeof password !== "string"
+    ) {
       return res.status(400).json({
         message: "Invalid input types",
       });
     }
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
-      "+password",
-    );
+
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    }).select("+password");
 
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
     // if (!user.isVerified) {
@@ -151,9 +174,16 @@ export const login = async (req, res) => {
       });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    const isPasswordCorrect =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
+
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
     const token = generateToken(user._id);
@@ -167,8 +197,14 @@ export const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error("Login error:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error(
+      "Login error:",
+      error.message
+    );
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -178,11 +214,22 @@ export const login = async (req, res) => {
 // Send success response
 export const logout = (req, res) => {
   try {
-    res.cookie("jwt", "", { maxAge: 0 });
-    res.status(200).json({ message: "Logged out successfully" });
+    res.cookie("jwt", "", {
+      maxAge: 0,
+    });
+
+    res.status(200).json({
+      message: "Logged out successfully",
+    });
   } catch (error) {
-    console.error("Logout error:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error(
+      "Logout error:",
+      error.message
+    );
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -194,8 +241,13 @@ export const logout = (req, res) => {
 // Get secure_url from Cloudinary response
 // Update user profilePic in database
 // Return updated user data (without password)
-export const updateProfile = async (req, res) => {
-  const { profilePic, fullName } = req.body;
+export const updateProfile = async (
+  req,
+  res
+) => {
+  const { profilePic, fullName } =
+    req.body;
+
   const userId = req.user._id;
 
   try {
@@ -206,22 +258,43 @@ export const updateProfile = async (req, res) => {
     }
 
     if (profilePic) {
-      const uploadResponse = await cloudinary.uploader.upload(profilePic);
-      updateData.profilePic = uploadResponse.secure_url;
+      const uploadResponse =
+        await cloudinary.uploader.upload(
+          profilePic
+        );
+
+      updateData.profilePic =
+        uploadResponse.secure_url;
     }
 
-    if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ message: "No data provided to update" });
+    if (
+      Object.keys(updateData).length === 0
+    ) {
+      return res.status(400).json({
+        message:
+          "No data provided to update",
+      });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
-      new: true,
-    }).select("-password");
+    const updatedUser =
+      await User.findByIdAndUpdate(
+        userId,
+        updateData,
+        {
+          new: true,
+        }
+      ).select("-password");
 
     res.status(200).json(updatedUser);
   } catch (error) {
-    console.error("Update profile error:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error(
+      "Update profile error:",
+      error.message
+    );
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -229,123 +302,229 @@ export const updateProfile = async (req, res) => {
 // Middleware validates JWT
 // Middleware attaches user to req.user
 // Return req.user in response
-export const checkAuth = async (req, res) => {
+export const checkAuth = async (
+  req,
+  res
+) => {
   try {
-    const user = await User.findById(req.user._id).select(
+    const user = await User.findById(
+      req.user._id
+    ).select(
       "-password -passwordResetSession"
     );
 
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({
+        message: "User not found",
+      });
     }
 
     if (user.isBanned) {
-      return res.status(403).json({ message: "Account banned" });
+      return res.status(403).json({
+        message: "Account banned",
+      });
     }
 
     user.securityQuestions = undefined;
 
     res.status(200).json(user);
   } catch (error) {
-    console.error("Check auth error:", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-export const setupSecurityQuestions = async (req, res) => {
-  const { questions } = req.body; // [{question, answer}]
-  const userId = req.user._id;
-
-  try {
-    if (!questions || questions.length === 0) {
-      return res.status(400).json({ message: "Questions required" });
-    }
-
-    if (questions.length > 3) {
-      return res.status(400).json({ message: "Max 3 questions allowed" });
-    }
-
-    const hashedQuestions = await Promise.all(
-      questions.map(async (q) => ({
-        question: q.question,
-        answer: await bcrypt.hash(q.answer.toLowerCase().trim(), 10),
-      })),
+    console.error(
+      "Check auth error:",
+      error.message
     );
 
-    await User.findByIdAndUpdate(userId, {
-      securityQuestions: hashedQuestions,
+    res.status(500).json({
+      message: "Internal Server Error",
     });
-
-    res.status(200).json({ message: "Security questions saved" });
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-export const verifySecurityAnswers = async (req, res) => {
-  const { email, answers } = req.body;
+export const setupSecurityQuestions =
+  async (req, res) => {
+    const { questions } = req.body; // [{question, answer}]
+    const userId = req.user._id;
 
-  try {
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
-      "+securityQuestions.answer +passwordResetSession",
-    );
+    try {
+      if (
+        !questions ||
+        questions.length === 0
+      ) {
+        return res.status(400).json({
+          message: "Questions required",
+        });
+      }
 
-    if (!user || user.securityQuestions.length === 0) {
-      return res.status(400).json({ message: "Invalid request" });
-    }
+      if (questions.length > 3) {
+        return res.status(400).json({
+          message:
+            "Max 3 questions allowed",
+        });
+      }
 
-    if (answers.length !== user.securityQuestions.length) {
-      return res.status(400).json({ message: "Answers mismatch" });
-    }
+      const hashedQuestions =
+        await Promise.all(
+          questions.map(async (q) => ({
+            question: q.question,
+            answer: await bcrypt.hash(
+              q.answer
+                .toLowerCase()
+                .trim(),
+              10
+            ),
+          }))
+        );
 
-    for (let i = 0; i < answers.length; i++) {
-      const isMatch = await bcrypt.compare(
-        answers[i].toLowerCase().trim(),
-        user.securityQuestions[i].answer,
+      await User.findByIdAndUpdate(
+        userId,
+        {
+          securityQuestions:
+            hashedQuestions,
+        }
       );
 
-      if (!isMatch) {
-        return res.status(400).json({ message: "Incorrect answers" });
-      }
+      res.status(200).json({
+        message:
+          "Security questions saved",
+      });
+    } catch (error) {
+      res.status(500).json({
+        message:
+          "Internal Server Error",
+      });
     }
+  };
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
+export const verifySecurityAnswers =
+  async (req, res) => {
+    const { email, answers } =
+      req.body;
 
-    user.passwordResetSession = resetToken;
-    await user.save();
+    try {
+      const user =
+        await User.findOne({
+          email: email.toLowerCase(),
+        }).select(
+          "+securityQuestions.answer +passwordResetSession"
+        );
 
-    res.status(200).json({ resetToken });
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+      if (
+        !user ||
+        user.securityQuestions.length ===
+        0
+      ) {
+        return res.status(400).json({
+          message: "Invalid request",
+        });
+      }
 
-export const resetPassword = async (req, res) => {
-  const { email, resetToken, newPassword } = req.body;
+      if (
+        answers.length !==
+        user.securityQuestions.length
+      ) {
+        return res.status(400).json({
+          message: "Answers mismatch",
+        });
+      }
+
+      for (
+        let i = 0;
+        i < answers.length;
+        i++
+      ) {
+        const isMatch =
+          await bcrypt.compare(
+            answers[i]
+              .toLowerCase()
+              .trim(),
+            user.securityQuestions[i]
+              .answer
+          );
+
+        if (!isMatch) {
+          return res.status(400).json({
+            message:
+              "Incorrect answers",
+          });
+        }
+      }
+
+      const resetToken =
+        crypto.randomBytes(32).toString(
+          "hex"
+        );
+
+      user.passwordResetSession =
+        resetToken;
+
+      await user.save();
+
+      res.status(200).json({
+        resetToken,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message:
+          "Internal Server Error",
+      });
+    }
+  };
+
+export const resetPassword = async (
+  req,
+  res
+) => {
+  const {
+    email,
+    resetToken,
+    newPassword,
+  } = req.body;
 
   try {
-    const user = await User.findOne({ email: email.toLowerCase() }).select(
-      "+passwordResetSession +password",
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    }).select(
+      "+passwordResetSession +password +resetOtp +resetOtpExpiry"
     );
 
-    if (!user || user.passwordResetSession !== resetToken) {
-      return res.status(400).json({ message: "Unauthorized reset attempt" });
+    if (
+      !user ||
+      user.passwordResetSession !==
+      resetToken
+    ) {
+      return res.status(400).json({
+        message:
+          "Unauthorized reset attempt",
+      });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
-        message: "Password must be at least 6 characters",
+        message:
+          "Password must be at least 6 characters",
       });
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(
+      newPassword,
+      10
+    );
+
     user.passwordResetSession = null;
+    user.resetOtp = null;
+    user.resetOtpExpiry = null;
 
     await user.save();
 
-    res.status(200).json({ message: "Password reset successful" });
+    res.status(200).json({
+      message:
+        "Password reset successful",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({
+      message:
+        "Internal Server Error",
+    });
   }
 };
 
@@ -367,21 +546,53 @@ export const resetPassword = async (req, res) => {
 //   }
 // };
 
-export const getSecurityQuestions = async (req, res) => {
-  const { email } = req.body;
-  // console.log("EMAIL RECEIVED:", email);
-  const user = await User.findOne({ email: email.toLowerCase() });
-  // console.log("USER FOUND:", user);
-  if (!user || !user.securityQuestions.length) {
-    return res.status(400).json({ message: "Invalid credentials" });
-  }
+export const getSecurityQuestions =
+  async (req, res) => {
+    try {
+      const { email } = req.body;
 
-  res.status(200).json({
-    questions: user.securityQuestions.map((q) => q.question),
-  });
-};
+      if (typeof email !== "string") {
+        return res.status(400).json({
+          message: "Invalid credentials",
+        });
+      }
 
-//Future alaning--->
+      // console.log("EMAIL RECEIVED:", email);
+
+      const user = await User.findOne({
+        email: email.toLowerCase(),
+      });
+
+      // console.log("USER FOUND:", user);
+
+      if (
+        !user ||
+        !user.securityQuestions ||
+        !user.securityQuestions.length
+      ) {
+        return res.status(400).json({
+          message: "Invalid credentials",
+        });
+      }
+
+      res.status(200).json({
+        questions:
+          user.securityQuestions.map(
+            (q) => q.question
+          ),
+      });
+    } catch (error) {
+      console.error(
+        "Get security questions error:",
+        error.message
+      );
+
+      res.status(500).json({
+        message: "Internal Server Error",
+      });
+    }
+  };
+
 // export const verifyEmail = async (req, res) => {
 //   const { token } = req.params;
 
@@ -402,3 +613,179 @@ export const getSecurityQuestions = async (req, res) => {
 
 //   res.redirect("http://localhost:5173/login");
 // };
+
+export const sendOtp = async (
+  req,
+  res
+) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const normalizedEmail =
+      email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select(
+      "+resetOtp +resetOtpExpiry"
+    );
+
+    const genericMessage =
+      "If an account exists, an OTP has been sent.";
+
+    // Prevent email enumeration
+    if (!user) {
+      return res.status(200).json({
+        message: genericMessage,
+      });
+    }
+
+    // Cooldown check (60 sec)
+    if (user.resetOtpExpiry) {
+      const lastSentTime =
+        new Date(
+          user.resetOtpExpiry
+        ).getTime() -
+        5 * 60 * 1000;
+
+      const timeSinceLastSent =
+        Date.now() - lastSentTime;
+
+      if (
+        timeSinceLastSent <
+        60 * 1000
+      ) {
+        return res.status(200).json({
+          message: genericMessage,
+        });
+      }
+    }
+
+    // Generate 6-digit OTP
+    const otp = crypto.randomInt(
+      100000,
+      1000000
+    ).toString();
+
+    // Hash OTP
+    const hashedOtp =
+      await bcrypt.hash(otp, 10);
+
+    user.resetOtp = hashedOtp;
+
+    user.resetOtpExpiry = new Date(
+      Date.now() + 5 * 60 * 1000
+    );
+
+    await user.save();
+
+    setImmediate(() => {
+      sendOtpEmail(user.email, otp);
+    });
+
+    res.status(200).json({
+      message: genericMessage,
+    });
+  } catch (error) {
+    console.error(
+      "Send OTP error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const verifyOtp = async (
+  req,
+  res
+) => {
+  const { email, otp } = req.body;
+
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({
+        message:
+          "Email and OTP are required",
+      });
+    }
+
+    const normalizedEmail =
+      email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select(
+      "+resetOtp +resetOtpExpiry +passwordResetSession"
+    );
+
+    if (!user) {
+      return res.status(400).json({
+        message:
+          "Invalid email or OTP",
+      });
+    }
+
+    // Check expiry
+    if (
+      !user.resetOtp ||
+      !user.resetOtpExpiry ||
+      user.resetOtpExpiry <
+      new Date()
+    ) {
+      return res.status(400).json({
+        message:
+          "OTP has expired or is invalid",
+      });
+    }
+
+    // Compare OTP
+    const isOtpCorrect =
+      await bcrypt.compare(
+        otp,
+        user.resetOtp
+      );
+
+    if (!isOtpCorrect) {
+      return res.status(400).json({
+        message:
+          "Invalid email or OTP",
+      });
+    }
+
+    // Clear OTP after successful verification
+    user.resetOtp = null;
+    user.resetOtpExpiry = null;
+
+    // Generate reset token
+    const resetToken = crypto
+      .randomBytes(32)
+      .toString("hex");
+
+    user.passwordResetSession =
+      resetToken;
+
+    await user.save();
+
+    res.status(200).json({
+      resetToken,
+    });
+  } catch (error) {
+    console.error(
+      "Verify OTP error:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};

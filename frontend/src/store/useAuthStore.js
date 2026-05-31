@@ -25,6 +25,8 @@ export const useAuthStore = create((set, get) => ({
   resetToken: null,
   securityQuestions: [],
   isFetchingQuestions: false,
+  isSendingOtp: false,
+  isVerifyingOtp: false,
 
   checkAuth: async () => {
     try {
@@ -140,6 +142,35 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  sendOtp: async (email) => {
+    set({ isSendingOtp: true });
+    try {
+      const res = await axiosInstance.post("/auth/send-otp", { email });
+      toast.success(res.data.message || "OTP sent successfully");
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send OTP");
+      return false;
+    } finally {
+      set({ isSendingOtp: false });
+    }
+  },
+
+  verifyOtp: async (data) => {
+    set({ isVerifyingOtp: true });
+    try {
+      const res = await axiosInstance.post("/auth/verify-otp", data);
+      set({ resetToken: res.data.resetToken });
+      toast.success("OTP verified successfully");
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid or expired OTP");
+      return false;
+    } finally {
+      set({ isVerifyingOtp: false });
+    }
+  },
+
   fetchSecurityQuestions: async (email) => {
     set({ isFetchingQuestions: true });
 
@@ -193,7 +224,6 @@ export const useAuthStore = create((set, get) => ({
 
       timeout: 20000,
     });
-
 
     newSocket.on("getOnlineUsers", (userIds) => {
       console.log("RAW FROM SERVER:", userIds);
