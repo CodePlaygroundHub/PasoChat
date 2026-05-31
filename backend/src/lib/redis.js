@@ -1,20 +1,36 @@
 import { createClient } from "redis";
 
-export const pubClient = createClient({
-  url: process.env.REDIS_URL,
-});
+export let pubClient = null;
+export let subClient = null;
 
-export const subClient = pubClient.duplicate();
+if (process.env.REDIS_URL) {
+  pubClient = createClient({
+    url: process.env.REDIS_URL,
+  });
 
-pubClient.on("error", (err) => {
-  console.log("Redis Pub Error:", err);
-});
+  subClient = pubClient.duplicate();
 
-subClient.on("error", (err) => {
-  console.log("Redis Sub Error:", err);
-});
+  pubClient.on("error", (err) => {
+    console.log("Redis Pub Error:", err.message);
+  });
 
-await pubClient.connect();
-await subClient.connect();
+  subClient.on("error", (err) => {
+    console.log("Redis Sub Error:", err.message);
+  });
 
-console.log("✅ Redis connected");
+  try {
+    await pubClient.connect();
+    await subClient.connect();
+
+    console.log("✅ Redis connected");
+  } catch (error) {
+    console.log(
+      "⚠️ Redis unavailable:",
+      error.message,
+    );
+  }
+} else {
+  console.log(
+    "⚠️ REDIS_URL not provided. Running without Redis."
+  );
+}
