@@ -32,13 +32,14 @@ export const sendWelcomeEmail = async (email, fullName) => {
     } else {
       console.log("Email sent successfully:", data);
     }
-
   } catch (error) {
     console.error("Brevo error:", error);
   }
 };
 
 export const sendOtpEmail = async (email, otp) => {
+  console.log("BREVO_EMAIL:", process.env.BREVO_EMAIL);
+  console.log("BREVO_API_KEY loaded:", !!process.env.BREVO_API_KEY);
   console.log("OTP email sent Successfully");
 
   if (
