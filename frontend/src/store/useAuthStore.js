@@ -225,7 +225,6 @@ export const useAuthStore = create((set, get) => ({
       timeout: 20000,
     });
 
-
     newSocket.on("getOnlineUsers", (userIds) => {
       console.log("RAW FROM SERVER:", userIds);
 

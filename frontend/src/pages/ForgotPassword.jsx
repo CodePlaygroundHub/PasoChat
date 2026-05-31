@@ -1,38 +1,47 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
-import { Loader2, Lock, Mail, ArrowLeft, ShieldCheck, KeyRound, CheckCircle2 } from "lucide-react";
+import {
+  Loader2,
+  Lock,
+  Mail,
+  ArrowLeft,
+  ShieldCheck,
+  KeyRound,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
 
   const {
-  fetchSecurityQuestions,
-  verifySecurityAnswers,
-  sendOtp,
-  verifyOtp,
-  resetPassword,
-  securityQuestions,
-  isFetchingQuestions,
-  isVerifyingSecurity,
-  isSendingOtp,
-  isVerifyingOtp,
-  isResettingPassword,
-} = useAuthStore();
+    fetchSecurityQuestions,
+    verifySecurityAnswers,
+    sendOtp,
+    verifyOtp,
+    resetPassword,
+    securityQuestions,
+    isFetchingQuestions,
+    isVerifyingSecurity,
+    isSendingOtp,
+    isVerifyingOtp,
+    isResettingPassword,
+  } = useAuthStore();
 
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [recoveryMethod, setRecoveryMethod] =
-  useState("otp");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [recoveryMethod, setRecoveryMethod] = useState("otp");
 
-const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState([]);
   const [cooldown, setCooldown] = useState(0);
   const [passwords, setPasswords] = useState({
     newPassword: "",
     confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -43,6 +52,65 @@ const [answers, setAnswers] = useState([]);
     }
     return () => clearInterval(timer);
   }, [cooldown]);
+
+  const handleOtpChange = (index, value) => {
+    if (!/^\d?$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace") {
+      const newOtp = [...otp];
+
+      if (otp[index]) {
+        newOtp[index] = "";
+        setOtp(newOtp);
+        return;
+      }
+
+      if (index > 0) {
+        document.getElementById(`otp-${index - 1}`)?.focus();
+      }
+    }
+
+    if (e.key === "ArrowLeft" && index > 0) {
+      document.getElementById(`otp-${index - 1}`)?.focus();
+    }
+
+    if (e.key === "ArrowRight" && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+
+    const pastedData = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    if (!pastedData) return;
+
+    const newOtp = [...otp];
+
+    pastedData.split("").forEach((digit, index) => {
+      newOtp[index] = digit;
+    });
+
+    setOtp(newOtp);
+
+    const lastIndex = Math.min(pastedData.length - 1, 5);
+
+    document.getElementById(`otp-${lastIndex}`)?.focus();
+  };
 
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
@@ -55,10 +123,14 @@ const [answers, setAnswers] = useState([]);
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (otp.length !== 6) {
+    const otpValue = otp.join("");
+    if (otpValue.length !== 6) {
       return toast.error("Please enter a 6-digit OTP");
     }
-    const success = await verifyOtp({ email, otp });
+    const success = await verifyOtp({
+      email,
+      otp: otpValue,
+    });
     if (success) setStep(3);
   };
 
@@ -111,7 +183,9 @@ const [answers, setAnswers] = useState([]);
                 {step === 2 && <ShieldCheck className="size-6 text-primary" />}
                 {step === 3 && <KeyRound className="size-6 text-primary" />}
               </div>
-              <h1 className="text-2xl font-black tracking-tight">Account Recovery</h1>
+              <h1 className="text-2xl font-black tracking-tight">
+                Account Recovery
+              </h1>
               <p className="text-base-content/50 text-xs mt-1">
                 {step === 1 && "Verify your email to continue"}
                 {step === 2 && "Enter the 6-digit OTP sent to your email"}
@@ -121,8 +195,8 @@ const [answers, setAnswers] = useState([]);
 
             <div className="flex gap-2 mb-8">
               {[1, 2, 3].map((s) => (
-                <div 
-                  key={s} 
+                <div
+                  key={s}
                   className={`h-1 flex-1 rounded-full transition-all duration-500 ${
                     step >= s ? "bg-primary" : "bg-base-300"
                   }`}
@@ -131,248 +205,277 @@ const [answers, setAnswers] = useState([]);
             </div>
 
             {step === 1 && (
-  <form
-    onSubmit={handleSendOtp}
-    className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
-  >
-    <div className="form-control">
-      <label className="label py-1">
-        <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
-          Email Address
-        </span>
-      </label>
+              <form
+                onSubmit={handleSendOtp}
+                className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
+              >
+                <div className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
+                      Email Address
+                    </span>
+                  </label>
 
-      <div className="relative">
-        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
 
-        <input
-          type="email"
-          required
-          placeholder="name@example.com"
-          className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all"
-          value={email}
-          onChange={(e) =>
-            setEmail(e.target.value)
-          }
-        />
-      </div>
-    </div>
+                    <input
+                      type="email"
+                      required
+                      placeholder="name@example.com"
+                      className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-    <button
-      type="submit"
-      disabled={isSendingOtp}
-      className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
-    >
-      {isSendingOtp ? (
-        <Loader2 className="animate-spin" />
-      ) : (
-        "Send OTP"
-      )}
-    </button>
+                <button
+                  type="submit"
+                  disabled={isSendingOtp}
+                  className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
+                >
+                  {isSendingOtp ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Send OTP"
+                  )}
+                </button>
 
-    <button
-      type="button"
-      disabled={isFetchingQuestions}
-      onClick={async () => {
-        const success =
-          await fetchSecurityQuestions(
-            email
-          );
+                <button
+                  type="button"
+                  disabled={isFetchingQuestions}
+                  onClick={async () => {
+                    const success = await fetchSecurityQuestions(email);
 
-        if (success) {
-          setRecoveryMethod(
-            "security"
-          );
+                    if (success) {
+                      setRecoveryMethod("security");
 
-          setAnswers(
-            new Array(
-              securityQuestions.length
-            ).fill("")
-          );
+                      setAnswers(new Array(securityQuestions.length).fill(""));
 
-          setStep(2);
-        }
-      }}
-      className="btn btn-outline w-full"
-    >
-      {isFetchingQuestions ? (
-        <Loader2 className="animate-spin" />
-      ) : (
-        "Use Security Questions Instead"
-      )}
-    </button>
-  </form>
-)}
+                      setStep(2);
+                    }
+                  }}
+                  className="btn btn-outline w-full"
+                >
+                  {isFetchingQuestions ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Use Security Questions Instead"
+                  )}
+                </button>
+              </form>
+            )}
 
-            {step === 2 &&
-  recoveryMethod === "otp" && (
-    <form
-      onSubmit={handleVerifyOtp}
-      className="space-y-6 animate-in fade-in slide-in-from-bottom-2"
-    >
-      <div className="space-y-4">
-        <div className="form-control">
-          <label className="label py-1">
-            <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
-              Verification Code
-            </span>
-          </label>
-
-          <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
-
-            <input
-              type="text"
-              maxLength="6"
-              required
-              placeholder="Enter 6-digit OTP"
-              className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12 transition-all tracking-[0.25em] text-center font-bold text-lg"
-              value={otp}
-              onChange={(e) =>
-                setOtp(
-                  e.target.value.replace(
-                    /\D/g,
-                    ""
-                  )
-                )
-              }
-            />
-          </div>
-        </div>
-
-        <div className="text-center">
-          {cooldown > 0 ? (
-            <p className="text-xs text-base-content/40">
-              Resend OTP in{" "}
-              <span className="font-semibold text-primary">
-                {cooldown}s
-              </span>
-            </p>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSendOtp}
-              disabled={isSendingOtp}
-              className="text-xs font-bold text-primary hover:underline focus:outline-none"
-            >
-              Resend OTP
-            </button>
-          )}
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        disabled={isVerifyingOtp}
-        className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
-      >
-        {isVerifyingOtp ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          "Verify OTP"
-        )}
-      </button>
-    </form>
-  )}
-
-{step === 2 &&
-  recoveryMethod === "security" && (
-    <form
-      onSubmit={async (e) => {
-        e.preventDefault();
-
-        const success =
-          await verifySecurityAnswers({
-            email,
-            answers,
-          });
-
-        if (success) {
-          setStep(3);
-        }
-      }}
-      className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
-    >
-      {securityQuestions.map(
-        (question, index) => (
-          <div
-            key={index}
-            className="form-control"
-          >
-            <label className="label py-1">
-              <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
-                {question}
-              </span>
-            </label>
-
-            <input
-              type="text"
-              required
-              className="input input-bordered w-full bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12"
-              value={answers[index]}
-              onChange={(e) => {
-                const updated = [
-                  ...answers,
-                ];
-
-                updated[index] =
-                  e.target.value;
-
-                setAnswers(updated);
-              }}
-            />
-          </div>
-        )
-      )}
-
-      <button
-        type="submit"
-        disabled={isVerifyingSecurity}
-        className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
-      >
-        {isVerifyingSecurity ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          "Verify Answers"
-        )}
-      </button>
-    </form>
-  )}
-
-            {step === 3 && (
-              <form onSubmit={handleReset} className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            {step === 2 && recoveryMethod === "otp" && (
+              <form
+                onSubmit={handleVerifyOtp}
+                className="space-y-6 animate-in fade-in slide-in-from-bottom-2"
+              >
                 <div className="space-y-4">
                   <div className="form-control">
-                    <label className="label py-1"><span className="label-text font-bold text-[10px] uppercase opacity-60">New Password</span></label>
+                    <label className="label py-1">
+                      <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
+                        Verification Code
+                      </span>
+                    </label>
+
+                    <div className="flex justify-center gap-2">
+                      {otp.map((digit, index) => (
+                        <input
+                          key={index}
+                          id={`otp-${index}`}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={digit}
+                          onChange={(e) =>
+                            handleOtpChange(index, e.target.value)
+                          }
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          onPaste={handleOtpPaste}
+                          className="w-12 h-12 text-center text-lg font-bold border rounded-xl bg-base-200/50 focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    {cooldown > 0 ? (
+                      <p className="text-xs text-base-content/40">
+                        Resend OTP in{" "}
+                        <span className="font-semibold text-primary">
+                          {cooldown}s
+                        </span>
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={isSendingOtp}
+                        className="text-xs font-bold text-primary hover:underline focus:outline-none"
+                      >
+                        Resend OTP
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isVerifyingOtp}
+                  className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
+                >
+                  {isVerifyingOtp ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Verify OTP"
+                  )}
+                </button>
+              </form>
+            )}
+
+            {step === 2 && recoveryMethod === "security" && (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+
+                  const success = await verifySecurityAnswers({
+                    email,
+                    answers,
+                  });
+
+                  if (success) {
+                    setStep(3);
+                  }
+                }}
+                className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
+              >
+                {securityQuestions.map((question, index) => (
+                  <div key={index} className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text font-bold text-[10px] uppercase tracking-widest opacity-60">
+                        {question}
+                      </span>
+                    </label>
+
+                    <input
+                      type="text"
+                      required
+                      className="input input-bordered w-full bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12"
+                      value={answers[index]}
+                      onChange={(e) => {
+                        const updated = [...answers];
+
+                        updated[index] = e.target.value;
+
+                        setAnswers(updated);
+                      }}
+                    />
+                  </div>
+                ))}
+
+                <button
+                  type="submit"
+                  disabled={isVerifyingSecurity}
+                  className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20"
+                >
+                  {isVerifyingSecurity ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Verify Answers"
+                  )}
+                </button>
+              </form>
+            )}
+
+            {step === 3 && (
+              <form
+                onSubmit={handleReset}
+                className="space-y-4 animate-in fade-in slide-in-from-bottom-2"
+              >
+                <div className="space-y-4">
+                  <div className="form-control">
+                    <label className="label py-1">
+                      <span className="label-text font-bold text-[10px] uppercase opacity-60">
+                        New Password
+                      </span>
+                    </label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         required
                         className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12"
                         placeholder="••••••••"
                         value={passwords.newPassword}
-                        onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})}
+                        onChange={(e) =>
+                          setPasswords({
+                            ...passwords,
+                            newPassword: e.target.value,
+                          })
+                        }
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100"
+                      >
+                        {showPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
                     </div>
                   </div>
                   <div className="form-control">
-                    <label className="label py-1"><span className="label-text font-bold text-[10px] uppercase opacity-60">Confirm Password</span></label>
+                    <label className="label py-1">
+                      <span className="label-text font-bold text-[10px] uppercase opacity-60">
+                        Confirm Password
+                      </span>
+                    </label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-30" />
                       <input
-                        type="password"
+                        type={showConfirmPassword ? "text" : "password"}
                         required
                         className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20 h-12"
                         placeholder="••••••••"
                         value={passwords.confirmPassword}
-                        onChange={(e) => setPasswords({...passwords, confirmPassword: e.target.value})}
+                        onChange={(e) =>
+                          setPasswords({
+                            ...passwords,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                       />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        className="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
-                <button type="submit" disabled={isResettingPassword} className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20 mt-2">
-                  {isResettingPassword ? <Loader2 className="animate-spin" /> : "Update Password"}
+                <button
+                  type="submit"
+                  disabled={isResettingPassword}
+                  className="btn btn-primary w-full h-12 shadow-lg shadow-primary/20 mt-2"
+                >
+                  {isResettingPassword ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Update Password"
+                  )}
                 </button>
               </form>
             )}
