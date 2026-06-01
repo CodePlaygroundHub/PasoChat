@@ -3,11 +3,12 @@
 ## Table of Contents
 
 1. [Architecture Overview](#architecture-overview)
-2. [Component Breakdown](#component-breakdown)
-3. [Data Flow Patterns](#data-flow-patterns)
-4. [Technology Stack](#technology-stack)
-5. [Design Decisions](#design-decisions)
-6. [Scalability Patterns](#scalability-patterns)
+2. [Database Design](#database-design)
+3. [Component Breakdown](#component-breakdown)
+4. [Data Flow Patterns](#data-flow-patterns)
+5. [Technology Stack](#technology-stack)
+6. [Design Decisions](#design-decisions)
+7. [Scalability Patterns](#scalability-patterns)
 
 ---
 
@@ -93,6 +94,25 @@ graph TB
     BACKEND1 -->|Upload| CLOUDINARY
     BACKEND1 -->|Send| BREVO
 ```
+
+---
+
+## Database Design
+
+The following Entity Relationship Diagram (ERD) represents the core data model of PASO. It captures user management, messaging, groups, reactions, status updates, moderation workflows, and account recovery mechanisms.
+
+### Entity Relationship Diagram
+
+<img width="4225" height="5259" alt="PASO_Database_design" src="https://github.com/user-attachments/assets/28368419-5755-4d40-9a67-cfc66bcdae9f" />
+
+### Key Design Decisions
+
+- Users can participate in direct and group conversations.
+- Messages support replies, reactions, moderation metadata, and media attachments.
+- Groups use a membership model with role-based permissions.
+- Status updates follow a temporary story-style lifecycle.
+- Reports provide moderation and administrative workflows.
+- Security questions support account recovery.
 
 ---
 
