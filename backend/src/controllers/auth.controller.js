@@ -2,7 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-import { sendWelcomeEmail, sendOtpEmail } from "../lib/sendEmail.js";
+import { sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
 
 //signup
@@ -13,8 +13,10 @@ import crypto from "crypto";
 // Check if user already exists in DB
 // Hash password using bcrypt
 // Create new user in database
-// Generate JWT token and set cookie
-// Send user data (without password) in response
+// Generate email verification OTP
+// Create unverified user
+// Send verification OTP email
+// Return verification required response
 export const signup = async (req, res) => {
   try {
     const { fullName, email, password, securityQuestions } = req.body;
@@ -81,35 +83,38 @@ export const signup = async (req, res) => {
         ),
       }))
     );
+    const verificationOtp = crypto.randomInt(100000, 1000000).toString();
 
-    // Create user (NO verification fields)
+    const hashedVerificationOtp = crypto
+      .createHash("sha256")
+      .update(verificationOtp)
+      .digest("hex");
+
+    const verificationOtpExpiry = new Date(
+      Date.now() + 5 * 60 * 1000
+    );
+    // Create unverified user with email verification OTP
     const newUser = await User.create({
       fullName,
       email: normalizedEmail,
       password: hashedPassword,
       securityQuestions: hashedQuestions,
       role: "user",
+      isVerified: false,
+      emailVerificationOtp: hashedVerificationOtp,
+      emailVerificationOtpExpiry: verificationOtpExpiry,
     });
 
-    // Generate JWT immediately
-    const token = generateToken(newUser._id);
-
-    // Send Welcome Email (non-blocking)
     setImmediate(() => {
-      sendWelcomeEmail(
+      sendVerificationOtpEmail(
         newUser.email,
-        newUser.fullName
+        verificationOtp
       );
     });
 
-    // Send user response
     res.status(201).json({
-      _id: newUser._id,
-      fullName: newUser.fullName,
-      email: newUser.email,
-      profilePic: newUser.profilePic,
-      role: newUser.role,
-      token,
+      message:
+        "Account created successfully. Please verify your email using the OTP sent to your email address.",
     });
   } catch (error) {
     console.error("Signup error:", error);
