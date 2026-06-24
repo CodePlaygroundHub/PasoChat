@@ -2,7 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-import { sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
+import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
 
 //signup
@@ -118,6 +118,85 @@ export const signup = async (req, res) => {
     });
   } catch (error) {
     console.error("Signup error:", error);
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select(
+      "+emailVerificationOtp +emailVerificationOtpExpiry"
+    );
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid email or OTP",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: "Email is already verified",
+      });
+    }
+
+    if (
+      !user.emailVerificationOtp ||
+      !user.emailVerificationOtpExpiry ||
+      user.emailVerificationOtpExpiry < new Date()
+    ) {
+      return res.status(400).json({
+        message: "OTP has expired or is invalid",
+      });
+    }
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    if (hashedOtp !== user.emailVerificationOtp) {
+      return res.status(400).json({
+        message: "Invalid email or OTP",
+      });
+    }
+
+    user.isVerified = true;
+    user.emailVerificationOtp = null;
+    user.emailVerificationOtpExpiry = null;
+
+    await user.save();
+
+    setImmediate(() => {
+      sendWelcomeEmail(
+        user.email,
+        user.fullName
+      );
+    });
+
+    res.status(200).json({
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    console.error(
+      "Verify email error:",
+      error
+    );
 
     res.status(500).json({
       message: "Internal Server Error",
