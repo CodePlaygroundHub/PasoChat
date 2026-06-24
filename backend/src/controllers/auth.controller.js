@@ -245,11 +245,11 @@ export const login = async (req, res) => {
       });
     }
 
-    // if (!user.isVerified) {
-    //   return res.status(401).json({
-    //     message: "Please verify your email first",
-    //   });
-    // }
+    if (!user.isVerified) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+      });
+    }
 
     // checking user is baned from admin side or not
     if (user.isBanned) {
