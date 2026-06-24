@@ -873,3 +873,79 @@ export const verifyOtp = async (
     });
   }
 };
+
+export const resendVerificationOtp = async (
+  req,
+  res
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const normalizedEmail =
+      email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select(
+      "+emailVerificationOtp +emailVerificationOtpExpiry"
+    );
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: "Email is already verified",
+      });
+    }
+
+    const verificationOtp = crypto
+      .randomInt(100000, 1000000)
+      .toString();
+
+    const hashedVerificationOtp = crypto
+      .createHash("sha256")
+      .update(verificationOtp)
+      .digest("hex");
+
+    user.emailVerificationOtp =
+      hashedVerificationOtp;
+
+    user.emailVerificationOtpExpiry =
+      new Date(
+        Date.now() + 5 * 60 * 1000
+      );
+
+    await user.save();
+
+    setImmediate(() => {
+      sendVerificationOtpEmail(
+        user.email,
+        verificationOtp
+      );
+    });
+
+    return res.status(200).json({
+      message:
+        "Verification OTP sent successfully",
+    });
+  } catch (error) {
+    console.error(
+      "Resend verification OTP error:",
+      error
+    );
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};

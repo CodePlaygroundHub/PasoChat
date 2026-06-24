@@ -4,9 +4,11 @@ import {
   login,
   logout,
   signup,
+  verifyEmail,
   updateProfile,
   setupSecurityQuestions,
   verifySecurityAnswers,
+  resendVerificationOtp,
   resetPassword,
   getSecurityQuestions,
   sendOtp,
@@ -19,6 +21,8 @@ import { forgotPasswordLimiter, otpRateLimiter } from "../middleware/rateLimiter
 const router = express.Router();
 
 router.post("/signup", signup);
+router.post("/verify-email", otpRateLimiter, verifyEmail);
+router.post("/resend-verification-otp", resendVerificationOtp);
 router.post("/login", login);
 router.post("/logout", logout);
 router.get("/check", protectRoute, checkAuth);
