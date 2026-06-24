@@ -2,18 +2,22 @@ import { jest } from "@jest/globals";
 
 // Bind the mock to the global object to share it across module link cycles in ESM Jest
 global.sendOtpEmailMock = jest.fn();
+global.sendVerificationOtpEmailMock = jest.fn();
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: global.sendOtpEmailMock,
+  sendVerificationOtpEmail: global.sendVerificationOtpEmailMock,
 }));
 
 import request from "supertest";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 import { connectTestDB, disconnectTestDB } from "../setup.js";
 
 import { cleanupRedis } from "../teardown.js";
+import { createTestUser } from "../utils/testHelpers.js";
 
 const { app } = await import("../../src/index.js");
 const { default: User } = await import("../../src/models/user.model.js");
@@ -32,6 +36,7 @@ afterAll(async () => {
 afterEach(async () => {
   await User.deleteMany();
   global.sendOtpEmailMock.mockClear();
+  global.sendVerificationOtpEmailMock.mockClear();
 });
 
 describe("OTP Password Recovery Flow", () => {
@@ -227,6 +232,159 @@ describe("OTP Password Recovery Flow", () => {
 
       expect(secondResetRes.statusCode).toBe(400);
       expect(secondResetRes.body.message).toBe("Unauthorized reset attempt");
+    });
+  });
+
+  describe("POST /api/auth/verify-email", () => {
+    const verificationEmail = "verify@test.com";
+    const verificationOtp = "654321";
+    const hashedVerificationOtp = crypto
+      .createHash("sha256")
+      .update(verificationOtp)
+      .digest("hex");
+
+    beforeEach(async () => {
+      const userPayload = await createTestUser({
+        email: verificationEmail,
+        isVerified: false,
+        emailVerificationOtp: hashedVerificationOtp,
+        emailVerificationOtpExpiry: new Date(Date.now() + 5 * 60 * 1000),
+      });
+      await User.create(userPayload);
+    });
+
+    it("should verify an account with a valid OTP", async () => {
+      const response = await request(app)
+        .post("/api/auth/verify-email")
+        .send({ email: verificationEmail, otp: verificationOtp });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.message).toBe("Email verified successfully");
+
+      const user = await User.findOne({ email: verificationEmail }).select(
+        "+emailVerificationOtp +emailVerificationOtpExpiry"
+      );
+      expect(user.isVerified).toBe(true);
+      expect(user.emailVerificationOtp).toBeNull();
+      expect(user.emailVerificationOtpExpiry).toBeNull();
+    });
+
+    it("should reject an invalid OTP", async () => {
+      const response = await request(app)
+        .post("/api/auth/verify-email")
+        .send({ email: verificationEmail, otp: "000000" });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("Invalid email or OTP");
+    });
+
+    it("should reject an expired OTP", async () => {
+      await User.findOneAndUpdate(
+        { email: verificationEmail },
+        {
+          emailVerificationOtp: hashedVerificationOtp,
+          emailVerificationOtpExpiry: new Date(Date.now() - 1000),
+        }
+      );
+
+      const response = await request(app)
+        .post("/api/auth/verify-email")
+        .send({ email: verificationEmail, otp: verificationOtp });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("OTP has expired or is invalid");
+    });
+
+    it("should reject an already verified account", async () => {
+      await User.findOneAndUpdate(
+        { email: verificationEmail },
+        { isVerified: true }
+      );
+
+      const response = await request(app)
+        .post("/api/auth/verify-email")
+        .send({ email: verificationEmail, otp: verificationOtp });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("Email is already verified");
+    });
+  });
+
+  describe("POST /api/auth/resend-verification-otp", () => {
+    const resendEmail = "resend@test.com";
+
+    beforeEach(async () => {
+      const userPayload = await createTestUser({
+        email: resendEmail,
+        isVerified: false,
+        emailVerificationOtp: crypto
+          .createHash("sha256")
+          .update("111111")
+          .digest("hex"),
+        emailVerificationOtpExpiry: new Date(Date.now() + 5 * 60 * 1000),
+      });
+      await User.create(userPayload);
+    });
+
+    it("should generate a new verification OTP and update expiry", async () => {
+      const previousUser = await User.findOne({ email: resendEmail }).select(
+        "+emailVerificationOtp +emailVerificationOtpExpiry"
+      );
+      const previousOtpHash = previousUser.emailVerificationOtp;
+
+      const response = await request(app)
+        .post("/api/auth/resend-verification-otp")
+        .send({ email: resendEmail });
+
+      await wait(20);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.message).toBe(
+        "Verification OTP sent successfully"
+      );
+      expect(global.sendVerificationOtpEmailMock).toHaveBeenCalledTimes(1);
+      expect(global.sendVerificationOtpEmailMock.mock.calls[0][0]).toBe(
+        resendEmail
+      );
+
+      const sentOtp = global.sendVerificationOtpEmailMock.mock.calls[0][1];
+      expect(sentOtp).toMatch(/^\d{6}$/);
+
+      const user = await User.findOne({ email: resendEmail }).select(
+        "+emailVerificationOtp +emailVerificationOtpExpiry"
+      );
+      expect(user.emailVerificationOtp).not.toBe(previousOtpHash);
+      expect(user.emailVerificationOtpExpiry).toBeInstanceOf(Date);
+
+      const matches = crypto
+        .createHash("sha256")
+        .update(sentOtp)
+        .digest("hex");
+      expect(user.emailVerificationOtp).toBe(matches);
+    });
+
+    it("should reject verified users", async () => {
+      await User.findOneAndUpdate(
+        { email: resendEmail },
+        { isVerified: true }
+      );
+
+      const response = await request(app)
+        .post("/api/auth/resend-verification-otp")
+        .send({ email: resendEmail });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("Email is already verified");
+      expect(global.sendVerificationOtpEmailMock).not.toHaveBeenCalled();
+    });
+
+    it("should reject nonexistent users", async () => {
+      const response = await request(app)
+        .post("/api/auth/resend-verification-otp")
+        .send({ email: "missing@test.com" });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("User not found");
     });
   });
 });

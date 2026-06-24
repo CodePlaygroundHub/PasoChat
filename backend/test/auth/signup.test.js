@@ -1,8 +1,13 @@
 import { jest } from "@jest/globals";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
+const sendVerificationOtpEmailMock = jest.fn();
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: sendVerificationOtpEmailMock,
 }));
 
 import request from "supertest";
@@ -12,10 +17,7 @@ import {
   clearAllCollections,
 } from "../setup.js";
 import { cleanupRedis } from "../teardown.js";
-import {
-  createSignupPayload,
-  assertValidAuthResponse,
-} from "../utils/testHelpers.js";
+import { createSignupPayload } from "../utils/testHelpers.js";
 
 const { app } = await import("../../src/index.js");
 const { default: User } = await import("../../src/models/user.model.js");
@@ -31,11 +33,12 @@ afterAll(async () => {
 
 afterEach(async () => {
   await clearAllCollections();
+  sendVerificationOtpEmailMock.mockClear();
 });
 
 describe("POST /api/auth/signup - Create new user account", () => {
   describe("✓ Successful signup scenarios", () => {
-    it("should create new user with all required fields", async () => {
+    it("should create an unverified user and send a verification OTP", async () => {
       const payload = createSignupPayload();
 
       const response = await request(app)
@@ -43,23 +46,46 @@ describe("POST /api/auth/signup - Create new user account", () => {
         .send(payload);
 
       expect(response.statusCode).toBe(201);
-      assertValidAuthResponse(response.body);
-      expect(response.body.email).toBe(payload.email.toLowerCase());
+      expect(response.body.message).toBe(
+        "Account created successfully. Please verify your email using the OTP sent to your email address."
+      );
+      expect(response.body).not.toHaveProperty("token");
 
-      const userInDB = await User.findOne({ email: payload.email });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(sendVerificationOtpEmailMock).toHaveBeenCalledTimes(1);
+      expect(sendVerificationOtpEmailMock).toHaveBeenCalledWith(
+        payload.email.toLowerCase(),
+        expect.any(String)
+      );
+
+      const sentOtp = sendVerificationOtpEmailMock.mock.calls[0][1];
+      expect(sentOtp).toMatch(/^\d{6}$/);
+
+      const userInDB = await User.findOne({ email: payload.email }).select(
+        "+emailVerificationOtp +emailVerificationOtpExpiry"
+      );
       expect(userInDB).not.toBeNull();
       expect(userInDB.fullName).toBe(payload.fullName);
+      expect(userInDB.isVerified).toBe(false);
+      expect(userInDB.emailVerificationOtpExpiry).toBeInstanceOf(Date);
+
+      const otpHash = crypto
+  .createHash("sha256")
+  .update(sentOtp)
+  .digest("hex");
+
+expect(userInDB.emailVerificationOtp).toBe(otpHash);
     });
 
-    it("should generate valid JWT token on signup", async () => {
+    it("should require email verification in the response", async () => {
       const payload = createSignupPayload();
       const response = await request(app)
         .post("/api/auth/signup")
         .send(payload);
 
-      expect(response.body.token).toBeDefined();
-      expect(typeof response.body.token).toBe("string");
-      expect(response.body.token.split(".").length).toBe(3); // JWT format check
+      expect(response.statusCode).toBe(201);
+      expect(response.body.message).toContain("verify your email");
     });
 
     it("should hash password securely", async () => {
@@ -96,7 +122,10 @@ describe("POST /api/auth/signup - Create new user account", () => {
         .post("/api/auth/signup")
         .send(payload);
 
-      expect(response.body.email).toBe("test@example.com");
+      expect(response.statusCode).toBe(201);
+
+      const userInDB = await User.findOne({ email: "test@example.com" });
+      expect(userInDB.email).toBe("test@example.com");
     });
 
     it("should set default role as 'user'", async () => {
@@ -105,7 +134,10 @@ describe("POST /api/auth/signup - Create new user account", () => {
         .post("/api/auth/signup")
         .send(payload);
 
-      expect(response.body.role).toBe("user");
+      expect(response.statusCode).toBe(201);
+
+      const userInDB = await User.findOne({ email: payload.email });
+      expect(userInDB.role).toBe("user");
     });
 
     it("should not expose password in response", async () => {
@@ -316,7 +348,7 @@ describe("POST /api/auth/signup - Create new user account", () => {
 
       expect(response.statusCode).toBe(201);
       // Verify trimming in DB
-      const user = await User.findById(response.body._id);
+      const user = await User.findOne({ email: payload.email.toLowerCase(), });
       expect(user.fullName).toBe("John Doe");
     });
 
@@ -358,7 +390,7 @@ describe("POST /api/auth/signup - Create new user account", () => {
         .send(payload);
 
       expect(response.statusCode).toBe(201);
-      const user = await User.findById(response.body._id);
+      const user = await User.findOne({ email: payload.email.toLowerCase(), });
       expect(user.fullName).toBe('{"$ne": null}');
     });
   });
@@ -402,7 +434,7 @@ describe("POST /api/auth/signup - Create new user account", () => {
         .post("/api/auth/signup")
         .send(payload);
 
-      const userInDB = await User.findById(response.body._id);
+      const userInDB = await User.findOne({email: payload.email.toLowerCase(),});
       expect(userInDB.email).toBe(payload.email.toLowerCase());
       expect(userInDB.fullName).toBe(payload.fullName);
     });

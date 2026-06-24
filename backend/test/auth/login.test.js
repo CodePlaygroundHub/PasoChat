@@ -3,6 +3,7 @@ import { jest } from "@jest/globals";
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import request from "supertest";
@@ -15,7 +16,6 @@ import {
 import { cleanupRedis } from "../teardown.js";
 import {
   createTestUser,
-  createLoginPayload,
   assertValidAuthResponse,
 } from "../utils/testHelpers.js";
 
@@ -125,6 +125,26 @@ describe("POST /api/auth/login - Authenticate user", () => {
   });
 
   describe("✗ Invalid credentials", () => {
+    it("should reject unverified users from logging in", async () => {
+      const userPayload = await createTestUser({
+        email: "unverified@test.com",
+        isVerified: false,
+      });
+      await User.create(userPayload);
+
+      const response = await request(app)
+        .post("/api/auth/login")
+        .send({
+          email: "unverified@test.com",
+          password: "testPassword123",
+        });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.message).toBe(
+        "Please verify your email before logging in"
+      );
+    });
+
     it("should reject wrong password", async () => {
       const userPayload = await createTestUser({
         email: "wrongpass@test.com",
@@ -320,6 +340,7 @@ describe("POST /api/auth/login - Authenticate user", () => {
         fullName: "Special Char User",
         email: "special@test.com",
         password: hashedPassword,
+        isVerified: true,
         securityQuestions: [
           { question: "Q1", answer: "A1" },
           { question: "Q2", answer: "A2" },
@@ -345,6 +366,7 @@ describe("POST /api/auth/login - Authenticate user", () => {
         fullName: "Long Pass User",
         email: "longpass@test.com",
         password: hashedPassword,
+        isVerified: true,
         securityQuestions: [
           { question: "Q1", answer: "A1" },
           { question: "Q2", answer: "A2" },
@@ -377,4 +399,4 @@ describe("POST /api/auth/login - Authenticate user", () => {
     });
   });
 });
-    
+
