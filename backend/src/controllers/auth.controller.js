@@ -85,10 +85,10 @@ export const signup = async (req, res) => {
     );
     const verificationOtp = crypto.randomInt(100000, 1000000).toString();
 
-    const hashedVerificationOtp = crypto
-      .createHash("sha256")
-      .update(verificationOtp)
-      .digest("hex");
+    const hashedVerificationOtp = await bcrypt.hash(
+      verificationOtp,
+      10
+    );
 
     const verificationOtpExpiry = new Date(
       Date.now() + 5 * 60 * 1000
@@ -105,11 +105,16 @@ export const signup = async (req, res) => {
       emailVerificationOtpExpiry: verificationOtpExpiry,
     });
 
-    setImmediate(() => {
-      sendVerificationOtpEmail(
-        newUser.email,
-        verificationOtp
-      );
+    // Asynchronously send the verification email to avoid blocking the HTTP response.
+    setImmediate(async () => {
+      try {
+        await sendVerificationOtpEmail(
+          newUser.email,
+          verificationOtp
+        );
+      } catch (error) {
+        console.error("Verification email failed:", error);
+      }
     });
 
     res.status(201).json({
@@ -165,12 +170,12 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    const hashedOtp = crypto
-      .createHash("sha256")
-      .update(otp)
-      .digest("hex");
+    const isOtpValid = await bcrypt.compare(
+      otp,
+      user.emailVerificationOtp
+    );
 
-    if (hashedOtp !== user.emailVerificationOtp) {
+    if (!isOtpValid) {
       return res.status(400).json({
         message: "Invalid email or OTP",
       });
@@ -182,11 +187,16 @@ export const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    setImmediate(() => {
-      sendWelcomeEmail(
-        user.email,
-        user.fullName
-      );
+    // Asynchronously send the welcome email to avoid blocking the HTTP response.
+    setImmediate(async () => {
+      try {
+        await sendWelcomeEmail(
+          user.email,
+          user.fullName
+        );
+      } catch (error) {
+        console.error("Welcome email failed:", error);
+      }
     });
 
     res.status(200).json({
@@ -245,7 +255,7 @@ export const login = async (req, res) => {
       });
     }
 
-    if (!user.isVerified) {
+    if (user.isVerified === false && user.isInit("isVerified")) {
       return res.status(403).json({
         message: "Please verify your email before logging in",
       });
@@ -896,47 +906,42 @@ export const resendVerificationOtp = async (
       "+emailVerificationOtp +emailVerificationOtpExpiry"
     );
 
-    if (!user) {
-      return res.status(400).json({
-        message: "User not found",
-      });
-    }
+    if (user && user.isVerified === false) {
+      const verificationOtp = crypto
+        .randomInt(100000, 1000000)
+        .toString();
 
-    if (user.isVerified) {
-      return res.status(400).json({
-        message: "Email is already verified",
-      });
-    }
-
-    const verificationOtp = crypto
-      .randomInt(100000, 1000000)
-      .toString();
-
-    const hashedVerificationOtp = crypto
-      .createHash("sha256")
-      .update(verificationOtp)
-      .digest("hex");
-
-    user.emailVerificationOtp =
-      hashedVerificationOtp;
-
-    user.emailVerificationOtpExpiry =
-      new Date(
-        Date.now() + 5 * 60 * 1000
+      const hashedVerificationOtp = await bcrypt.hash(
+        verificationOtp,
+        10
       );
 
-    await user.save();
+      user.emailVerificationOtp =
+        hashedVerificationOtp;
 
-    setImmediate(() => {
-      sendVerificationOtpEmail(
-        user.email,
-        verificationOtp
-      );
-    });
+      user.emailVerificationOtpExpiry =
+        new Date(
+          Date.now() + 5 * 60 * 1000
+        );
+
+      await user.save();
+
+      // Asynchronously send the verification email to avoid blocking the HTTP response.
+      setImmediate(async () => {
+        try {
+          await sendVerificationOtpEmail(
+            user.email,
+            verificationOtp
+          );
+        } catch (error) {
+          console.error("Verification email failed:", error);
+        }
+      });
+    }
 
     return res.status(200).json({
       message:
-        "Verification OTP sent successfully",
+        "If an account exists and requires verification, a verification OTP has been sent.",
     });
   } catch (error) {
     console.error(

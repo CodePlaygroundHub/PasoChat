@@ -51,7 +51,7 @@ const waitForEmailMock = async () => {
     sendVerificationOtpEmailMock.mock.calls.length === 0;
     attempt += 1
   ) {
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    await new Promise((resolve) => setImmediate(resolve));
   }
 
   expect(sendVerificationOtpEmailMock).toHaveBeenCalled();

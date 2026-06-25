@@ -51,7 +51,7 @@ describe("POST /api/auth/signup - Create new user account", () => {
       );
       expect(response.body).not.toHaveProperty("token");
 
-      await new Promise((resolve) => setTimeout(resolve, 20));
+      await new Promise((resolve) => setImmediate(resolve));
 
       expect(sendVerificationOtpEmailMock).toHaveBeenCalledTimes(1);
       expect(sendVerificationOtpEmailMock).toHaveBeenCalledWith(
@@ -70,12 +70,8 @@ describe("POST /api/auth/signup - Create new user account", () => {
       expect(userInDB.isVerified).toBe(false);
       expect(userInDB.emailVerificationOtpExpiry).toBeInstanceOf(Date);
 
-      const otpHash = crypto
-  .createHash("sha256")
-  .update(sentOtp)
-  .digest("hex");
-
-expect(userInDB.emailVerificationOtp).toBe(otpHash);
+      const isOtpCorrect = await bcrypt.compare(sentOtp, userInDB.emailVerificationOtp);
+      expect(isOtpCorrect).toBe(true);
     });
 
     it("should require email verification in the response", async () => {

@@ -22,7 +22,7 @@ const router = express.Router();
 
 router.post("/signup", signup);
 router.post("/verify-email", otpRateLimiter, verifyEmail);
-router.post("/resend-verification-otp", resendVerificationOtp);
+router.post("/resend-verification-otp", otpRateLimiter, resendVerificationOtp);
 router.post("/login", login);
 router.post("/logout", logout);
 router.get("/check", protectRoute, checkAuth);

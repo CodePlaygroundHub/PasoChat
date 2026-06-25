@@ -122,6 +122,26 @@ describe("POST /api/auth/login - Authenticate user", () => {
       expect(response.body.fullName).toBe("Test User Full");
       expect(response.body.email).toBe("populate@test.com");
     });
+
+    it("should allow legacy users (where isVerified is undefined) to log in", async () => {
+      const userPayload = await createTestUser({
+        email: "legacy@test.com",
+      });
+      delete userPayload.isVerified;
+
+      const createdUser = await User.create(userPayload);
+      await User.updateOne({ _id: createdUser._id }, { $unset: { isVerified: "" } });
+
+      const response = await request(app)
+        .post("/api/auth/login")
+        .send({
+          email: "legacy@test.com",
+          password: "testPassword123",
+        });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.email).toBe("legacy@test.com");
+    });
   });
 
   describe("✗ Invalid credentials", () => {

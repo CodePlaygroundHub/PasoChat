@@ -232,11 +232,8 @@ describe("Security - JWT Token Tests", () => {
       const immediateExpireToken = jwt.sign(
         { userId: user._id.toString() },
         process.env.JWT_SECRET,
-        { expiresIn: "0s" }
+        { expiresIn: "-1s" }
       );
-
-      // Wait a bit and try to use
-      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const response = await request(app)
         .get("/api/auth/check")
