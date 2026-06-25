@@ -273,7 +273,7 @@ describe("OTP Password Recovery Flow", () => {
         .send({ email: verificationEmail, otp: "000000" });
 
       expect(response.statusCode).toBe(400);
-      expect(response.body.message).toBe("Invalid email or OTP");
+      expect(response.body.message).toBe("Invalid or expired verification request");
     });
 
     it("should reject an expired OTP", async () => {
@@ -290,7 +290,7 @@ describe("OTP Password Recovery Flow", () => {
         .send({ email: verificationEmail, otp: verificationOtp });
 
       expect(response.statusCode).toBe(400);
-      expect(response.body.message).toBe("OTP has expired or is invalid");
+      expect(response.body.message).toBe("Invalid or expired verification request");
     });
 
     it("should reject an already verified account", async () => {
@@ -304,7 +304,7 @@ describe("OTP Password Recovery Flow", () => {
         .send({ email: verificationEmail, otp: verificationOtp });
 
       expect(response.statusCode).toBe(400);
-      expect(response.body.message).toBe("Email is already verified");
+      expect(response.body.message).toBe("Invalid or expired verification request");
     });
   });
 

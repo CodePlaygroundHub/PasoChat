@@ -134,7 +134,13 @@ export const verifyEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    if (!email || !otp) {
+    // Validate input types
+    if (
+      typeof email !== "string" ||
+      typeof otp !== "string" ||
+      !email.trim() ||
+      !otp.trim()
+    ) {
       return res.status(400).json({
         message: "Email and OTP are required",
       });
@@ -148,15 +154,19 @@ export const verifyEmail = async (req, res) => {
       "+emailVerificationOtp +emailVerificationOtpExpiry"
     );
 
+    const genericErrorMessage =
+      "Invalid or expired verification request";
+
+    // Prevent user enumeration
     if (!user) {
       return res.status(400).json({
-        message: "Invalid email or OTP",
+        message: genericErrorMessage,
       });
     }
 
     if (user.isVerified) {
       return res.status(400).json({
-        message: "Email is already verified",
+        message: genericErrorMessage,
       });
     }
 
@@ -166,7 +176,7 @@ export const verifyEmail = async (req, res) => {
       user.emailVerificationOtpExpiry < new Date()
     ) {
       return res.status(400).json({
-        message: "OTP has expired or is invalid",
+        message: genericErrorMessage,
       });
     }
 
@@ -177,7 +187,7 @@ export const verifyEmail = async (req, res) => {
 
     if (!isOtpValid) {
       return res.status(400).json({
-        message: "Invalid email or OTP",
+        message: genericErrorMessage,
       });
     }
 
@@ -187,7 +197,7 @@ export const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    // Asynchronously send the welcome email to avoid blocking the HTTP response.
+    // Send welcome email asynchronously
     setImmediate(async () => {
       try {
         await sendWelcomeEmail(
@@ -195,11 +205,14 @@ export const verifyEmail = async (req, res) => {
           user.fullName
         );
       } catch (error) {
-        console.error("Welcome email failed:", error);
+        console.error(
+          "Welcome email failed:",
+          error
+        );
       }
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Email verified successfully",
     });
   } catch (error) {
@@ -208,7 +221,7 @@ export const verifyEmail = async (req, res) => {
       error
     );
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal Server Error",
     });
   }
