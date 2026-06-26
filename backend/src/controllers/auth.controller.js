@@ -120,6 +120,7 @@ export const signup = async (req, res) => {
     res.status(201).json({
       message:
         "Account created successfully. Please verify your email using the OTP sent to your email address.",
+        email: newUser.email,
     });
   } catch (error) {
     console.error("Signup error:", error);
