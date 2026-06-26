@@ -7,20 +7,22 @@ const VerifyEmailPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const email = location.state?.email || "";
+    const email = location.state?.email || sessionStorage.getItem("pendingVerificationEmail") || "";
     const [otp, setOtp] = useState("");
+    const isOtpComplete = /^\d{6}$/.test(otp);
     const { verifyEmailOtp, resendVerificationOtp, isVerifyingOtp, isSendingOtp } = useAuthStore();
 
     const handleVerify = async (e) => {
         e.preventDefault();
 
-        if (otp.length !== 6) {
+        if (!isOtpComplete) {
             return;
         }
 
         const success = await verifyEmailOtp({ email, otp });
 
         if (success) {
+            sessionStorage.removeItem("pendingVerificationEmail");
             navigate("/login");
         }
     };
@@ -68,15 +70,18 @@ const VerifyEmailPage = () => {
 
                     <input
                         type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        pattern="\d{6}"
                         maxLength={6}
                         value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
+                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                         placeholder="Enter 6-digit OTP"
                         className="input input-bordered w-full text-center text-xl tracking-[8px]"
                     />
 
                     <button className="btn btn-primary w-full"
-                        disabled={isVerifyingOtp}
+                        disabled={isVerifyingOtp || isSendingOtp || !isOtpComplete}
                     >
                         {isVerifyingOtp ? (
                             <>
@@ -89,7 +94,7 @@ const VerifyEmailPage = () => {
                     </button>
                 </form>
                 <button
-                    className="btn btn-ghost w-full mt-4" onClick={handleResend} disabled={isSendingOtp}
+                    className="btn btn-ghost w-full mt-4" onClick={handleResend} disabled={isSendingOtp || isVerifyingOtp}
                 >
                     {isSendingOtp ? "Sending..." : "Resend OTP"}
                 </button>

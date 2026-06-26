@@ -179,7 +179,7 @@ export const useAuthStore = create((set, get) => ({
         otp,
       });
 
-      toast.success(res.data.message);
+      toast.success(res.data.message || "Email verified successfully");
       return true;
     } catch (error) {
       toast.error(

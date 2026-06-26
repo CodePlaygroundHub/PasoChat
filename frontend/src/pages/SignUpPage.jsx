@@ -52,7 +52,9 @@ const SignUpPage = () => {
     if (!validateForm()) return;
     const result = await signup(formData);
     if(result){
-      navigate("/verify-email",{state:{email: result.email}});
+      const email = result.email || formData.email.trim();
+      sessionStorage.setItem("pendingVerificationEmail", email);
+      navigate("/verify-email",{state:{email}});
     }
   };
 
