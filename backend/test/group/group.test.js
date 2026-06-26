@@ -4,11 +4,12 @@
  */
 
 import { jest } from "@jest/globals";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import request from "supertest";
@@ -331,7 +332,7 @@ describe("GET /api/groups/:id - Get group info", () => {
       const user = await User.create(userPayload);
       const token = generateTestToken(user._id.toString());
 
-      const fakeGroupId = new ObjectId();
+      const fakeGroupId = new mongoose.Types.ObjectId();
 
       const response = await request(app)
         .get(`/api/groups/${fakeGroupId}`)
@@ -358,7 +359,7 @@ describe("GET /api/groups/:id - Get group info", () => {
       const group = await Group.create({
         name: "Test",
         members: [],
-        createdBy: new ObjectId(),
+        createdBy: new mongoose.Types.ObjectId(),
       });
 
       const response = await request(app).get(

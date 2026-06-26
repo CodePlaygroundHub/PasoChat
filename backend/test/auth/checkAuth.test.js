@@ -1,9 +1,10 @@
 import { jest } from "@jest/globals";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import request from "supertest";
@@ -221,7 +222,7 @@ describe("GET /api/auth/check - Verify JWT authentication", () => {
     });
 
     it("should reject token with non-existent userId", async () => {
-      const fakeUserId = new ObjectId();
+      const fakeUserId = new mongoose.Types.ObjectId();
       const token = generateTestToken(fakeUserId.toString());
 
       const response = await request(app)

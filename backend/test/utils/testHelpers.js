@@ -5,6 +5,7 @@
 
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
 // ============================================================================
 // DATABASE FACTORIES
@@ -31,8 +32,11 @@ export const createTestUser = async (overrides = {}) => {
     password: hashedPassword,
     securityQuestions,
     role: "user",
+    isVerified: true,
     isOnline: false,
     profilePic: "",
+    emailVerificationOtp: null,
+    emailVerificationOtpExpiry: null,
     ...overrides,
   };
 };
@@ -256,8 +260,7 @@ export const assertValidGroupResponse = (group) => {
  * @returns {Object} MongoDB ObjectId
  */
 export const createObjectId = () => {
-  const ObjectId = require("mongodb").ObjectId;
-  return new ObjectId();
+  return new mongoose.Types.ObjectId();
 };
 
 /**
@@ -266,8 +269,7 @@ export const createObjectId = () => {
  * @returns {boolean} True if valid ObjectId
  */
 export const isValidObjectId = (id) => {
-  const ObjectId = require("mongodb").ObjectId;
-  return ObjectId.isValid(id);
+  return mongoose.Types.ObjectId.isValid(id);
 };
 
 // ============================================================================

@@ -4,11 +4,12 @@
  */
 
 import { jest } from "@jest/globals";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import request from "supertest";
@@ -44,12 +45,19 @@ afterEach(async () => {
 describe("Security - JWT Token Tests", () => {
   describe("✓ Token format and structure", () => {
     it("should generate properly formatted JWT", async () => {
-      const payload = createSignupPayload();
-      const response = await request(app)
-        .post("/api/auth/signup")
-        .send(payload);
+      const payload = await createTestUser({
+        email: "tokenformat@test.com",
+      });
+      await User.create(payload);
 
-      expect(response.statusCode).toBe(201);
+      const response = await request(app)
+        .post("/api/auth/login")
+        .send({
+          email: payload.email,
+          password: "testPassword123",
+        });
+
+      expect(response.statusCode).toBe(200);
       const token = response.body.token;
 
       // JWT format: header.payload.signature
@@ -62,10 +70,17 @@ describe("Security - JWT Token Tests", () => {
     });
 
     it("should include userId in token payload", async () => {
-      const payload = createSignupPayload();
+      const payload = await createTestUser({
+        email: "tokenpayload@test.com",
+      });
+      await User.create(payload);
+
       const response = await request(app)
-        .post("/api/auth/signup")
-        .send(payload);
+        .post("/api/auth/login")
+        .send({
+          email: payload.email,
+          password: "testPassword123",
+        });
 
       const token = response.body.token;
       const decoded = jwt.decode(token);
@@ -75,10 +90,17 @@ describe("Security - JWT Token Tests", () => {
     });
 
     it("should use correct signing algorithm", async () => {
-      const payload = createSignupPayload();
+      const payload = await createTestUser({
+        email: "tokenalgo@test.com",
+      });
+      await User.create(payload);
+
       const response = await request(app)
-        .post("/api/auth/signup")
-        .send(payload);
+        .post("/api/auth/login")
+        .send({
+          email: payload.email,
+          password: "testPassword123",
+        });
 
       const token = response.body.token;
       const parts = token.split(".");
@@ -90,10 +112,17 @@ describe("Security - JWT Token Tests", () => {
     });
 
     it("should have expiration time", async () => {
-      const payload = createSignupPayload();
+      const payload = await createTestUser({
+        email: "tokenexp@test.com",
+      });
+      await User.create(payload);
+
       const response = await request(app)
-        .post("/api/auth/signup")
-        .send(payload);
+        .post("/api/auth/login")
+        .send({
+          email: payload.email,
+          password: "testPassword123",
+        });
 
       const token = response.body.token;
       const decoded = jwt.decode(token);
@@ -165,7 +194,7 @@ describe("Security - JWT Token Tests", () => {
 
     it("should reject token with missing signature", async () => {
       const parts = generateTestToken(
-        new ObjectId().toString()
+        new mongoose.Types.ObjectId().toString()
       ).split(".");
       const modified = parts[0] + "." + parts[1];
 
@@ -203,11 +232,8 @@ describe("Security - JWT Token Tests", () => {
       const immediateExpireToken = jwt.sign(
         { userId: user._id.toString() },
         process.env.JWT_SECRET,
-        { expiresIn: "0s" }
+        { expiresIn: "-1s" }
       );
-
-      // Wait a bit and try to use
-      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const response = await request(app)
         .get("/api/auth/check")

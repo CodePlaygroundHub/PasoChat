@@ -106,7 +106,7 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    // OTP-based recovery
+    // OTP-based password recovery
     resetOtp: {
       type: String,
       select: false,
@@ -118,21 +118,22 @@ const userSchema = new mongoose.Schema(
       default: null,
     },
 
-    // Future implementation
-    // Email Verification
-    // isVerified: {
-    //   type: Boolean,
-    //   default: false,
-    // },
+    // OTP-based email verification
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
 
-    // verificationToken: {
-    //   type: String,
-    //   select: false,
-    // },
+    emailVerificationOtp: {
+      type: String,
+      select: false,
+      default: null,
+    },
 
-    // verificationTokenExpires: {
-    //   type: Date,
-    // },
+    emailVerificationOtpExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true },
 );

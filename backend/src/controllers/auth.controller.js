@@ -2,7 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-import { sendWelcomeEmail, sendOtpEmail } from "../lib/sendEmail.js";
+import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
 
 //signup
@@ -13,8 +13,10 @@ import crypto from "crypto";
 // Check if user already exists in DB
 // Hash password using bcrypt
 // Create new user in database
-// Generate JWT token and set cookie
-// Send user data (without password) in response
+// Generate email verification OTP
+// Create unverified user
+// Send verification OTP email
+// Return verification required response
 export const signup = async (req, res) => {
   try {
     const { fullName, email, password, securityQuestions } = req.body;
@@ -81,40 +83,153 @@ export const signup = async (req, res) => {
         ),
       }))
     );
+    const verificationOtp = crypto.randomInt(100000, 1000000).toString();
 
-    // Create user (NO verification fields)
+    const hashedVerificationOtp = await bcrypt.hash(
+      verificationOtp,
+      10
+    );
+
+    const verificationOtpExpiry = new Date(
+      Date.now() + 5 * 60 * 1000
+    );
+    // Create unverified user with email verification OTP
     const newUser = await User.create({
       fullName,
       email: normalizedEmail,
       password: hashedPassword,
       securityQuestions: hashedQuestions,
       role: "user",
+      isVerified: false,
+      emailVerificationOtp: hashedVerificationOtp,
+      emailVerificationOtpExpiry: verificationOtpExpiry,
     });
 
-    // Generate JWT immediately
-    const token = generateToken(newUser._id);
-
-    // Send Welcome Email (non-blocking)
-    setImmediate(() => {
-      sendWelcomeEmail(
-        newUser.email,
-        newUser.fullName
-      );
+    // Asynchronously send the verification email to avoid blocking the HTTP response.
+    setImmediate(async () => {
+      try {
+        await sendVerificationOtpEmail(
+          newUser.email,
+          verificationOtp
+        );
+      } catch (error) {
+        console.error("Verification email failed:", error);
+      }
     });
 
-    // Send user response
     res.status(201).json({
-      _id: newUser._id,
-      fullName: newUser.fullName,
+      message:
+        "Account created successfully. Please verify your email using the OTP sent to your email address.",
       email: newUser.email,
-      profilePic: newUser.profilePic,
-      role: newUser.role,
-      token,
     });
   } catch (error) {
     console.error("Signup error:", error);
 
     res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    // Validate input types
+    if (
+      typeof email !== "string" ||
+      typeof otp !== "string" ||
+      !email.trim() ||
+      !otp.trim()
+    ) {
+      return res.status(400).json({
+        message: "Email and OTP are required",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select(
+      "+emailVerificationOtp +emailVerificationOtpExpiry"
+    );
+
+    const genericErrorMessage =
+      "Invalid or expired verification request";
+
+    // Prevent user enumeration
+    if (!user) {
+      return res.status(400).json({
+        message: genericErrorMessage,
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: genericErrorMessage,
+      });
+    }
+
+    if (
+      !user.emailVerificationOtp ||
+      !user.emailVerificationOtpExpiry ||
+      user.emailVerificationOtpExpiry < new Date()
+    ) {
+      return res.status(400).json({
+        message: genericErrorMessage,
+      });
+    }
+
+    const isOtpValid = await bcrypt.compare(
+      otp,
+      user.emailVerificationOtp
+    );
+
+    if (!isOtpValid) {
+      return res.status(400).json({
+        message: genericErrorMessage,
+      });
+    }
+
+    user.isVerified = true;
+    user.emailVerificationOtp = null;
+    user.emailVerificationOtpExpiry = null;
+
+    await user.save();
+
+    // Send welcome email asynchronously
+    setImmediate(async () => {
+      try {
+        await sendWelcomeEmail(
+          user.email,
+          user.fullName
+        );
+      } catch (error) {
+        console.error(
+          "Welcome email failed:",
+          error
+        );
+      }
+    });
+
+    const token = generateToken(user._id);
+    return res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role,
+      token,
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    console.error(
+      "Verify email error:",
+      error
+    );
+
+    return res.status(500).json({
       message: "Internal Server Error",
     });
   }
@@ -161,11 +276,11 @@ export const login = async (req, res) => {
       });
     }
 
-    // if (!user.isVerified) {
-    //   return res.status(401).json({
-    //     message: "Please verify your email first",
-    //   });
-    // }
+    if (user.isVerified === false && user.isInit("isVerified")) {
+      return res.status(403).json({
+        message: "Please verify your email before logging in",
+      });
+    }
 
     // checking user is baned from admin side or not
     if (user.isBanned) {
@@ -785,6 +900,77 @@ export const verifyOtp = async (
     );
 
     res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const resendVerificationOtp = async (
+  req,
+  res
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
+      });
+    }
+
+    const normalizedEmail =
+      email.toLowerCase().trim();
+
+    const user = await User.findOne({
+      email: normalizedEmail,
+    }).select(
+      "+emailVerificationOtp +emailVerificationOtpExpiry"
+    );
+
+    if (user && user.isVerified === false) {
+      const verificationOtp = crypto
+        .randomInt(100000, 1000000)
+        .toString();
+
+      const hashedVerificationOtp = await bcrypt.hash(
+        verificationOtp,
+        10
+      );
+
+      user.emailVerificationOtp =
+        hashedVerificationOtp;
+
+      user.emailVerificationOtpExpiry =
+        new Date(
+          Date.now() + 5 * 60 * 1000
+        );
+
+      await user.save();
+
+      // Asynchronously send the verification email to avoid blocking the HTTP response.
+      setImmediate(async () => {
+        try {
+          await sendVerificationOtpEmail(
+            user.email,
+            verificationOtp
+          );
+        } catch (error) {
+          console.error("Verification email failed:", error);
+        }
+      });
+    }
+
+    return res.status(200).json({
+      message:
+        "If an account exists and requires verification, a verification OTP has been sent.",
+    });
+  } catch (error) {
+    console.error(
+      "Resend verification OTP error:",
+      error
+    );
+
+    return res.status(500).json({
       message: "Internal Server Error",
     });
   }

@@ -4,11 +4,14 @@
  */
 
 import { jest } from "@jest/globals";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
+
+const sendVerificationOtpEmailMock = jest.fn();
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: sendVerificationOtpEmailMock,
 }));
 
 jest.unstable_mockModule("../../src/lib/mlService.js", () => ({
@@ -29,7 +32,6 @@ import { cleanupRedis } from "../teardown.js";
 import {
   createTestUser,
   createSignupPayload,
-  createLoginPayload,
   generateTestToken,
 } from "../utils/testHelpers.js";
 
@@ -42,6 +44,59 @@ const { default: Group } = await import(
   "../../src/models/group.model.js"
 );
 
+const waitForEmailMock = async () => {
+  for (
+    let attempt = 0;
+    attempt < 10 &&
+    sendVerificationOtpEmailMock.mock.calls.length === 0;
+    attempt += 1
+  ) {
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+
+  expect(sendVerificationOtpEmailMock).toHaveBeenCalled();
+};
+
+const completeSignupVerificationAndLogin = async (payload) => {
+  const signupResponse = await request(app)
+    .post("/api/auth/signup")
+    .send(payload);
+
+  expect(signupResponse.statusCode).toBe(201);
+  expect(signupResponse.body.message).toContain("verify your email");
+
+  await waitForEmailMock();
+
+  const sentOtp =
+    sendVerificationOtpEmailMock.mock.calls[
+      sendVerificationOtpEmailMock.mock.calls.length - 1
+    ][1];
+
+  const verifyResponse = await request(app)
+    .post("/api/auth/verify-email")
+    .send({
+      email: payload.email,
+      otp: sentOtp,
+    });
+
+  expect(verifyResponse.statusCode).toBe(200);
+  expect(verifyResponse.body.message).toBe(
+    "Email verified successfully"
+  );
+
+  const loginResponse = await request(app)
+    .post("/api/auth/login")
+    .send({
+      email: payload.email,
+      password: payload.password,
+    });
+
+  expect(loginResponse.statusCode).toBe(200);
+  expect(loginResponse.body.token).toBeDefined();
+
+  return loginResponse.body.token;
+};
+
 beforeAll(async () => {
   await connectTestDB();
 });
@@ -53,6 +108,7 @@ afterAll(async () => {
 
 afterEach(async () => {
   await clearAllCollections();
+  sendVerificationOtpEmailMock.mockClear();
 });
 
 describe("Integration - Complete User Journey", () => {
@@ -60,38 +116,16 @@ describe("Integration - Complete User Journey", () => {
     it("should complete signup -> login -> auth check flow", async () => {
       const payload = createSignupPayload();
 
-      // Step 1: Signup
-      const signupResponse = await request(app)
-        .post("/api/auth/signup")
-        .send(payload);
+      const loginToken =
+        await completeSignupVerificationAndLogin(payload);
 
-      expect(signupResponse.statusCode).toBe(201);
-      expect(signupResponse.body.token).toBeDefined();
-      const signupToken = signupResponse.body.token;
-
-      // Step 2: Verify auth with signup token
+      // Step 2: Verify auth with login token
       const checkResponse = await request(app)
-        .get("/api/auth/check")
-        .set("Authorization", `Bearer ${signupToken}`);
-
-      expect(checkResponse.statusCode).toBe(200);
-      expect(checkResponse.body.email).toBe(payload.email);
-
-      // Step 3: Login with credentials
-      const loginResponse = await request(app)
-        .post("/api/auth/login")
-        .send(createLoginPayload(payload));
-
-      expect(loginResponse.statusCode).toBe(200);
-      expect(loginResponse.body.token).toBeDefined();
-      const loginToken = loginResponse.body.token;
-
-      // Step 4: Verify auth with login token
-      const checkResponse2 = await request(app)
         .get("/api/auth/check")
         .set("Authorization", `Bearer ${loginToken}`);
 
-      expect(checkResponse2.statusCode).toBe(200);
+      expect(checkResponse.statusCode).toBe(200);
+      expect(checkResponse.body.email).toBe(payload.email);
     });
 
     it("should persist user data across requests", async () => {
@@ -100,11 +134,8 @@ describe("Integration - Complete User Journey", () => {
         email: "integration@test.com",
       });
 
-      const signupResponse = await request(app)
-        .post("/api/auth/signup")
-        .send(payload);
-
-      const token = signupResponse.body.token;
+      const token =
+        await completeSignupVerificationAndLogin(payload);
 
       // Check multiple times - data should persist
       for (let i = 0; i < 3; i++) {
@@ -285,7 +316,7 @@ describe("Integration - Complete User Journey", () => {
   describe("✓ Error recovery", () => {
     it("should handle and recover from invalid requests", async () => {
       const token = generateTestToken(
-        new ObjectId().toString()
+        new mongoose.Types.ObjectId().toString()
       );
 
       // Make invalid request

@@ -8,6 +8,7 @@ import { jest } from "@jest/globals";
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 jest.unstable_mockModule("../../src/lib/mlService.js", () => ({
@@ -20,7 +21,6 @@ jest.unstable_mockModule("../../src/lib/mlService.js", () => ({
 
 import request from "supertest";
 import mongoose from "mongoose";
-import { ObjectId } from "mongodb";
 import {
   connectTestDB,
   disconnectTestDB,
@@ -219,7 +219,7 @@ describe("POST /api/messages/send/:id - Send message", () => {
       const sender = await User.create(userPayload);
       const token = generateTestToken(sender._id.toString());
 
-      const fakeUserId = new ObjectId();
+      const fakeUserId = new mongoose.Types.ObjectId();
 
       const response = await request(app)
         .post(`/api/messages/send/${fakeUserId}`)
