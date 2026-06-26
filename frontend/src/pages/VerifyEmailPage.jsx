@@ -23,7 +23,7 @@ const VerifyEmailPage = () => {
 
         if (success) {
             sessionStorage.removeItem("pendingVerificationEmail");
-            navigate("/login");
+            navigate("/");
         }
     };
 

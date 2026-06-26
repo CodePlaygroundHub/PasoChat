@@ -178,14 +178,25 @@ export const useAuthStore = create((set, get) => ({
         email,
         otp,
       });
+      localStorage.setItem("token", res.data.token);
+      set({
+        authUser: {
+          _id: res.data._id,
+          fullName: res.data.fullName,
+          email: res.data.email,
+          profilePic: res.data.profilePic,
+          role: res.data.role,
+        },
+      });
 
       toast.success(res.data.message || "Email verified successfully");
+      get().connectSocket();
       return true;
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Verification failed"
       );
-      return false;
+      return false; 
     } finally {
       set({ isVerifyingOtp: false });
     }
