@@ -56,7 +56,7 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 ### Enterprise Requirements Addressed
 
 - **Real-time at Scale**: Horizontal scaling with Redis adapter for millions of concurrent users
-- **AI/ML Integration**: Moderation pipelines, intent detection, toxicity analysis
+- **AI/ML Integration**: Moderation pipelines, intent detection, toxic message analysis
 - **Multimedia Communication**: Voice, video, file sharing, status systems
 - **Security First**: JWT authentication, rate limiting, input validation, encrypted communications
 - **Analytics & Compliance**: Admin dashboards, reporting, audit trails, user moderation
