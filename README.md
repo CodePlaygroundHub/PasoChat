@@ -32,6 +32,7 @@
 ## Status & Badges
 
 <p align="center">
+  <img src="https://img.shields.io/badge/ECSoC-2026_Project_Admin-blueviolet?style=flat-square" alt="ECSoC 2026 Project" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License: MIT" />
   <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg?style=flat-square" alt="Frontend CI Status" />
   <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg?style=flat-square" alt="Backend CI Status" />
