@@ -12,7 +12,7 @@ import { useChatStore } from "./store/useChatStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useEffect } from "react";
 
-import { Loader } from "lucide-react";
+import { Loader, Ribbon } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 import IncomingCallModal from "./components/call/IncomingCallModal.jsx";
@@ -26,7 +26,7 @@ import AdminRoute from "./components/admin/AdminRoute";
 import AdminLayout from "./components/admin/AdminLayout";
 import ForgotPasswordPage from "./pages/ForgotPassword.jsx";
 import ContributePage from "./components/ContributePage.jsx";
-// import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage.jsx";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -83,6 +83,10 @@ const App = () => {
           <Route
             path="/signup"
             element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+          />
+          <Route
+            path="/verify-email" 
+            element= {!authUser?<VerifyEmailPage/>: <Navigate to="/"/>}
           />
           <Route
             path="/login"

@@ -10,7 +10,7 @@ import {
   User,
   ShieldCheck,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
@@ -28,12 +28,13 @@ const SignUpPage = () => {
   });
 
   const { signup, isSigningUp } = useAuthStore();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     if (!formData.fullName.trim()) return toast.error("Full name is required");
     if (!formData.email.trim()) return toast.error("Email is required");
     if (!/\S+@\S+\.\S+/.test(formData.email))
-      return toast.error("Invalid email format");
+      return toast.error("Invalid email format")
     if (!formData.password) return toast.error("Password is required");
     if (formData.password.length < 6)
       return toast.error("Password must be at least 6 characters");
@@ -46,9 +47,15 @@ const SignUpPage = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (validateForm()) signup(formData);
+    if (!validateForm()) return;
+    const result = await signup(formData);
+    if(result){
+      const email = result.email || formData.email.trim();
+      sessionStorage.setItem("pendingVerificationEmail", email);
+      navigate("/verify-email",{state:{email}});
+    }
   };
 
   const handleAnswerChange = (index, value) => {

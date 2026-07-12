@@ -4,11 +4,12 @@
  */
 
 import { jest } from "@jest/globals";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import request from "supertest";
@@ -226,7 +227,7 @@ describe("PATCH /api/admin/users/:id/ban - Ban/unban user", () => {
       const admin = await User.create(adminPayload);
       const token = generateTestToken(admin._id.toString());
 
-      const fakeUserId = new ObjectId();
+      const fakeUserId = new mongoose.Types.ObjectId();
 
       const response = await request(app)
         .patch(`/api/admin/users/${fakeUserId}/ban`)
@@ -293,7 +294,7 @@ describe("DELETE /api/admin/users/:id - Delete user", () => {
       const admin = await User.create(adminPayload);
       const token = generateTestToken(admin._id.toString());
 
-      const fakeUserId = new ObjectId();
+      const fakeUserId = new mongoose.Types.ObjectId();
 
       const response = await request(app)
         .delete(`/api/admin/users/${fakeUserId}`)

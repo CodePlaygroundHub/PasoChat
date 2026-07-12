@@ -4,12 +4,13 @@
  */
 
 import { jest } from "@jest/globals";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import {
@@ -230,7 +231,7 @@ describe("Auth Middleware - protectRoute", () => {
 
   describe("✗ User not found", () => {
     it("should reject token for non-existent user", async () => {
-      const fakeUserId = new ObjectId();
+      const fakeUserId = new mongoose.Types.ObjectId();
       const token = generateTestToken(fakeUserId.toString());
 
       const req = createMockRequest({

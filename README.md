@@ -32,6 +32,7 @@
 ## Status & Badges
 
 <p align="center">
+  <img src="https://img.shields.io/badge/ECSoC-2026-blueviolet?style=flat-square" alt="ECSoC 2026 Project" />
   <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License: MIT" />
   <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg?style=flat-square" alt="Frontend CI Status" />
   <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg?style=flat-square" alt="Backend CI Status" />
@@ -56,7 +57,7 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 ### Enterprise Requirements Addressed
 
 - **Real-time at Scale**: Horizontal scaling with Redis adapter for millions of concurrent users
-- **AI/ML Integration**: Moderation pipelines, intent detection, toxicity analysis
+- **AI/ML Integration**: Moderation pipelines, intent detection, toxic message analysis
 - **Multimedia Communication**: Voice, video, file sharing, status systems
 - **Security First**: JWT authentication, rate limiting, input validation, encrypted communications
 - **Analytics & Compliance**: Admin dashboards, reporting, audit trails, user moderation

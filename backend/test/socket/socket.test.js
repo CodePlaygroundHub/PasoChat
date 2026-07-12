@@ -3,6 +3,7 @@ import { jest } from "@jest/globals";
 jest.unstable_mockModule("../../src/lib/sendEmail.js", () => ({
   sendWelcomeEmail: jest.fn(),
   sendOtpEmail: jest.fn(),
+  sendVerificationOtpEmail: jest.fn(),
 }));
 
 import { io as Client } from "socket.io-client";

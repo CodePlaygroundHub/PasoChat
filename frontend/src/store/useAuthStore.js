@@ -45,12 +45,11 @@ export const useAuthStore = create((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
-      localStorage.setItem("token", res.data.token);
-      set({ authUser: res.data });
-      toast.success("Account created successfully");
-      get().connectSocket();
+      toast.success(res.data.message || "Account created. Please verify your Email.");
+      return res.data;
     } catch (error) {
-      toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message || "Signup failed");
+      return null;
     } finally {
       set({ isSigningUp: false });
     }
@@ -168,6 +167,61 @@ export const useAuthStore = create((set, get) => ({
       return false;
     } finally {
       set({ isVerifyingOtp: false });
+    }
+  },
+
+  verifyEmailOtp: async ({ email, otp }) => {
+    set({ isVerifyingOtp: true });
+
+    try {
+      const res = await axiosInstance.post("/auth/verify-email", {
+        email,
+        otp,
+      });
+      localStorage.setItem("token", res.data.token);
+      set({
+        authUser: {
+          _id: res.data._id,
+          fullName: res.data.fullName,
+          email: res.data.email,
+          profilePic: res.data.profilePic,
+          role: res.data.role,
+        },
+      });
+
+      toast.success(res.data.message || "Email verified successfully");
+      get().connectSocket();
+      return true;
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Verification failed"
+      );
+      return false; 
+    } finally {
+      set({ isVerifyingOtp: false });
+    }
+  },
+
+  resendVerificationOtp: async (email) => {
+    set({ isSendingOtp: true });
+
+    try {
+      const res = await axiosInstance.post(
+        "/auth/resend-verification-otp",
+        { email }
+      );
+
+      toast.success(res.data.message || "OTP sent successfully");
+
+      return true;
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to resend OTP"
+      );
+
+      return false;
+    } finally {
+      set({ isSendingOtp: false });
     }
   },
 
