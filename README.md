@@ -604,6 +604,4 @@ If PASO helps you, consider giving it a ⭐ on GitHub!
 
 <p align="center">
   <strong>Built with ❤️ by the CodePlaygroundHub community</strong>
-  <br/>
-  <em>Sponsored by GitHub Copilot for Development</em>
 </p>
