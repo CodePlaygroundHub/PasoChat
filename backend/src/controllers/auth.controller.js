@@ -411,6 +411,7 @@ export const refresh = async (req, res) => {
     const user = await User.findOne({
       _id: decoded.userId,
       refreshTokenHash: hash,
+      isBanned: false,
     });
 
     if (!user) {

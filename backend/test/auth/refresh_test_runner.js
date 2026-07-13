@@ -6,6 +6,7 @@ process.env.REFRESH_TOKEN_SECRET = "test-refresh-token-secret-key-do-not-use-in-
 import request from "supertest";
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // Dynamically import app and models after env variables are set
 const { app } = await import("../../src/index.js");
@@ -58,7 +59,24 @@ const runTests = async () => {
   if (!refreshCookie) {
     throw new Error("refreshToken cookie not set in login response headers");
   }
-  console.log("✓ refreshToken cookie is set in response headers");
+  
+  // Assert security properties on the cookie
+  const cookieParts = refreshCookie.split(";").map(part => part.trim().toLowerCase());
+  const hasHttpOnly = cookieParts.includes("httponly");
+  const hasStrictSameSite = cookieParts.includes("samesite=strict");
+  const hasMaxAge7Days = cookieParts.includes("max-age=604800");
+
+  if (!hasHttpOnly) {
+    throw new Error("refreshToken cookie is missing 'HttpOnly' attribute");
+  }
+  if (!hasStrictSameSite) {
+    throw new Error("refreshToken cookie is missing 'SameSite=Strict' attribute");
+  }
+  if (!hasMaxAge7Days) {
+    throw new Error(`refreshToken cookie is missing 7-day expiration attribute (Max-Age=604800). Got: ${refreshCookie}`);
+  }
+  
+  console.log("✓ refreshToken cookie set with HttpOnly, SameSite=Strict, and 7-day lifetime");
 
   // Verify hash is saved in DB
   const userInDb = await User.findById(user._id).select("+refreshTokenHash");
@@ -104,6 +122,22 @@ const runTests = async () => {
   }
   console.log("✓ Refresh with invalid token returned 401");
 
+  // 5b. Test POST /api/auth/refresh with expired token
+  console.log("Testing POST /api/auth/refresh with expired token...");
+  const expiredToken = jwt.sign(
+    { userId: user._id.toString() },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: "-1h" }
+  );
+  const expiredRes = await request(app)
+    .post("/api/auth/refresh")
+    .set("Cookie", [`refreshToken=${expiredToken}`]);
+
+  if (expiredRes.status !== 401) {
+    throw new Error(`Expected 401 for expired refresh token, got ${expiredRes.status}`);
+  }
+  console.log("✓ Refresh with expired token returned 401");
+
   // 6. Test POST /api/auth/logout
   console.log("Testing POST /api/auth/logout...");
   const logoutRes = await request(app)
@@ -144,6 +178,33 @@ const runTests = async () => {
     throw new Error(`Expected 401 for revoked refresh token, got ${revokedRes.status}`);
   }
   console.log("✓ Refresh with revoked token returned 401");
+
+  // 8. Test POST /api/auth/refresh with a banned user
+  console.log("Testing POST /api/auth/refresh with a banned user...");
+  const newLoginRes = await request(app)
+    .post("/api/auth/login")
+    .send({ email: "test@example.com", password });
+  
+  const newCookies = newLoginRes.headers["set-cookie"] || [];
+  const newRefreshCookie = newCookies.find(c => c.startsWith("refreshToken="));
+  if (!newRefreshCookie) {
+    throw new Error("Failed to obtain a new refresh token cookie for banned user testing");
+  }
+
+  // Ban the user in the database
+  await User.updateOne({ _id: user._id }, { isBanned: true });
+
+  const bannedRes = await request(app)
+    .post("/api/auth/refresh")
+    .set("Cookie", [newRefreshCookie]);
+
+  // Restore the user status
+  await User.updateOne({ _id: user._id }, { isBanned: false });
+
+  if (bannedRes.status !== 401) {
+    throw new Error(`Expected 401 for banned user refresh token, got ${bannedRes.status}`);
+  }
+  console.log("✓ Refresh with banned user returned 401");
 
   console.log("\nALL REFRESH TOKEN TESTS PASSED SUCCESSFULLY! 🎉");
 };
