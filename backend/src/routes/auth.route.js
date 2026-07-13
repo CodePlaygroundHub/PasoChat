@@ -13,6 +13,7 @@ import {
   getSecurityQuestions,
   sendOtp,
   verifyOtp,
+  refresh,
 } from "../controllers/auth.controller.js";
 
 import { protectRoute } from "../middleware/auth.middleware.js";
@@ -25,6 +26,7 @@ router.post("/verify-email", otpRateLimiter, verifyEmail);
 router.post("/resend-verification-otp", otpRateLimiter, resendVerificationOtp);
 router.post("/login", login);
 router.post("/logout", logout);
+router.post("/refresh", refresh);
 router.get("/check", protectRoute, checkAuth);
 router.put("/update-profile", protectRoute, updateProfile);
 router.put("/security-questions", protectRoute, setupSecurityQuestions);
