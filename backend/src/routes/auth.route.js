@@ -13,6 +13,7 @@ import {
   getSecurityQuestions,
   sendOtp,
   verifyOtp,
+  googleAuth,
 } from "../controllers/auth.controller.js";
 
 import { protectRoute } from "../middleware/auth.middleware.js";
@@ -24,6 +25,7 @@ router.post("/signup", signup);
 router.post("/verify-email", otpRateLimiter, verifyEmail);
 router.post("/resend-verification-otp", otpRateLimiter, resendVerificationOtp);
 router.post("/login", login);
+router.post("/google", googleAuth);
 router.post("/logout", logout);
 router.get("/check", protectRoute, checkAuth);
 router.put("/update-profile", protectRoute, updateProfile);

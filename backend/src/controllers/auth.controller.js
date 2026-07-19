@@ -1,9 +1,13 @@
+import { OAuth2Client } from "google-auth-library";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
+
+// Google OAuth client used to verify Google ID tokens.
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 //signup
 // Get fullName, email, password from req.body
@@ -969,6 +973,98 @@ export const resendVerificationOtp = async (
       "Resend verification OTP error:",
       error
     );
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+/**
+ * Authenticate user using Google Identity Services.
+ *
+ * Flow:
+ * 1. Validate request payload.
+ * 2. Verify Google ID token.
+ * 3. Find or create user.
+ * 4. Generate JWT.
+ * 5. Return authenticated user.
+ */
+export const googleAuth = async (req, res) => {
+  try {
+    // Implementation will be added incrementally.
+    // Extract Google ID token sent by the frontend.
+    const { token } = req.body;
+
+    // Basic request validation.
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        message: "Google ID token is required.",
+      });
+    }
+    // Verify the Google ID token using Google's public keys.
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const {
+      sub: googleId,
+      email,
+      name,
+      picture,
+      email_verified,
+    } = payload;
+
+    // Check if the email is verified by Google.
+    if (!email_verified) {
+      return res.status(401).json({
+        message: "Google email is not verified.",
+      });
+    }
+
+    // Check if a user with this email already exists.
+    let user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    });
+
+    if (user) {
+      // Link Google account if this is the user's first Google login.
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        fullName: name,
+        email: email.toLowerCase().trim(),
+
+        profilePic: picture,
+
+        provider: "google",
+
+        googleId,
+
+        isVerified: true,
+      });
+    }
+    // Generate JWT for the authenticated user.
+    const jwtToken = generateToken(user._id);
+
+    return res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role,
+      provider: user.provider,
+      token: jwtToken,
+      message: "Google login successful.",
+    });
+  } catch (error) {
+    console.error("Google authentication error:", error);
 
     return res.status(500).json({
       message: "Internal Server Error",

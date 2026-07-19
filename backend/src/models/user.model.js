@@ -34,7 +34,6 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
       minlength: 6,
       select: false,
     },
@@ -132,6 +131,17 @@ const userSchema = new mongoose.Schema(
 
     emailVerificationOtpExpiry: {
       type: Date,
+      default: null,
+    },
+
+    provider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+
+    googleId: {
+      type: String,
       default: null,
     },
   },
