@@ -4,3 +4,10 @@ backend/node_modules/
 .env
 dist/
 build/
+
+# Python virtual environment
+ml-service/venv/
+
+# Python cache
+__pycache__/
+*.pyc

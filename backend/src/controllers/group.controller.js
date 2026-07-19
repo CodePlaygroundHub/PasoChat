@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
 import Group from "../models/group.model.js";
 import User from "../models/user.model.js";
+import cloudinary from "../lib/cloudinary.js";
+import mongoose from "mongoose";
 
 // GET MY GROUPS
 export const getMyGroups = async (req, res) => {
@@ -51,10 +52,15 @@ export const createGroup = async (req, res) => {
       userId: id,
       role: id === userId.toString() ? "admin" : "member",
     }));
-
+    // upload avatar to cloudinary
+    let avatarUrl = "";
+    if (avatar) {
+      const uploadResponse = await cloudinary.uploader.upload(avatar);
+      avatarUrl = uploadResponse.secure_url;
+    }
     const group = await Group.create({
       name,
-      avatar,
+      avatar: avatarUrl,
       members: groupMembers,
       createdBy: userId,
     });
@@ -214,10 +220,24 @@ export const updateGroup = async (req, res) => {
     }
 
     if (name) group.name = name;
-    if (avatar !== undefined) group.avatar = avatar;
+    if (avatar !== undefined) {
+      if (avatar) {
+        const uploadResponse = await cloudinary.uploader.upload(avatar, {
+          folder: "groups",
+        });
+        group.avatar = uploadResponse.secure_url;
+      } else {
+        group.avatar = "";
+      }
+    }
 
     await group.save();
-    res.status(200).json(group);
+
+    const updatedGroup = await Group.findById(group._id)
+      .populate("members.userId", "fullName profilePic email")
+      .populate("createdBy", "_id");
+
+    res.status(200).json(updatedGroup);
   } catch (error) {
     console.error("Update group error:", error);
     res.status(500).json({ message: "Server error" });

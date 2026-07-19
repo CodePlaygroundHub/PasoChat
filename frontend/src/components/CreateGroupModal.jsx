@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { X } from "lucide-react";
+import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
-import { axiosInstance } from "../lib/axios";
+import { useState } from "react";
 
 const CreateGroupModal = ({ onClose }) => {
   const { users, setSelectedGroup, getGroups } = useChatStore();
@@ -10,6 +10,19 @@ const CreateGroupModal = ({ onClose }) => {
   const [groupName, setGroupName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [avatar, setAvatar] = useState("");
+  
+  const handleImageSelect = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+
+  reader.onloadend = () => {
+    setAvatar(reader.result);
+  };
+};
 
   const toggleUser = (userId) => {
     setSelectedUsers((prev) =>
@@ -42,8 +55,9 @@ const CreateGroupModal = ({ onClose }) => {
       const res = await axiosInstance.post("/groups/create", {
         name: groupName.trim(),
         members: humanMembers,
+        avatar,
       });
-
+    console.log(res.data);
       toast.success("Group created");
 
       await getGroups();          // refresh sidebar
@@ -65,7 +79,20 @@ const CreateGroupModal = ({ onClose }) => {
             <X />
           </button>
         </div>
+    <div className="mb-4 flex flex-col items-center gap-2">
+  <img
+    src={avatar || "/group.png"}
+    alt="Group Avatar"
+    className="h-20 w-20 rounded-full object-cover border"
+  />
 
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleImageSelect}
+    className="file-input file-input-bordered file-input-sm w-full"
+  />
+</div>
         <input
           type="text"
           placeholder="Group name"

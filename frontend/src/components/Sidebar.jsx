@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
-import { Users, Plus, UsersRound, Trash2, CircleDot } from "lucide-react";
-import { useChatStore } from "../store/useChatStore";
-import { useAuthStore } from "../store/useAuthStore";
-import SidebarSkeleton from "./skeletons/SidebarSkeleton";
+import { CircleDot, Plus, Trash2, Users, UsersRound } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import CreateGroupModal from "./CreateGroupModal";
+import SidebarSkeleton from "./skeletons/SidebarSkeleton";
+import { useAuthStore } from "../store/useAuthStore";
+import { useChatStore } from "../store/useChatStore";
 
 const Sidebar = ({ setActiveTab }) => {
   const {
@@ -109,7 +110,15 @@ const Sidebar = ({ setActiveTab }) => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <UsersRound className="h-10 w-10 rounded-full bg-primary/10 p-2" />
+                    {group.avatar ? (
+                  <img
+                    src={group.avatar}
+                    alt={group.name}
+                    className="h-10 w-10 rounded-full object-cover"
+                        />
+                     ) : (
+                <UsersRound className="h-10 w-10 rounded-full bg-primary/10 p-2" />
+                         )}
                     <div>
                       <p className="font-medium truncate">{group.name}</p>
                       <p className="text-xs opacity-60">Group chat</p>
