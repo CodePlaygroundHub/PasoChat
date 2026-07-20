@@ -7,10 +7,12 @@ import {
   Mic,
   StopCircle,
   Smile,
+  Clapperboard,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
 import EmojiPicker from "emoji-picker-react";
+import GifPicker from "./GifPicker";
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -19,9 +21,11 @@ const MessageInput = () => {
   const [audioData, setAudioData] = useState(null);
   const [recording, setRecording] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const emojiRef = useRef(null);
+  const gifRef = useRef(null);
   const fileRef = useRef(null);
   const imageRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -55,6 +59,9 @@ const MessageInput = () => {
       if (emojiRef.current && !emojiRef.current.contains(event.target)) {
         setShowEmojiPicker(false);
       }
+      if (gifRef.current && !gifRef.current.contains(event.target)) {
+        setShowGifPicker(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -76,6 +83,11 @@ const MessageInput = () => {
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
+  };
+
+  const handleGifSelect = (gifUrl) => {
+    setImagePreview(gifUrl);
+    setShowGifPicker(false);
   };
 
   const handleFileChange = (e) => {
@@ -372,7 +384,7 @@ const MessageInput = () => {
   "
             />
 
-            {!isAI && (
+{!isAI && (
               <div className="flex items-center gap-0.5 sm:gap-1 ml-2">
                 <input
                   ref={imageRef}
@@ -427,6 +439,36 @@ const MessageInput = () => {
                 >
                   <Image size={18} />
                 </button>
+
+                <div className="relative" ref={gifRef}>
+                  <button
+                    type="button"
+                    onClick={() => setShowGifPicker((prev) => !prev)}
+                    className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                  >
+                    <Clapperboard size={18} />
+                  </button>
+
+                  {showGifPicker && (
+                    <div
+                      className="
+                        fixed sm:absolute
+                        bottom-0 sm:bottom-12
+                        left-0 sm:left-auto
+                        right-0
+                        z-50
+                        w-full sm:w-auto
+                        sm:border sm:rounded-xl
+                        shadow-lg
+                      "
+                    >
+                      <GifPicker
+                        onSelect={handleGifSelect}
+                        onClose={() => setShowGifPicker(false)}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <button
                   type="button"
