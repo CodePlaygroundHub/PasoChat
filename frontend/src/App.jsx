@@ -5,14 +5,15 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
+import LandingPage from "./pages/LandingPage";
 
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
 import { useChatStore } from "./store/useChatStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useEffect } from "react";
 
-import { Loader, Ribbon } from "lucide-react";
+import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 import IncomingCallModal from "./components/call/IncomingCallModal.jsx";
@@ -32,6 +33,8 @@ const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { subscribeToMessages, unsubscribeFromMessages } = useChatStore();
   const { theme } = useThemeStore();
+  const location = useLocation();
+  const isLandingPage = location.pathname === "/";
 
   useEffect(() => {
     console.log("AUTH USER:", authUser);
@@ -56,17 +59,18 @@ const App = () => {
   }
 
   return (
-    <div data-theme={theme} className="flex flex-col h-screen">
+    <div data-theme={theme} className={`flex flex-col ${isLandingPage ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
       {authUser && <IncomingCallModal />}
       {authUser && <OutgoingCallModal />}
       {authUser && <CallRoom />}
-      {authUser && authUser.role !== "admin" && <Navbar />}
+      {authUser && authUser.role !== "admin" && !isLandingPage && <Navbar />}
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 overflow-y-auto">
+      <div className={`flex-1 ${isLandingPage ? '' : 'overflow-y-auto'}`}>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route
-            path="/"
+            path="/chat"
             element={
               authUser ? (
                 authUser.role === "admin" ? (
@@ -82,19 +86,19 @@ const App = () => {
 
           <Route
             path="/signup"
-            element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+            element={!authUser ? <SignUpPage /> : <Navigate to="/chat" />}
           />
           <Route
             path="/verify-email" 
-            element= {!authUser?<VerifyEmailPage/>: <Navigate to="/"/>}
+            element= {!authUser?<VerifyEmailPage/>: <Navigate to="/chat"/>}
           />
           <Route
             path="/login"
-            element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+            element={!authUser ? <LoginPage /> : <Navigate to="/chat" />}
           />
           <Route
             path="/forgot-password"
-            element={!authUser ? <ForgotPasswordPage /> : <Navigate to="/" />}
+            element={!authUser ? <ForgotPasswordPage /> : <Navigate to="/chat" />}
           />
           <Route
             path="/settings"
