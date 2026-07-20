@@ -1033,9 +1033,22 @@ export const googleAuth = async (req, res) => {
     });
 
     if (user) {
+      if (user.isBanned) {
+        return res.status(403).json({
+          message: "Your account has been banned",
+        });
+      }
+
       // Link Google account if this is the user's first Google login.
       if (!user.googleId) {
+        if (!user.isVerified) {
+          // Untrusted/unverified pre-existing record: treat Google's verified
+          // email as authoritative and invalidate any prior local password
+          // to prevent the original registrant from retaining access.
+          user.password = undefined;
+        }
         user.googleId = googleId;
+        user.isVerified = true;
         await user.save();
       }
     } else {
