@@ -11,24 +11,32 @@ const CreateGroupModal = ({ onClose }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [avatar, setAvatar] = useState("");
-  
+
   const handleImageSelect = (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
 
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5 MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-  reader.onloadend = () => {
-    setAvatar(reader.result);
+    reader.onloadend = () => {
+      setAvatar(reader.result);
+    };
   };
-};
 
   const toggleUser = (userId) => {
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
@@ -57,10 +65,10 @@ const CreateGroupModal = ({ onClose }) => {
         members: humanMembers,
         avatar,
       });
-    console.log(res.data);
+
       toast.success("Group created");
 
-      await getGroups();          // refresh sidebar
+      await getGroups(); // refresh sidebar
       setSelectedGroup(res.data); // auto-open group
       onClose();
     } catch (err) {
@@ -79,20 +87,20 @@ const CreateGroupModal = ({ onClose }) => {
             <X />
           </button>
         </div>
-    <div className="mb-4 flex flex-col items-center gap-2">
-  <img
-    src={avatar || "/group.png"}
-    alt="Group Avatar"
-    className="h-20 w-20 rounded-full object-cover border"
-  />
+        <div className="mb-4 flex flex-col items-center gap-2">
+          <img
+            src={avatar || "/group.png"}
+            alt="Group Avatar"
+            className="h-20 w-20 rounded-full object-cover border"
+          />
 
-  <input
-    type="file"
-    accept="image/*"
-    onChange={handleImageSelect}
-    className="file-input file-input-bordered file-input-sm w-full"
-  />
-</div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="file-input file-input-bordered file-input-sm w-full"
+          />
+        </div>
         <input
           type="text"
           placeholder="Group name"

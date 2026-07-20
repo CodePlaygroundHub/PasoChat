@@ -7,14 +7,22 @@ const ChangeGroupInfoModal = ({ group, onClose, onUpdateGroup }) => {
   const [name, setName] = useState(group.name);
   const [avatar, setAvatar] = useState(group?.avatar || "");
   const [avatarPreview, setAvatarPreview] = useState(
-    group?.avatar || "/group.png"
+    group?.avatar || "/group.png",
   );
   const [loading, setLoading] = useState(false);
   const { getGroups } = useChatStore();
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
 
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5 MB");
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = () => {
       const result = reader.result;
@@ -31,10 +39,10 @@ const ChangeGroupInfoModal = ({ group, onClose, onUpdateGroup }) => {
 
     setLoading(true);
     try {
-      const res = await axiosInstance.patch(
-        `/groups/${group._id}/update`,
-        { name, avatar, }
-      );
+      const res = await axiosInstance.patch(`/groups/${group._id}/update`, {
+        name,
+        avatar,
+      });
       onUpdateGroup(res.data);
       await getGroups();
       toast.success("Group updated");
@@ -81,10 +89,7 @@ const ChangeGroupInfoModal = ({ group, onClose, onUpdateGroup }) => {
         </div>
 
         <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="btn btn-sm btn-ghost"
-          >
+          <button onClick={onClose} className="btn btn-sm btn-ghost">
             Cancel
           </button>
           <button

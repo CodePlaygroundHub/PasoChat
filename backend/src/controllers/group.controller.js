@@ -55,7 +55,17 @@ export const createGroup = async (req, res) => {
     // upload avatar to cloudinary
     let avatarUrl = "";
     if (avatar) {
-      const uploadResponse = await cloudinary.uploader.upload(avatar);
+      // Basic validation for base64 image
+      if (!avatar.startsWith("data:image/")) {
+        return res.status(400).json({
+          message: "Only image files are allowed",
+        });
+      }
+
+      const uploadResponse = await cloudinary.uploader.upload(avatar, {
+        folder: "groups",
+      });
+
       avatarUrl = uploadResponse.secure_url;
     }
     const group = await Group.create({
