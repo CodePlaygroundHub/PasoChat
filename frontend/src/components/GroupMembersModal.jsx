@@ -181,7 +181,9 @@ const GroupMembersModal = ({ groupId, onClose }) => {
           <div className="flex-1 overflow-y-auto px-2 py-2">
             {safeMembers.map((m) => {
               const isMe = m.userId._id === authUser._id;
-              const isCreatorMember = m.userId._id === group.createdBy;
+              const isCreatorMember =
+                m.userId._id.toString() ===
+                (group.createdBy?._id || group.createdBy)?.toString();
 
               return (
                 <div
