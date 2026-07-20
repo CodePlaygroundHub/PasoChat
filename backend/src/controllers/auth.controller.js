@@ -294,6 +294,11 @@ export const login = async (req, res) => {
       });
     }
 
+    if (!user.password) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
     const isPasswordCorrect =
       await bcrypt.compare(
         password,
@@ -1034,7 +1039,7 @@ export const googleAuth = async (req, res) => {
     // Check if a user with this email already exists.
     let user = await User.findOne({
       email: email.toLowerCase().trim(),
-    });
+    }).select("+password");
 
     if (user) {
       if (user.isBanned) {
