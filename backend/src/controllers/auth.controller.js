@@ -7,10 +7,9 @@ import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib
 import crypto from "crypto";
 
 // Google OAuth client used to verify Google ID tokens.
-if (!process.env.GOOGLE_CLIENT_ID) {
-  throw new Error("GOOGLE_CLIENT_ID is not defined");
-}
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClient = process.env.GOOGLE_CLIENT_ID
+  ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  : null;
 //signup
 // Get fullName, email, password from req.body
 // Check if any field is missing ---> if (!fullName || !email || !password)
@@ -994,6 +993,11 @@ export const resendVerificationOtp = async (
  */
 export const googleAuth = async (req, res) => {
   try {
+    if (!googleClient) {
+      return res.status(500).json({
+          message: "Google OAuth is not configured.",
+      });
+    }
     // Implementation will be added incrementally.
     // Extract Google ID token sent by the frontend.
     const { token } = req.body;
