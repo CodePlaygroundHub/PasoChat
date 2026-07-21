@@ -16,8 +16,9 @@ export default {
         'typing-dot': 'typingDot 1.4s infinite ease-in-out',
         'wave': 'wave 1.2s infinite ease-in-out',
         'slide-in-toast': 'slideInToast 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-        'message-appear': 'messageAppear 0.4s ease-out forwards',
+        'message-appear': 'messageAppear 0.5s ease-out forwards',
         'spin-slow': 'spin 8s linear infinite',
+        'marquee': 'marquee 30s linear infinite',
       },
       keyframes: {
         softTilt: {
@@ -29,8 +30,9 @@ export default {
           '50%': { transform: 'rotate(-2deg)' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 10px 0px hsl(var(--p) / 0.2)' },
-          '50%': { boxShadow: '0 0 25px 5px hsl(var(--p) / 0.5)' }
+          "0%": { boxShadow: "0 0 10px rgba(116, 128, 255, 0.2)", borderColor: "rgba(116, 128, 255, 0.2)" },
+          "50%": { boxShadow: "0 0 20px rgba(116, 128, 255, 0.5)", borderColor: "rgba(116, 128, 255, 0.5)" },
+          "100%": { boxShadow: "0 0 10px rgba(116, 128, 255, 0.2)", borderColor: "rgba(116, 128, 255, 0.2)" },
         },
         pulseGlowSecondary: {
           '0%, 100%': { boxShadow: '0 0 10px 0px hsl(var(--s) / 0.2)' },
@@ -65,6 +67,10 @@ export default {
         messageAppear: {
           '0%': { transform: 'scale(0.95) translateY(10px)', opacity: '0' },
           '100%': { transform: 'scale(1) translateY(0)', opacity: '1' },
+        },
+        marquee: {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0%)" },
         }
       }
     },
