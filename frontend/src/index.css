@@ -57,3 +57,22 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     transform: translateY(0);
   }
 }
+
+.hover-glow:hover {
+  box-shadow: 0 0 25px 5px hsl(var(--p) / 0.4) !important;
+  transform: translateY(-5px) scale(1.02) rotate(1deg) !important;
+}
+
+.hover-glow-reverse:hover {
+  box-shadow: 0 0 25px 5px hsl(var(--s) / 0.4) !important;
+  transform: translateY(-5px) scale(1.02) rotate(-1deg) !important;
+}
+
+.hover-glow-accent:hover {
+  box-shadow: 0 0 25px 5px hsl(var(--a) / 0.4) !important;
+  transform: translateY(-5px) scale(1.02) rotate(1deg) !important;
+}
+
+.card-anim {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}

@@ -8,7 +8,6 @@ import {
   User,
   X,
   GitPullRequest, // Added this for the logo
-  Code2, // Alternative "dev" logo
 } from "lucide-react";
 import { useState } from "react";
 import { useChatStore } from "../store/useChatStore";
@@ -29,7 +28,7 @@ const Navbar = () => {
       <div className="container mx-auto h-16 px-4">
         <div className="flex h-full items-center justify-between">
           <Link
-            to="/"
+            to={authUser ? "/chat" : "/"}
             className="flex items-center gap-3 text-lg font-semibold hover:opacity-80 transition-opacity"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
