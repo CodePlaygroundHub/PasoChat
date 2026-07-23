@@ -383,6 +383,18 @@ export const forwardMessage = async (req, res) => {
         isForwarded: true,
         originalMessageId: originalMessage._id,
       });
+
+      if (receiverId){
+        emitToUser(receiverId.toString(), "newMessage", newMessage);
+
+        emitToUser(senderId.toString(), "messageStatusUpdate",{
+          messageId:newMessage._id,
+          status: "delivered",
+        });
+      }else if (groupId){
+        io.to(groupId.toString()).emit("newGroupMessage", newMessage);
+      }
+
       forwardedMessages.push(newMessageData);
     }
     res.status(201).json({ 
