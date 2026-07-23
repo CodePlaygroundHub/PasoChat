@@ -11,6 +11,7 @@ import {
   CheckCheck,
   Sparkles,
   Reply,
+  forward,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChatStore } from "../store/useChatStore";
@@ -111,6 +112,11 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
       setOpen(false);
     }
   };
+
+  const handleForward = () => {
+    console.log("Forward message", message._id);
+    setOpen(false);
+  }
 
   return (
     <motion.div
@@ -247,6 +253,13 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                         <Reply size={16} className="opacity-50" />
                         <span>Reply</span>
                       </button>
+
+                      <button onClick={handleForward}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-base-200">
+                          <Forward size={16} className="opacity-50" />
+                          <span>Forward</span>
+                      </button>
+
                       {!isMe && !message.deletedForEveryone && (
                         <button onClick={handleReport} className="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-warning/10 text-warning border-t border-base-200">
                           <ShieldAlert size={16} />
