@@ -358,6 +358,43 @@ export const sendGroupMessage = async (req, res) => {
   }
 };
 
+export const forwardMessage = async (req, res) => {
+  try {
+    const {messageId, destination} = req.body;
+    const senderId = req.user._id;
+
+    const originalMessage = await Message.findById(messageId);
+
+    if (!originalMessage) {
+      return res.status(404).json({ message: "Original message not found" });
+    }
+
+    const forwardedMessages =[];
+
+    for (const dest of destination) {
+      const newMessageData = await Message.create({
+        senderId,
+        receiverId: dest.receiverId || null,
+        groupId: dest.groupId || null,
+        text: originalMessage.text,
+        image: originalMessage.image,
+        audio: originalMessage.audio,
+        file: originalMessage.file,
+        isForwarded: true,
+        originalMessageId: originalMessage._id,
+      });
+      forwardedMessages.push(newMessageData);
+    }
+    res.status(201).json({ 
+      messages: forwardedMessages,
+      message: "Message forwarded successfully" 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export const deleteMessageForMe = async (req, res) => {
   try {
     const { messageId } = req.params;
