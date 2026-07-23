@@ -128,6 +128,16 @@ const messageSchema = new mongoose.Schema(
         emoji: String,
       },
     ],
+    isForwarded: {
+      type: Boolean,
+      default: false,
+    },
+    originalMessageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+      index: true,
+    },
   },
   { timestamps: true },
 );
