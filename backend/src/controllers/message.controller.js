@@ -360,46 +360,70 @@ export const sendGroupMessage = async (req, res) => {
 
 export const forwardMessage = async (req, res) => {
   try {
-    const {messageId, destination} = req.body;
+    // FIX 1: correctly destructure destinations from req.body
+    const { messageId, destinations } = req.body;
     const senderId = req.user._id;
 
     const originalMessage = await Message.findById(messageId);
 
     if (!originalMessage) {
-      return res.status(404).json({ message: "Original message not found" });
+      return res.status(404).json({
+        message: "Original message not found",
+      });
     }
 
-    const forwardedMessages =[];
+    const forwardedMessages = [];
 
-    for (const dest of destination) {
-      const newMessageData = await Message.create({
+    // FIX 2: loop through destinations (not destination)
+    for (const dest of destinations) {
+      const { receiverId, groupId } = dest;
+
+      // Create a safe file object
+      const safeFile =
+        originalMessage.file && typeof originalMessage.file === "object"
+          ? {
+            url: originalMessage.file.url || "",
+            name: originalMessage.file.name || "",
+            type: originalMessage.file.type || "",
+            size: originalMessage.file.size || 0,
+          }
+          : {
+            url: "",
+            name: "",
+            type: "",
+            size: 0,
+          };
+
+      const newMessage = await Message.create({
         senderId,
-        receiverId: dest.receiverId || null,
-        groupId: dest.groupId || null,
+        receiverId: receiverId || null,
+        groupId: groupId || null,
         text: originalMessage.text,
         image: originalMessage.image,
         audio: originalMessage.audio,
-        file: originalMessage.file,
+        file: safeFile,
         isForwarded: true,
         originalMessageId: originalMessage._id,
       });
 
-      if (receiverId){
+      // FIX 3: use the correct variable names for Socket.IO
+      if (receiverId) {
         emitToUser(receiverId.toString(), "newMessage", newMessage);
 
-        emitToUser(senderId.toString(), "messageStatusUpdate",{
-          messageId:newMessage._id,
+        emitToUser(senderId.toString(), "messageStatusUpdate", {
+          messageId: newMessage._id,
           status: "delivered",
         });
-      }else if (groupId){
+      } else if (groupId) {
         io.to(groupId.toString()).emit("newGroupMessage", newMessage);
       }
 
-      forwardedMessages.push(newMessageData);
+      forwardedMessages.push(newMessage);
     }
-    res.status(201).json({ 
+
+    res.status(201).json({
+      message: "Message forwarded successfully",
       messages: forwardedMessages,
-      message: "Message forwarded successfully" 
     });
   } catch (error) {
     console.error(error);

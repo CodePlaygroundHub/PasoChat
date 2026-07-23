@@ -45,6 +45,8 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
     setHighlightedMessage,
     highlightedMessageId,
     searchQuery,
+    users,
+    groups,
   } = useChatStore();
 
   const authUser = useAuthStore((state) => state.authUser);
@@ -399,8 +401,8 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
         isOpen={showForwardModal}
         onClose={() => setShowForwardModal(false)}
         messageId={message._id}
-        users={[]}
-        groups={[]}
+        users={users}
+        groups={groups}
       />
     </>
   );
