@@ -364,6 +364,14 @@ export const forwardMessage = async (req, res) => {
     const { messageId, destinations } = req.body;
     const senderId = req.user._id;
 
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      return res.status(400).json({ message: "Invalid message id" });
+    }
+
+    if (!Array.isArray(destinations) || destinations.length === 0) {
+      return res.status(400).json({ message: "Destinations must be a non-empty array" });
+    }
+
     const originalMessage = await Message.findById(messageId);
 
     if (!originalMessage) {
@@ -372,11 +380,50 @@ export const forwardMessage = async (req, res) => {
       });
     }
 
+    const isOriginalPrivateChat =
+      (originalMessage.senderId.toString() === senderId.toString()) ||
+      (originalMessage.receiverId &&
+        originalMessage.receiverId.toString() === senderId.toString());
+
+    if (!isOriginalPrivateChat && originalMessage.groupId) {
+      const originalGroup = await Group.findById(originalMessage.groupId);
+
+      if (
+        !originalGroup ||
+        !originalGroup.members.some(
+          (member) => member.toString() === senderId.toString(),
+        )
+      ) {
+        return res.status(403).json({
+          message: "You are not authorized to forward this message",
+        });
+      }
+    } else if (!isOriginalPrivateChat) {
+      return res.status(403).json({
+        message: "You are not authorized to forward this message",
+      });
+    }
+
     const forwardedMessages = [];
 
     // FIX 2: loop through destinations (not destination)
     for (const dest of destinations) {
       const { receiverId, groupId } = dest;
+
+      if (groupId) {
+        const group = await Group.findById(groupId);
+
+        if (
+          !group ||
+          !group.members.some(
+            (member) => member.toString() === senderId.toString(),
+          )
+        ) {
+          return res.status(403).json({
+            message: "You are not authorized to forward messages to this group",
+          });
+        }
+      }
 
       // Create a safe file object
       const safeFile =
