@@ -300,6 +300,22 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                 transition={{ repeat: Infinity, duration: 3 }}
                 className={`relative px-4 py-2.5 shadow-sm transition-all duration-300 rounded-2xl
                 ${highlightedMessageId === message._id ? "ring-2 ring-primary ring-offset-2 bg-primary/10" : ""}
+                ${message.isForwarded && (
+                    <div className={`relative px-4 py-2.5 shadow-sm transition-all duration-300 rounded-2xl
+                        ${highlightedMessageId === message._id ? "ring-2 ring-primary ring-offset-2 bg-primary/10" : ""}
+                        ${message.deletedForEveryone
+                        ? "bg-base-200/50 border border-base-300 text-base-content/40 italic"
+                        : isMe
+                          ? "bg-primary text-primary-content rounded-tr-none shadow-md"
+                          : isAI
+                            ? "bg-base-100 border-2 border-primary/20 text-base-content rounded-tl-none shadow-lg shadow-primary/5"
+                            : "ƒbg-base-100 border border-base-200 text-base-content rounded-tl-none shadow-sm"
+                      }
+                    `}>
+                      <Forward size={12} className="opacity-70" />
+                      <span>Forwarded</span>
+                    </div>
+                  )}
                 ${message.deletedForEveryone ? "bg-base-200/50 border border-base-300 text-base-content/40 italic" :
                     isMe ? "bg-primary text-primary-content rounded-tr-none shadow-md" :
                       isAI ? "bg-base-100 border-2 border-primary/20 text-base-content rounded-tl-none shadow-lg shadow-primary/5" :
@@ -312,6 +328,12 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                   </div>
                 ) : (
                   <>
+                    {message.isForwarded && (
+                      <div className={`mb-1.5 flex items-center gap-1.5 text-[12px] text-base-content/70 ${isMe ? "text-[#D1DBFF]" : "text-[#4A00FF]"}`}>
+                        <Forward size={12} />
+                        <span>Forwarded</span>
+                      </div>
+                    )}
                     {isAI && (
                       <div className="absolute -top-2 -left-2 bg-primary text-primary-content p-1 rounded-full shadow-lg scale-75">
                         <Sparkles size={10} fill="currentColor" />
