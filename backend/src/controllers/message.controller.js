@@ -391,7 +391,7 @@ export const forwardMessage = async (req, res) => {
       if (
         !originalGroup ||
         !originalGroup.members.some(
-          (member) => member.toString() === senderId.toString(),
+          (member) => member.userId.toString() === senderId.toString(),
         )
       ) {
         return res.status(403).json({
@@ -416,7 +416,7 @@ export const forwardMessage = async (req, res) => {
         if (
           !group ||
           !group.members.some(
-            (member) => member.toString() === senderId.toString(),
+            (member) => member.userId.toString() === senderId.toString(),
           )
         ) {
           return res.status(403).json({
