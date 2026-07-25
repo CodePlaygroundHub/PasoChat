@@ -401,7 +401,7 @@ export const refresh = async (req, res) => {
     let decoded;
     try {
       decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    } catch (err) {
+    } catch {
       return res.status(401).json({
         message: "Invalid or expired refresh token",
       });
@@ -587,7 +587,7 @@ export const setupSecurityQuestions =
         message:
           "Security questions saved",
       });
-    } catch (error) {
+    } catch  {
       res.status(500).json({
         message:
           "Internal Server Error",
@@ -662,7 +662,7 @@ export const verifySecurityAnswers =
       res.status(200).json({
         resetToken,
       });
-    } catch (error) {
+    } catch {
       res.status(500).json({
         message:
           "Internal Server Error",
@@ -720,7 +720,7 @@ export const resetPassword = async (
       message:
         "Password reset successful",
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({
       message:
         "Internal Server Error",
