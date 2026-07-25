@@ -118,12 +118,11 @@ describe("Security - JWT Token Tests", () => {
       const decoded = jwt.decode(token);
 
       expect(decoded.exp).toBeDefined();
-      // Should be valid for at least 1 day
+
       const expiresIn = decoded.exp - decoded.iat;
 
-      // Access token should be around 15 minutes
-      expect(expiresIn).toBeGreaterThanOrEqual(14 * 60);
-      expect(expiresIn).toBeLessThanOrEqual(15 * 60);
+      // Access token should be valid for exactly 15 minutes
+      expect(expiresIn).toBe(15 * 60);
     });
   });
 
