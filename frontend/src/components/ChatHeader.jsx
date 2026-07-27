@@ -1,22 +1,23 @@
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  X,
-  Info,
   ArrowLeft,
-  MoreVertical,
-  Trash2,
-  Sparkles,
-  Phone,
-  Video,
   Image,
-  Trash,
+  Info,
+  MoreVertical,
+  Phone,
   Search,
+  Sparkles,
+  Trash,
+  Trash2,
+  Video,
+  X,
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useAuthStore } from "../store/useAuthStore";
-import { useChatStore } from "../store/useChatStore";
+import { useEffect, useRef, useState } from "react";
+
 import GroupMembersModal from "./GroupMembersModal";
+import { useAuthStore } from "../store/useAuthStore";
 import { useCallStore } from "../store/useCallStore";
+import { useChatStore } from "../store/useChatStore";
 
 const ChatHeader = () => {
   const {
@@ -126,23 +127,39 @@ const ChatHeader = () => {
 
             <div className="shrink-0">
               {isGroup ? (
-                <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <span className="font-bold text-primary text-sm sm:text-lg">
-                    {selectedGroup.name[0].toUpperCase()}
-                  </span>
-                </div>
+                selectedGroup?.avatar ? (
+                  <img
+                    src={selectedGroup.avatar}
+                    alt={selectedGroup.name}
+                    className="h-9 w-9 sm:h-12 sm:w-12 rounded-full object-cover ring-2 ring-base-200"
+                  />
+                ) : (
+                  <div className="h-9 w-9 sm:h-12 sm:w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <span className="font-bold text-primary text-sm sm:text-lg">
+                      {selectedGroup.name[0].toUpperCase()}
+                    </span>
+                  </div>
+                )
               ) : (
                 <div className="relative">
                   <img
-                    src={selectedUser?.profilePic || "/avatar.png"}
-                    alt="avatar"
+                    src={
+                      isGroup
+                        ? selectedGroup?.avatar || "/group.png"
+                        : selectedUser?.profilePic || "/avatar.png"
+                    }
+                    alt={isGroup ? selectedGroup?.name : "avatar"}
                     className={`h-9 w-9 sm:h-12 sm:w-12 rounded-full object-cover ring-2 ring-base-200 ${
                       isAI ? "border-2 border-primary/30 animate-pulse" : ""
                     }`}
                   />
-                  {!isAI && onlineUsers.includes(selectedUser?._id) && (
-                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-base-100" />
-                  )}
+
+                  {!isGroup &&
+                    !isAI &&
+                    onlineUsers.includes(selectedUser?._id) && (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-base-100" />
+                    )}
+
                   {isAI && isAILoading && (
                     <span className="absolute inset-0 rounded-full border-2 border-primary animate-ping opacity-20" />
                   )}
@@ -371,8 +388,6 @@ const ChatHeader = () => {
           </div>
         </div>
       </div>
-
-      
     </header>
   );
 };
