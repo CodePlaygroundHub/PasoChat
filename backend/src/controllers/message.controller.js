@@ -358,6 +358,126 @@ export const sendGroupMessage = async (req, res) => {
   }
 };
 
+export const forwardMessage = async (req, res) => {
+  try {
+    // FIX 1: correctly destructure destinations from req.body
+    const { messageId, destinations } = req.body;
+    const senderId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(messageId)) {
+      return res.status(400).json({ message: "Invalid message id" });
+    }
+
+    if (!Array.isArray(destinations) || destinations.length === 0) {
+      return res.status(400).json({ message: "Destinations must be a non-empty array" });
+    }
+
+    const originalMessage = await Message.findById(messageId);
+
+    if (!originalMessage) {
+      return res.status(404).json({
+        message: "Original message not found",
+      });
+    }
+
+    const isOriginalPrivateChat =
+      (originalMessage.senderId.toString() === senderId.toString()) ||
+      (originalMessage.receiverId &&
+        originalMessage.receiverId.toString() === senderId.toString());
+
+    if (!isOriginalPrivateChat && originalMessage.groupId) {
+      const originalGroup = await Group.findById(originalMessage.groupId);
+
+      if (
+        !originalGroup ||
+        !originalGroup.members.some(
+          (member) => member.userId.toString() === senderId.toString(),
+        )
+      ) {
+        return res.status(403).json({
+          message: "You are not authorized to forward this message",
+        });
+      }
+    } else if (!isOriginalPrivateChat) {
+      return res.status(403).json({
+        message: "You are not authorized to forward this message",
+      });
+    }
+
+    const forwardedMessages = [];
+
+    // FIX 2: loop through destinations (not destination)
+    for (const dest of destinations) {
+      const { receiverId, groupId } = dest;
+
+      if (groupId) {
+        const group = await Group.findById(groupId);
+
+        if (
+          !group ||
+          !group.members.some(
+            (member) => member.userId.toString() === senderId.toString(),
+          )
+        ) {
+          return res.status(403).json({
+            message: "You are not authorized to forward messages to this group",
+          });
+        }
+      }
+
+      // Create a safe file object
+      const safeFile =
+        originalMessage.file && typeof originalMessage.file === "object"
+          ? {
+            url: originalMessage.file.url || "",
+            name: originalMessage.file.name || "",
+            type: originalMessage.file.type || "",
+            size: originalMessage.file.size || 0,
+          }
+          : {
+            url: "",
+            name: "",
+            type: "",
+            size: 0,
+          };
+
+      const newMessage = await Message.create({
+        senderId,
+        receiverId: receiverId || null,
+        groupId: groupId || null,
+        text: originalMessage.text,
+        image: originalMessage.image,
+        audio: originalMessage.audio,
+        file: safeFile,
+        isForwarded: true,
+        originalMessageId: originalMessage._id,
+      });
+
+      // FIX 3: use the correct variable names for Socket.IO
+      if (receiverId) {
+        emitToUser(receiverId.toString(), "newMessage", newMessage);
+
+        emitToUser(senderId.toString(), "messageStatusUpdate", {
+          messageId: newMessage._id,
+          status: "delivered",
+        });
+      } else if (groupId) {
+        io.to(groupId.toString()).emit("newGroupMessage", newMessage);
+      }
+
+      forwardedMessages.push(newMessage);
+    }
+
+    res.status(201).json({
+      message: "Message forwarded successfully",
+      messages: forwardedMessages,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
 export const deleteMessageForMe = async (req, res) => {
   try {
     const { messageId } = req.params;
