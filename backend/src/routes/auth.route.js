@@ -13,6 +13,7 @@ import {
   getSecurityQuestions,
   sendOtp,
   verifyOtp,
+  googleAuth,
   refresh,
 } from "../controllers/auth.controller.js";
 
@@ -25,13 +26,14 @@ router.post("/signup", signup);
 router.post("/verify-email", otpRateLimiter, verifyEmail);
 router.post("/resend-verification-otp", otpRateLimiter, resendVerificationOtp);
 router.post("/login", login);
+router.post("/google", googleAuth);
 router.post("/logout", logout);
 router.post("/refresh", refresh);
 router.get("/check", protectRoute, checkAuth);
 router.put("/update-profile", protectRoute, updateProfile);
 router.put("/security-questions", protectRoute, setupSecurityQuestions);
-router.post("/verify-security",forgotPasswordLimiter,verifySecurityAnswers);
-router.post("/reset-password",forgotPasswordLimiter,resetPassword);
+router.post("/verify-security", forgotPasswordLimiter, verifySecurityAnswers);
+router.post("/reset-password", forgotPasswordLimiter, resetPassword);
 router.post("/get-security-questions", getSecurityQuestions);
 router.post("/send-otp", otpRateLimiter, sendOtp);
 router.post("/verify-otp", otpRateLimiter, verifyOtp);

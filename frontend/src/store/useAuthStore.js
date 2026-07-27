@@ -16,6 +16,7 @@ export const useAuthStore = create((set, get) => ({
   authUser: null,
   isSigningUp: false,
   isLoggingIn: false,
+  isGoogleLoggingIn: false,
   isUpdatingProfile: false,
   isCheckingAuth: true,
   onlineUsers: [],
@@ -80,6 +81,33 @@ export const useAuthStore = create((set, get) => ({
   //     toast.error(error.response?.data?.message);
   //   }
   // },
+
+  googleLogin: async (googleToken) => {
+    set({ isGoogleLoggingIn: true });
+
+    try {
+      const res = await axiosInstance.post("/auth/google", {
+        token: googleToken,
+      });
+
+      localStorage.setItem("token", res.data.token);
+
+      set({ authUser: res.data });
+
+      toast.success("Logged in with Google");
+
+      get().connectSocket();
+
+      return true;
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Google login failed"
+      );
+      return false;
+    } finally {
+      set({ isGoogleLoggingIn: false });
+    }
+  },
 
   logout: async () => {
     localStorage.removeItem("token");
@@ -196,7 +224,7 @@ export const useAuthStore = create((set, get) => ({
       toast.error(
         error.response?.data?.message || "Verification failed"
       );
-      return false; 
+      return false;
     } finally {
       set({ isVerifyingOtp: false });
     }

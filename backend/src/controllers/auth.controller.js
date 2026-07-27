@@ -1,3 +1,4 @@
+import { OAuth2Client } from "google-auth-library";
 import { generateToken, generateRefreshToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
@@ -6,6 +7,10 @@ import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
+// Google OAuth client used to verify Google ID tokens.
+const googleClient = process.env.GOOGLE_CLIENT_ID
+  ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  : null;
 //signup
 // Get fullName, email, password from req.body
 // Check if any field is missing ---> if (!fullName || !email || !password)
@@ -301,6 +306,11 @@ export const login = async (req, res) => {
       });
     }
 
+    if (!user.password) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
     const isPasswordCorrect =
       await bcrypt.compare(
         password,
@@ -1054,6 +1064,116 @@ export const resendVerificationOtp = async (
       "Resend verification OTP error:",
       error
     );
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+/**
+ * Authenticate user using Google Identity Services.
+ *
+ * Flow:
+ * 1. Validate request payload.
+ * 2. Verify Google ID token.
+ * 3. Find or create user.
+ * 4. Generate JWT.
+ * 5. Return authenticated user.
+ */
+export const googleAuth = async (req, res) => {
+  try {
+    if (!googleClient) {
+      return res.status(500).json({
+          message: "Google OAuth is not configured.",
+      });
+    }
+    // Implementation will be added incrementally.
+    // Extract Google ID token sent by the frontend.
+    const { token } = req.body;
+
+    // Basic request validation.
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        message: "Google ID token is required.",
+      });
+    }
+    // Verify the Google ID token using Google's public keys.
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const {
+      sub: googleId,
+      email,
+      name,
+      picture,
+      email_verified,
+    } = payload;
+
+    // Check if the email is verified by Google.
+    if (!email_verified) {
+      return res.status(401).json({
+        message: "Google email is not verified.",
+      });
+    }
+
+    // Check if a user with this email already exists.
+    let user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    }).select("+password");
+
+    if (user) {
+      if (user.isBanned) {
+        return res.status(403).json({
+          message: "Your account has been banned",
+        });
+      }
+
+      // Link Google account if this is the user's first Google login.
+      if (!user.googleId) {
+        if (!user.isVerified) {
+          // Untrusted/unverified pre-existing record: treat Google's verified
+          // email as authoritative and invalidate any prior local password
+          // to prevent the original registrant from retaining access.
+          user.password = undefined;
+        }
+        user.googleId = googleId;
+        user.isVerified = true;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        fullName: name,
+        email: email.toLowerCase().trim(),
+
+        profilePic: picture,
+
+        provider: "google",
+
+        googleId,
+
+        isVerified: true,
+      });
+    }
+    // Generate JWT for the authenticated user.
+    const jwtToken = generateToken(user._id);
+
+    return res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role,
+      provider: user.provider,
+      token: jwtToken,
+      message: "Google login successful.",
+    });
+  } catch (error) {
+    console.error("Google authentication error:", error);
 
     return res.status(500).json({
       message: "Internal Server Error",
