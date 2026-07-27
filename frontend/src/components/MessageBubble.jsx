@@ -139,14 +139,11 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (isMobile) {
-                    setEmojiPosition({ top: window.innerHeight / 2, left: window.innerWidth / 2 - 150 });
-                  } else {
+                  if (!isMobile) {
                     const rect = e.currentTarget.getBoundingClientRect();
-                    // 2. Safe Desktop Position (Clamping)
-                    setEmojiPosition({ 
-                      top: rect.top - 60, 
-                      left: Math.min(Math.max(rect.left + rect.width / 2, 120), window.innerWidth - 120) 
+                    setEmojiPosition({
+                      top: rect.top - 60,
+                      left: Math.min(Math.max(rect.left + rect.width / 2, 160), window.innerWidth - 160)
                     });
                   }
                   setShowEmojis((prev) => !prev);
@@ -160,21 +157,34 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
               <AnimatePresence>
                 {showEmojis && (
                   <>
-                    {isMobile && <div className="fixed inset-0 bg-black/20 z-[9998]" onClick={() => setShowEmojis(false)} />}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8, y: isMobile ? -50 : 10 }}
-                      animate={{ opacity: 1, scale: 1, y: isMobile ? -50 : 0 }}
-                      exit={{ opacity: 0, scale: 0.8, y: isMobile ? -50 : 10 }}
-                      className="fixed z-[9999] bg-base-100 border border-base-300 rounded-2xl px-3 py-2 shadow-xl flex items-center gap-2 sm:gap-3"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998] sm:hidden"
+                      onClick={() => setShowEmojis(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.7, y: isMobile ? 30 : 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.7, y: isMobile ? 30 : 10 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className="fixed z-[9999] bg-base-100 border border-base-300 rounded-2xl p-3 sm:p-2 shadow-2xl flex items-center gap-2 sm:gap-3"
                       style={{
-                        top: emojiPosition.top,
-                        left: emojiPosition.left,
+                        top: isMobile ? "50%" : emojiPosition.top,
+                        left: "50%",
                         transform: "translate(-50%, -50%)",
+                        minWidth: "280px",
                       }}
                     >
-                      {REACTIONS.map((emoji) => (
-                        <button
+                      {REACTIONS.map((emoji, index) => (
+                        <motion.button
                           key={emoji}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: index * 0.05, type: "spring", stiffness: 500 }}
+                          whileHover={{ scale: 1.3 }}
+                          whileTap={{ scale: 0.85 }}
                           onClick={async () => {
                             try {
                               await axiosInstance.post(`/messages/react/${message._id}`, { emoji });
@@ -183,10 +193,10 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                             }
                             setShowEmojis(false);
                           }}
-                          className="text-2xl hover:scale-125 active:scale-90 transition-transform p-1"
+                          className="text-2xl sm:text-xl p-2 sm:p-1 active:bg-base-200 rounded-full transition-colors"
                         >
                           {emoji}
-                        </button>
+                        </motion.button>
                       ))}
                     </motion.div>
                   </>
