@@ -50,12 +50,10 @@ describe("Security - JWT Token Tests", () => {
       });
       await User.create(payload);
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send({
-          email: payload.email,
-          password: "testPassword123",
-        });
+      const response = await request(app).post("/api/auth/login").send({
+        email: payload.email,
+        password: "testPassword123",
+      });
 
       expect(response.statusCode).toBe(200);
       const token = response.body.token;
@@ -75,12 +73,10 @@ describe("Security - JWT Token Tests", () => {
       });
       await User.create(payload);
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send({
-          email: payload.email,
-          password: "testPassword123",
-        });
+      const response = await request(app).post("/api/auth/login").send({
+        email: payload.email,
+        password: "testPassword123",
+      });
 
       const token = response.body.token;
       const decoded = jwt.decode(token);
@@ -95,18 +91,14 @@ describe("Security - JWT Token Tests", () => {
       });
       await User.create(payload);
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send({
-          email: payload.email,
-          password: "testPassword123",
-        });
+      const response = await request(app).post("/api/auth/login").send({
+        email: payload.email,
+        password: "testPassword123",
+      });
 
       const token = response.body.token;
       const parts = token.split(".");
-      const header = JSON.parse(
-        Buffer.from(parts[0], "base64").toString()
-      );
+      const header = JSON.parse(Buffer.from(parts[0], "base64").toString());
 
       expect(header.alg).toBe("HS256");
     });
@@ -117,21 +109,20 @@ describe("Security - JWT Token Tests", () => {
       });
       await User.create(payload);
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send({
-          email: payload.email,
-          password: "testPassword123",
-        });
+      const response = await request(app).post("/api/auth/login").send({
+        email: payload.email,
+        password: "testPassword123",
+      });
 
       const token = response.body.token;
       const decoded = jwt.decode(token);
 
       expect(decoded.exp).toBeDefined();
-      // Should be valid for at least 1 day
-      const expiresIn =
-        (decoded.exp - decoded.iat) / (24 * 3600);
-      expect(expiresIn).toBeGreaterThan(1);
+
+      const expiresIn = decoded.exp - decoded.iat;
+
+      // Access token should be valid for exactly 15 minutes
+      expect(expiresIn).toBe(15 * 60);
     });
   });
 
@@ -146,9 +137,7 @@ describe("Security - JWT Token Tests", () => {
       const modified =
         parts[0] +
         "." +
-        Buffer.from(JSON.stringify({ userId: "hacker" })).toString(
-          "base64"
-        ) +
+        Buffer.from(JSON.stringify({ userId: "hacker" })).toString("base64") +
         "." +
         parts[2];
 
@@ -162,7 +151,7 @@ describe("Security - JWT Token Tests", () => {
     it("should reject token signed with different key", async () => {
       const differentKeyToken = jwt.sign(
         { userId: "someid" },
-        "differentSecret"
+        "differentSecret",
       );
 
       const response = await request(app)
@@ -179,11 +168,7 @@ describe("Security - JWT Token Tests", () => {
 
       // Tamper with signature
       const parts = validToken.split(".");
-      const modified =
-        parts[0] +
-        "." +
-        parts[1] +
-        ".tamperedsignature";
+      const modified = parts[0] + "." + parts[1] + ".tamperedsignature";
 
       const response = await request(app)
         .get("/api/auth/check")
@@ -194,7 +179,7 @@ describe("Security - JWT Token Tests", () => {
 
     it("should reject token with missing signature", async () => {
       const parts = generateTestToken(
-        new mongoose.Types.ObjectId().toString()
+        new mongoose.Types.ObjectId().toString(),
       ).split(".");
       const modified = parts[0] + "." + parts[1];
 
@@ -215,7 +200,7 @@ describe("Security - JWT Token Tests", () => {
       const expiredToken = jwt.sign(
         { userId: user._id.toString() },
         process.env.JWT_SECRET,
-        { expiresIn: "-1h" }
+        { expiresIn: "-1h" },
       );
 
       const response = await request(app)
@@ -232,7 +217,7 @@ describe("Security - JWT Token Tests", () => {
       const immediateExpireToken = jwt.sign(
         { userId: user._id.toString() },
         process.env.JWT_SECRET,
-        { expiresIn: "-1s" }
+        { expiresIn: "-1s" },
       );
 
       const response = await request(app)
@@ -274,9 +259,7 @@ describe("Security - JWT Token Tests", () => {
       const user = await User.create(userPayload);
       const token = generateTestToken(user._id.toString());
 
-      const response = await request(app).get(
-        `/api/auth/check?token=${token}`
-      );
+      const response = await request(app).get(`/api/auth/check?token=${token}`);
 
       // Should fail - token must be in header
       expect(response.statusCode).toBe(401);
@@ -465,12 +448,10 @@ describe("Security - Rate Limiting", () => {
 
       // Try 3 times
       for (let i = 0; i < 3; i++) {
-        const response = await request(app)
-          .post("/api/auth/login")
-          .send({
-            email: "ratelimit@test.com",
-            password: "wrongpassword",
-          });
+        const response = await request(app).post("/api/auth/login").send({
+          email: "ratelimit@test.com",
+          password: "wrongpassword",
+        });
 
         expect(response.statusCode).toBe(400);
       }

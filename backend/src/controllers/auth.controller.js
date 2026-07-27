@@ -1,10 +1,16 @@
-import { generateToken } from "../lib/utils.js";
+import { OAuth2Client } from "google-auth-library";
+import { generateToken, generateRefreshToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
+// Google OAuth client used to verify Google ID tokens.
+const googleClient = process.env.GOOGLE_CLIENT_ID
+  ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+  : null;
 //signup
 // Get fullName, email, password from req.body
 // Check if any field is missing ---> if (!fullName || !email || !password)
@@ -196,6 +202,11 @@ export const verifyEmail = async (req, res) => {
     user.emailVerificationOtp = null;
     user.emailVerificationOtpExpiry = null;
 
+    const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    user.refreshTokenHash = refreshTokenHash;
+
     await user.save();
 
     // Send welcome email asynchronously
@@ -213,7 +224,13 @@ export const verifyEmail = async (req, res) => {
       }
     });
 
-    const token = generateToken(user._id);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     return res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
@@ -289,6 +306,11 @@ export const login = async (req, res) => {
       });
     }
 
+    if (!user.password) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
     const isPasswordCorrect =
       await bcrypt.compare(
         password,
@@ -302,6 +324,18 @@ export const login = async (req, res) => {
     }
 
     const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+
+    user.refreshTokenHash = refreshTokenHash;
+    await user.save();
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).json({
       _id: user._id,
@@ -327,10 +361,22 @@ export const login = async (req, res) => {
 // Clear JWT cookie by setting empty value
 // Set cookie expiration to 0
 // Send success response
-export const logout = (req, res) => {
+export const logout = async (req, res) => {
   try {
+    const refreshToken = req.cookies?.refreshToken;
+    if (refreshToken) {
+      const hash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+      await User.findOneAndUpdate({ refreshTokenHash: hash }, { refreshTokenHash: null });
+    }
+
     res.cookie("jwt", "", {
       maxAge: 0,
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
     });
 
     res.status(200).json({
@@ -343,6 +389,55 @@ export const logout = (req, res) => {
     );
 
     res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+// refresh token
+// Read refresh token from HTTP-only cookie
+// Verify JWT
+// Verify stored refresh token matches the user
+// Generate and return a new access token
+export const refresh = async (req, res) => {
+  try {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({
+        message: "Refresh token is missing",
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    } catch {
+      return res.status(401).json({
+        message: "Invalid or expired refresh token",
+      });
+    }
+
+    const hash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    const user = await User.findOne({
+      _id: decoded.userId,
+      refreshTokenHash: hash,
+      isBanned: false,
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid or expired refresh token",
+      });
+    }
+
+    const newAccessToken = generateToken(user._id);
+
+    return res.status(200).json({
+      token: newAccessToken,
+    });
+  } catch (error) {
+    console.error("Refresh error:", error.message);
+    return res.status(500).json({
       message: "Internal Server Error",
     });
   }
@@ -502,7 +597,7 @@ export const setupSecurityQuestions =
         message:
           "Security questions saved",
       });
-    } catch (error) {
+    } catch  {
       res.status(500).json({
         message:
           "Internal Server Error",
@@ -577,7 +672,7 @@ export const verifySecurityAnswers =
       res.status(200).json({
         resetToken,
       });
-    } catch (error) {
+    } catch {
       res.status(500).json({
         message:
           "Internal Server Error",
@@ -635,7 +730,7 @@ export const resetPassword = async (
       message:
         "Password reset successful",
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({
       message:
         "Internal Server Error",
@@ -969,6 +1064,116 @@ export const resendVerificationOtp = async (
       "Resend verification OTP error:",
       error
     );
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+/**
+ * Authenticate user using Google Identity Services.
+ *
+ * Flow:
+ * 1. Validate request payload.
+ * 2. Verify Google ID token.
+ * 3. Find or create user.
+ * 4. Generate JWT.
+ * 5. Return authenticated user.
+ */
+export const googleAuth = async (req, res) => {
+  try {
+    if (!googleClient) {
+      return res.status(500).json({
+          message: "Google OAuth is not configured.",
+      });
+    }
+    // Implementation will be added incrementally.
+    // Extract Google ID token sent by the frontend.
+    const { token } = req.body;
+
+    // Basic request validation.
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        message: "Google ID token is required.",
+      });
+    }
+    // Verify the Google ID token using Google's public keys.
+    const ticket = await googleClient.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    const {
+      sub: googleId,
+      email,
+      name,
+      picture,
+      email_verified,
+    } = payload;
+
+    // Check if the email is verified by Google.
+    if (!email_verified) {
+      return res.status(401).json({
+        message: "Google email is not verified.",
+      });
+    }
+
+    // Check if a user with this email already exists.
+    let user = await User.findOne({
+      email: email.toLowerCase().trim(),
+    }).select("+password");
+
+    if (user) {
+      if (user.isBanned) {
+        return res.status(403).json({
+          message: "Your account has been banned",
+        });
+      }
+
+      // Link Google account if this is the user's first Google login.
+      if (!user.googleId) {
+        if (!user.isVerified) {
+          // Untrusted/unverified pre-existing record: treat Google's verified
+          // email as authoritative and invalidate any prior local password
+          // to prevent the original registrant from retaining access.
+          user.password = undefined;
+        }
+        user.googleId = googleId;
+        user.isVerified = true;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        fullName: name,
+        email: email.toLowerCase().trim(),
+
+        profilePic: picture,
+
+        provider: "google",
+
+        googleId,
+
+        isVerified: true,
+      });
+    }
+    // Generate JWT for the authenticated user.
+    const jwtToken = generateToken(user._id);
+
+    return res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role,
+      provider: user.provider,
+      token: jwtToken,
+      message: "Google login successful.",
+    });
+  } catch (error) {
+    console.error("Google authentication error:", error);
 
     return res.status(500).json({
       message: "Internal Server Error",
