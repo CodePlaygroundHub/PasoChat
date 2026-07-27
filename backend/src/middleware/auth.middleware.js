@@ -5,11 +5,18 @@ export const protectRoute = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader) {
       return res.status(401).json({ message: "Unauthorized - No Token" });
     }
 
-    const token = authHeader.split(" ")[1];
+    const trimmedHeader = authHeader.trim();
+    const parts = trimmedHeader.split(/\s+/);
+
+    if (parts.length < 2 || parts[0] !== "Bearer") {
+      return res.status(401).json({ message: "Unauthorized - No Token" });
+    }
+
+    const token = parts[1];
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
