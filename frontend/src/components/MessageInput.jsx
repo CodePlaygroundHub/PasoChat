@@ -403,7 +403,10 @@ const MessageInput = () => {
                 <div className="relative" ref={emojiRef}>
                   <button
                     type="button"
-                    onClick={() => setShowEmojiPicker((prev) => !prev)}
+                    onClick={() => {
+                   setShowGifPicker(false);
+                   setShowEmojiPicker((prev) => !prev);
+                   }}
                     className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
                   >
                     <Smile size={18} />
@@ -443,7 +446,10 @@ const MessageInput = () => {
                 <div className="relative" ref={gifRef}>
                   <button
                     type="button"
-                    onClick={() => setShowGifPicker((prev) => !prev)}
+                    onClick={() => {
+                    setShowEmojiPicker(false);
+                    setShowGifPicker((prev) => !prev);
+                    }}
                     className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
                   >
                     <Clapperboard size={18} />

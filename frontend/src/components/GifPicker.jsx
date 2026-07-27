@@ -13,6 +13,7 @@ const GifPicker = ({ onSelect, onClose }) => {
 
   const debounceRef = useRef(null);
   const requestIdRef = useRef(0);
+  const isFirstRender = useRef(true);
 
   const fetchGifs = useCallback(async (searchQuery, currentOffset, append) => {
     const requestId = ++requestIdRef.current;
@@ -26,27 +27,38 @@ const GifPicker = ({ onSelect, onClose }) => {
 
     try {
       const endpoint = searchQuery.trim() ? "/gif/search" : "/gif/trending";
+
       const params = searchQuery.trim()
-        ? { query: searchQuery.trim(), offset: currentOffset }
-        : { offset: currentOffset };
+        ? {
+            query: searchQuery.trim(),
+            offset: currentOffset,
+          }
+        : {
+            offset: currentOffset,
+          };
 
       const res = await axiosInstance.get(endpoint, { params });
 
-      // Ignore stale responses if a newer request has since started
+      // Ignore stale responses
       if (requestId !== requestIdRef.current) return;
 
-      setGifs((prev) => (append ? [...prev, ...res.data.gifs] : res.data.gifs));
+      setGifs((prev) =>
+        append ? [...prev, ...res.data.gifs] : res.data.gifs
+      );
+
       setHasMore(res.data.hasMore);
       setOffset(currentOffset);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
 
       const status = err?.response?.status;
+
       if (status === 503) {
         setError("GIF search isn't available right now.");
       } else {
         setError("Couldn't load GIFs. Please try again.");
       }
+
       if (!append) setGifs([]);
     } finally {
       if (requestId === requestIdRef.current) {
@@ -56,14 +68,21 @@ const GifPicker = ({ onSelect, onClose }) => {
     }
   }, []);
 
-  // Load trending GIFs on mount
+  // Initial trending fetch
   useEffect(() => {
     fetchGifs("", 0, false);
   }, [fetchGifs]);
 
-  // Debounced search as the user types
+  // Debounced search
+  // Skip the first render because trending GIFs are already loaded above.
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     clearTimeout(debounceRef.current);
+
     debounceRef.current = setTimeout(() => {
       fetchGifs(query, 0, false);
     }, 400);
@@ -73,6 +92,7 @@ const GifPicker = ({ onSelect, onClose }) => {
 
   const handleLoadMore = () => {
     if (isLoadingMore || !hasMore) return;
+
     fetchGifs(query, offset + 24, true);
   };
 
@@ -84,6 +104,7 @@ const GifPicker = ({ onSelect, onClose }) => {
             size={16}
             className="absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40"
           />
+
           <input
             type="text"
             value={query}
@@ -93,6 +114,7 @@ const GifPicker = ({ onSelect, onClose }) => {
             className="w-full pl-8 pr-2 py-1.5 text-sm rounded-lg bg-base-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
+
         <button
           type="button"
           onClick={onClose}
