@@ -13,6 +13,7 @@ import seedAIUser from "./seeds/seedAIUser.js";
 import statusRoutes from "./routes/status.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import gifRoutes from "./routes/gif.routes.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/status", statusRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/gif", gifRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));

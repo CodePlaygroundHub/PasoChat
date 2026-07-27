@@ -17,3 +17,12 @@ export const otpRateLimiter = rateLimit({
   },
   skip: () => process.env.NODE_ENV === "test",
 });
+
+export const gifRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // max 30 GIF searches/trending calls per IP per minute
+  message: {
+    message: "Too many GIF requests. Please slow down and try again shortly.",
+  },
+  skip: () => process.env.NODE_ENV === "test",
+});
