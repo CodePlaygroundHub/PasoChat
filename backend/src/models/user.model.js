@@ -144,6 +144,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+
+    refreshTokenHash: {
+      type: String,
+      select: false,
+      default: null,
+    },
   },
   { timestamps: true },
 );

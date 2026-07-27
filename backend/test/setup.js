@@ -2,6 +2,8 @@ process.env.NODE_ENV = "test";
 
 process.env.JWT_SECRET = "test-jwt-secret-key-do-not-use-in-production";
 
+process.env.REFRESH_TOKEN_SECRET = "test-refresh-secret-key-do-not-use-in-production";
+
 process.env.GROQ_API_KEY = "gsk_test_key";
 
 process.env.REDIS_URL = "redis://localhost:6379";
