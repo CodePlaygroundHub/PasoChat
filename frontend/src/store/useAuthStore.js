@@ -130,6 +130,43 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  pinChat: async (chatId, chatType) => {
+    try {
+      const res = await axiosInstance.post("/users/pin", {
+        chatId,
+        chatType,
+      });
+
+      set({
+        authUser: res.data.user,
+      });
+
+      toast.success("Chat pinned");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to pin chat"
+      );
+    }
+  },
+
+  unpinChat: async (chatId) => {
+    try {
+      const res = await axiosInstance.delete(
+        `/users/pin/${chatId}`
+      );
+
+      set({
+        authUser: res.data.user,
+      });
+
+      toast.success("Chat unpinned");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Failed to unpin chat"
+      );
+    }
+  },
+
   verifySecurityAnswers: async (data) => {
     set({ isVerifyingSecurity: true });
 

@@ -237,6 +237,7 @@ export const verifyEmail = async (req, res) => {
       email: user.email,
       profilePic: user.profilePic,
       role: user.role,
+      pinnedChats: user.pinnedChats,
       token,
       message: "Email verified successfully",
     });
@@ -1169,6 +1170,7 @@ export const googleAuth = async (req, res) => {
       profilePic: user.profilePic,
       role: user.role,
       provider: user.provider,
+      pinnedChats: user.pinnedChats,
       token: jwtToken,
       message: "Google login successful.",
     });

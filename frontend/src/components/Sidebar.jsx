@@ -1,4 +1,4 @@
-import { CircleDot, Plus, Trash2, Users, UsersRound } from "lucide-react";
+import { CircleDot, Pin, Plus, Trash2, Users, UsersRound } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import CreateGroupModal from "./CreateGroupModal";
@@ -23,7 +23,11 @@ const Sidebar = ({ setActiveTab }) => {
     onlineUsers,
   } = useChatStore();
 
-  const authUser = useAuthStore((state) => state.authUser);
+  const {
+    authUser,
+    pinChat,
+    unpinChat,
+  } = useAuthStore();
 
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -37,16 +41,48 @@ const Sidebar = ({ setActiveTab }) => {
     return new Set((onlineUsers || []).map((id) => String(id)));
   }, [onlineUsers]);
 
-  const filteredUsers = useMemo(() => {
-    if (!showOnlineOnly) return users;
-    return users.filter((u) => onlineSet.has(String(u._id)));
-  }, [users, showOnlineOnly, onlineSet]);
-
   const handleDeleteGroup = (e, groupId) => {
     e.stopPropagation();
     if (!window.confirm("Delete this group?")) return;
     deleteGroup(groupId);
   };
+  const isPinned = (chatId, chatType) => {
+    return authUser?.pinnedChats?.some(
+      (chat) =>
+        String(chat.chatId) === String(chatId) &&
+        chat.chatType === chatType
+    );
+  };
+
+  const handlePin = async (e, chatId, chatType) => {
+    e.stopPropagation();
+
+    if (isPinned(chatId, chatType)) {
+      await unpinChat(chatId);
+    } else {
+      await pinChat(chatId, chatType);
+    }
+  };
+
+  const filteredUsers = useMemo(() => {
+    const filtered = !showOnlineOnly
+      ? users
+      : users.filter((u) => onlineSet.has(String(u._id)));
+
+    return [...filtered].sort((a, b) => {
+      return (
+        Number(isPinned(b._id, "user")) -
+        Number(isPinned(a._id, "user"))
+      );
+    });
+  }, [users, showOnlineOnly, onlineSet, authUser]);
+
+  const sortedGroups = [...groups].sort((a, b) => {
+    return (
+      Number(isPinned(b._id, "group")) -
+      Number(isPinned(a._id, "group"))
+    );
+  });
 
   if (isUsersLoading || isGroupsLoading) {
     return <SidebarSkeleton />;
@@ -97,7 +133,7 @@ const Sidebar = ({ setActiveTab }) => {
           <div className="border-b border-base-300 py-2">
             <p className="px-4 text-xs font-semibold opacity-60">GROUPS</p>
 
-            {groups.map((group) => {
+            {sortedGroups.map((group) => {
               const isActive = selectedGroup?._id === group._id;
               const isCreator = group.createdBy === authUser?._id;
 
@@ -105,20 +141,19 @@ const Sidebar = ({ setActiveTab }) => {
                 <button
                   key={group._id}
                   onClick={() => setSelectedGroup(group)}
-                  className={`flex w-full items-center justify-between px-3 py-2 hover:bg-base-200 ${
-                    isActive ? "bg-base-200" : ""
-                  }`}
+                  className={`flex w-full items-center justify-between px-3 py-2 hover:bg-base-200 ${isActive ? "bg-base-200" : ""
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     {group.avatar ? (
-                  <img
-                    src={group.avatar}
-                    alt={group.name}
-                    className="h-10 w-10 rounded-full object-cover"
-                        />
-                     ) : (
-                <UsersRound className="h-10 w-10 rounded-full bg-primary/10 p-2" />
-                         )}
+                      <img
+                        src={group.avatar}
+                        alt={group.name}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <UsersRound className="h-10 w-10 rounded-full bg-primary/10 p-2" />
+                    )}
                     <div>
                       <p className="font-medium truncate">{group.name}</p>
                       <p className="text-xs opacity-60">Group chat</p>
@@ -126,6 +161,22 @@ const Sidebar = ({ setActiveTab }) => {
                   </div>
 
                   <div className="flex items-center gap-2">
+
+                    <button
+                      onClick={(e) => handlePin(e, group._id, "group")}
+                      className="btn btn-ghost btn-xs"
+                      title={isPinned(group._id, "group") ? "Unpin Chat" : "Pin Chat"}
+                    >
+                      <Pin
+                        size={16}
+                        className={
+                          isPinned(group._id, "group")
+                            ? "fill-current text-warning"
+                            : ""
+                        }
+                      />
+                    </button>
+
                     {unreadCounts[group._id] > 0 && (
                       <span className="badge badge-error text-xs">
                         {unreadCounts[group._id] > 9
@@ -142,6 +193,7 @@ const Sidebar = ({ setActiveTab }) => {
                         <Trash2 size={16} />
                       </span>
                     )}
+
                   </div>
                 </button>
               );
@@ -160,9 +212,8 @@ const Sidebar = ({ setActiveTab }) => {
               <button
                 key={user._id}
                 onClick={() => setSelectedUser(user)}
-                className={`flex w-full items-center gap-3 px-3 py-2 hover:bg-base-200 ${
-                  isSelected ? "bg-base-200" : ""
-                }`}
+                className={`flex w-full items-center gap-3 px-3 py-2 hover:bg-base-200 ${isSelected ? "bg-base-200" : ""
+                  }`}
               >
                 <div className="relative">
                   <img
@@ -185,6 +236,21 @@ const Sidebar = ({ setActiveTab }) => {
                         : "Offline"}
                   </p>
                 </div>
+
+                <button
+                  onClick={(e) => handlePin(e, user._id, "user")}
+                  className="btn btn-ghost btn-xs"
+                  title={isPinned(user._id, "user") ? "Unpin Chat" : "Pin Chat"}
+                >
+                  <Pin
+                    size={16}
+                    className={
+                      isPinned(user._id, "user")
+                        ? "fill-current text-warning"
+                        : ""
+                    }
+                  />
+                </button>
 
                 {unreadCounts[user._id] > 0 && (
                   <span className="badge badge-error text-xs">
