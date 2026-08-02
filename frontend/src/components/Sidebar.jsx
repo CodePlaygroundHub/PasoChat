@@ -55,6 +55,7 @@ const Sidebar = ({ setActiveTab }) => {
   };
 
   const handlePin = async (e, chatId, chatType) => {
+    e.preventDefault();
     e.stopPropagation();
 
     if (isPinned(chatId, chatType)) {
@@ -162,8 +163,16 @@ const Sidebar = ({ setActiveTab }) => {
 
                   <div className="flex items-center gap-2">
 
-                    <button
+                    <span
                       onClick={(e) => handlePin(e, group._id, "group")}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handlePin(e, group._id, "group");
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                       className="btn btn-ghost btn-xs"
                       title={isPinned(group._id, "group") ? "Unpin Chat" : "Pin Chat"}
                     >
@@ -175,7 +184,7 @@ const Sidebar = ({ setActiveTab }) => {
                             : ""
                         }
                       />
-                    </button>
+                    </span>
 
                     {unreadCounts[group._id] > 0 && (
                       <span className="badge badge-error text-xs">
@@ -237,8 +246,16 @@ const Sidebar = ({ setActiveTab }) => {
                   </p>
                 </div>
 
-                <button
+                <span
                   onClick={(e) => handlePin(e, user._id, "user")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handlePin(e, user._id, "user");
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                   className="btn btn-ghost btn-xs"
                   title={isPinned(user._id, "user") ? "Unpin Chat" : "Pin Chat"}
                 >
@@ -250,7 +267,7 @@ const Sidebar = ({ setActiveTab }) => {
                         : ""
                     }
                   />
-                </button>
+                </span>
 
                 {unreadCounts[user._id] > 0 && (
                   <span className="badge badge-error text-xs">

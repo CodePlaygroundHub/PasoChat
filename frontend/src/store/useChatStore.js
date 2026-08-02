@@ -22,7 +22,6 @@ export const useChatStore = create(
       isMessagesLoading: false,
       reactions: {},
       pinnedMessages: {},
-      pinnedChats: [],
       clearedChats: {},
       replyingTo: null,
       highlightedMessageId: null,
@@ -303,55 +302,6 @@ export const useChatStore = create(
           // smartReplies: res.data.smartReplies || [],
           replyingTo: null,
         });
-      },
-
-      pinChat: async (chatId, chatType) => {
-        try {
-          const res = await axiosInstance.post("/users/pin", {
-            chatId,
-            chatType,
-          });
-
-          set({
-            pinnedChats: res.data.pinnedChats,
-          });
-
-          toast.success("Chat pinned");
-        } catch (error) {
-          toast.error(
-            error.response?.data?.message || "Failed to pin chat"
-          );
-        }
-      },
-
-      unpinChat: async (chatId) => {
-        try {
-          const res = await axiosInstance.delete(
-            `/users/pin/${chatId}`
-          );
-
-          set({
-            pinnedChats: res.data.pinnedChats,
-          });
-
-          toast.success("Chat unpinned");
-        } catch (error) {
-          toast.error(
-            error.response?.data?.message || "Failed to unpin chat"
-          );
-        }
-      },
-
-      getPinnedChats: async () => {
-        try {
-          const res = await axiosInstance.get("/users/pinned");
-
-          set({
-            pinnedChats: res.data,
-          });
-        } catch (error) {
-          console.error(error);
-        }
       },
 
       deleteMessageForMe: async (messageId) => {

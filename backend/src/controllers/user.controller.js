@@ -23,30 +23,38 @@ export const pinChat = async (req, res) => {
             });
         }
 
-        const user = await User.findById(req.user._id);
+        const updatedUser = await User.findOneAndUpdate(
+            {
+                _id: req.user._id,
+                pinnedChats: {
+                    $not: {
+                        $elemMatch: {
+                            chatId,
+                            chatType,
+                        },
+                    },
+                },
+            },
+            {
+                $push: {
+                    pinnedChats: {
+                        chatId,
+                        chatType,
+                    },
+                },
+            },
+            {
+                new: true,
+            }
+        ).select("-password");
 
-        const alreadyPinned = user.pinnedChats.some(
-            (chat) =>
-                chat.chatId.toString() === chatId &&
-                chat.chatType === chatType
-        );
-
-        if (alreadyPinned) {
+        if (!updatedUser) {
             return res.status(409).json({
                 message: "Chat is already pinned",
             });
         }
 
-        user.pinnedChats.push({
-            chatId,
-            chatType,
-        });
-
-        await user.save();
-
-        const updatedUser = await User.findById(req.user._id).select("-password");
-
-        res.status(200).json({
+        return res.status(200).json({
             message: "Chat pinned successfully",
             user: updatedUser,
         });
@@ -63,17 +71,23 @@ export const unpinChat = async (req, res) => {
     try {
         const { chatId } = req.params;
 
-        const user = await User.findById(req.user._id);
+        const updatedUser = await User.findOneAndUpdate(
+            {
+                _id: req.user._id,
+            },
+            {
+                $pull: {
+                    pinnedChats: {
+                        chatId,
+                    },
+                },
+            },
+            {
+                new: true,
+            }
+        ).select("-password");
 
-        user.pinnedChats = user.pinnedChats.filter(
-            (chat) => chat.chatId.toString() !== chatId
-        );
-
-        await user.save();
-
-        const updatedUser = await User.findById(req.user._id).select("-password");
-
-        res.status(200).json({
+        return res.status(200).json({
             message: "Chat unpinned successfully",
             user: updatedUser,
         });
