@@ -84,6 +84,23 @@ const userSchema = new mongoose.Schema(
       default: {},
     },
 
+    pinnedChats: {
+      type: [
+        {
+          chatId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+          },
+          chatType: {
+            type: String,
+            enum: ["user", "group"],
+            required: true,
+          },
+        },
+      ],
+      default: [],
+    },
+
     // Security Questions (Max 3)
     securityQuestions: {
       type: [securityQuestionSchema],

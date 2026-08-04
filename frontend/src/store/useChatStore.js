@@ -206,7 +206,7 @@ export const useChatStore = create(
           set((state) => {
             const updatedSelectedUser = state.selectedUser
               ? res.data.find((u) => u._id === state.selectedUser._id) ||
-                state.selectedUser
+              state.selectedUser
               : null;
 
             return {
