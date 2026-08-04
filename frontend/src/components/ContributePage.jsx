@@ -1,127 +1,78 @@
-import React, { useEffect, useRef } from "react";
-import mermaid from "mermaid";
+import { useState } from "react";
 import {
-  Github,
   MessageSquare,
   Lightbulb,
   Terminal,
   Heart,
   Code2,
   Rocket,
-  Share2,
   ShieldCheck,
-  Network,
-  Layers,
   ArrowLeft,
+  Copy,
+  Check,
+  Server,
+  Database,
+  Cpu,
+  Globe,
+  GitBranch,
+  ExternalLink,
+  Sparkles,
+  GitPullRequest,
+  CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar";
 
-// Initialize Mermaid configuration
-mermaid.initialize({
-  startOnLoad: true,
-  theme: "dark",
-  securityLevel: "loose",
-  fontFamily: "inherit",
-});
-
-const MermaidDiagram = ({ chart }) => {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (ref.current) {
-      mermaid.contentLoaded();
-    }
-  }, [chart]);
-
-  return (
-    <div className="mermaid flex justify-center py-4 overflow-x-auto" ref={ref}>
-      {chart}
-    </div>
-  );
-};
+const TECH_STACK = [
+  {
+    title: "Frontend Layer",
+    icon: Code2,
+    badge: "Client",
+    color: "text-primary bg-primary/10 border-primary/20",
+    techs: ["React.js", "Zustand State", "Tailwind CSS", "DaisyUI", "Socket.io Client"],
+  },
+  {
+    title: "Backend Services",
+    icon: Server,
+    badge: "Core API",
+    color: "text-secondary bg-secondary/10 border-secondary/20",
+    techs: ["Node.js", "Express.js", "Socket.io Server", "JWT Auth", "RESTful APIs"],
+  },
+  {
+    title: "Database Layer",
+    icon: Database,
+    badge: "Persistence",
+    color: "text-accent bg-accent/10 border-accent/20",
+    techs: ["MongoDB Atlas", "Mongoose ODM", "Schema Indexing"],
+  },
+  {
+    title: "ML Moderation",
+    icon: Cpu,
+    badge: "AI Service",
+    color: "text-warning bg-warning/10 border-warning/20",
+    techs: ["FastAPI", "Toxicity Analysis", "Content Moderation Model"],
+  },
+  {
+    title: "External Integrations",
+    icon: Globe,
+    badge: "Cloud Services",
+    color: "text-info bg-info/10 border-info/20",
+    techs: ["Groq AI API", "ZegoCloud Audio/Video", "Cloudinary Storage", "Brevo Mail"],
+  },
+];
 
 const ContributePage = () => {
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
 
-  const systemArchitecture = `
-    graph TD
-    %% ================= FRONTEND =================
-    subgraph FRONTEND [Frontend Layer]
-    A1[React App]
-    A2[State Management]
-    A3[UI: Tailwind + DaisyUI]
-    A4[Routing]
-    A5[Socket Client]
-    end
+  const commandText =
+    "git clone https://github.com/akashsantra/paso.git\ncd paso\nnpm install\nnpm run dev";
 
-    %% ================= BACKEND =================
-    subgraph BACKEND [Backend Layer]
-    B1[Express Server]
-    B2[REST API Controllers]
-    B3[Authentication Service]
-    B4[JWT Middleware]
-    B5[Socket.io Server]
-    B6[Message Service]
-    B7[Group Service]
-    B8[User Service]
-    B9[Admin Service]
-    end
-
-    %% ================= DATABASE =================
-    subgraph DATABASE [Database Layer]
-    C1[(MongoDB)]
-    C2[User Collection]
-    C3[Message Collection]
-    C4[Group Collection]
-    C5[Report Collection]
-    end
-
-    %% ================= ML SERVICE =================
-    subgraph ML [ML Moderation Service]
-    D1[FastAPI Server]
-    D2[Text Analysis Model]
-    D3[Toxicity Detection]
-    end
-
-    %% ================= EXTERNAL =================
-    subgraph EXTERNAL [External Services]
-    E1[Groq API - AI Chat]
-    E2[ZegoCloud - Voice/Video]
-    E3[Cloudinary - Media Storage]
-    E4[Brevo - Email Service]
-    end
-
-    %% ================= FLOW =================
-    A1 -->|HTTP Requests| B1
-    A5 -->|WebSocket| B5
-    B1 --> B2
-    B2 --> B3
-    B3 --> B4
-    B2 --> B6
-    B2 --> B7
-    B2 --> B8
-    B2 --> B9
-    B5 --> B6
-    B6 --> C3
-    B7 --> C4
-    B8 --> C2
-    B9 --> C5
-    C1 --> C2
-    C1 --> C3
-    C1 --> C4
-    C1 --> C5
-    B6 -->|Analyze Message| D1
-    D1 --> D2
-    D2 --> D3
-    B6 --> E1
-    B6 --> E3
-    B3 --> E4
-    B6 --> E2
-    A1 -->|AI Chat Request| B6
-    A1 -->|Call Init| E2
-    A1 -->|Upload Media| B6
-  `;
+  const handleCopy = () => {
+    navigator.clipboard.writeText(commandText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="flex h-full w-full bg-base-200 overflow-hidden items-center justify-center p-0 md:p-3 lg:p-4">
@@ -130,216 +81,313 @@ const ContributePage = () => {
         {/* Top Navbar */}
         <Navbar />
 
-        {/* Scrollable Main Content Container */}
-        <div className="flex-1 overflow-y-auto px-4 md:px-8 py-8 space-y-16 custom-scrollbar">
+        {/* Scrollable Container */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 space-y-12 custom-scrollbar">
           
-          {/* Back Action Bar */}
-          <div className="flex items-center gap-3 border-b border-base-200 pb-4">
-            <button
-              onClick={() => navigate("/")}
-              className="btn btn-ghost btn-sm btn-circle text-base-content/70 hover:text-base-content"
-              title="Back to App"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <span className="text-xs font-semibold uppercase tracking-wider text-base-content/60">
-              Back to Chat
-            </span>
-          </div>
-
-          {/* Hero Header */}
-          <section className="text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="badge badge-primary badge-outline gap-2 py-4 px-6 text-sm font-bold tracking-widest uppercase rounded-full">
-                <Code2 size={16} /> Open Source Initiative
+          {/* Header Action Bar */}
+          <div className="flex items-center justify-between border-b border-base-200 pb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/")}
+                className="btn btn-ghost btn-sm btn-circle text-base-content/70 hover:text-base-content hover:bg-base-200"
+                title="Back to App"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div>
+                <h1 className="text-xl font-extrabold tracking-tight text-base-content flex items-center gap-2">
+                  <GitPullRequest className="h-5 w-5 text-primary" />
+                  Contributor Portal
+                </h1>
+                <p className="text-xs text-base-content/60">
+                  Build and extend PASO with the open-source community
+                </p>
               </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              PASO Roadmap
+
+            <a
+              href="https://github.com/Akash504-ai/Chat-app"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-outline btn-sm gap-2 rounded-xl text-xs"
+            >
+              <ExternalLink size={14} />
+              <span>GitHub Repo</span>
+            </a>
+          </div>
+
+          {/* Hero Banner */}
+          <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-base-200/50 to-secondary/10 border border-base-300 p-6 sm:p-10 text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-base-100 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase shadow-sm">
+              <Code2 size={14} /> Open Source Initiative
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-base-content max-w-2xl mx-auto leading-tight">
+              Build the Future of Real-Time Chat with{" "}
+              <span className="bg-gradient-to-r from-primary via-primary/90 to-secondary bg-clip-text text-transparent">
+                PASO
+              </span>
             </h1>
-            <p className="text-base md:text-lg text-base-content/60 max-w-2xl mx-auto leading-relaxed">
-              From your first fork to your first production-ready Pull Request.
-              Join us in building a smarter communication ecosystem.
+
+            <p className="text-xs sm:text-sm text-base-content/70 max-w-xl mx-auto leading-relaxed">
+              From fixing bug tickets to adding AI moderation features—help us craft an accessible, ultra-fast messaging app.
             </p>
           </section>
 
-          {/* System Architecture */}
-          <section className="space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-              <div className="space-y-1">
-                <h2 className="text-2xl font-bold flex items-center gap-3">
-                  <Network className="text-primary" /> System Architecture
+          {/* Architecture Tech Stack Grid */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-base-content flex items-center gap-2">
+                  <GitBranch className="text-primary w-5 h-5" />
+                  System Architecture
                 </h2>
-                <p className="text-sm text-base-content/60">
-                  Understand the data flow between React, Express, FastAPI, and MongoDB.
+                <p className="text-xs text-base-content/60">
+                  Distributed microservice stack powering real-time chat & AI
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <div className="badge badge-sm badge-outline opacity-60">Microservices</div>
-                <div className="badge badge-sm badge-outline opacity-60">WebSockets</div>
-                <div className="badge badge-sm badge-outline opacity-60">ML-Integrated</div>
-              </div>
             </div>
 
-            <div className="relative group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-              <div className="relative bg-base-200 border border-base-300 rounded-2xl p-4 md:p-6 shadow-xl overflow-hidden">
-                <div className="flex items-center justify-between mb-4 px-2">
-                  <div className="flex items-center gap-2">
-                    <Layers size={18} className="text-primary" />
-                    <span className="text-xs font-bold uppercase tracking-widest opacity-70">
-                      Infrastructure Map v1.0
-                    </span>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {TECH_STACK.map((item, idx) => {
+                const IconComponent = item.icon;
+                return (
+                  <div
+                    key={idx}
+                    className="group relative p-4 rounded-2xl bg-base-200/40 border border-base-300 hover:border-primary/40 hover:bg-base-200/80 transition-all duration-300 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl border ${item.color}`}>
+                          <IconComponent size={18} />
+                        </div>
+                        <h3 className="font-bold text-sm text-base-content">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <span className="badge badge-xs badge-ghost text-[10px] opacity-60">
+                        {item.badge}
+                      </span>
+                    </div>
 
-                <div className="bg-base-100/50 rounded-xl p-2 md:p-4 overflow-x-auto custom-mermaid-container">
-                  <MermaidDiagram chart={systemArchitecture} />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Steps & Quick Start */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold flex items-center gap-3">
-                <Rocket className="text-primary" /> The Contributor's Journey
-              </h2>
-
-              <ul className="steps steps-vertical">
-                <li className="step step-primary">
-                  <div className="text-left ml-4 py-2">
-                    <h3 className="font-bold text-base">Fork & Explore</h3>
-                    <p className="text-xs text-base-content/60">
-                      Create your own copy of the PASO repository and explore the microservice architecture.
-                    </p>
-                  </div>
-                </li>
-                <li className="step step-primary">
-                  <div className="text-left ml-4 py-2">
-                    <h3 className="font-bold text-base">Branching Strategy</h3>
-                    <p className="text-xs text-base-content/60">
-                      Always create a <code>feat/feature-name</code> or <code>fix/bug-name</code> branch.
-                    </p>
-                  </div>
-                </li>
-                <li className="step">
-                  <div className="text-left ml-4 py-2">
-                    <h3 className="font-bold text-base">Pull Request</h3>
-                    <p className="text-xs text-base-content/60">
-                      Submit your PR with a clear description of the problem solved.
-                    </p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <div className="card bg-neutral text-neutral-content shadow-xl border border-white/5 rounded-2xl">
-              <div className="card-body p-0">
-                <div className="bg-white/5 px-4 py-3 flex items-center gap-2 border-b border-white/5">
-                  <div className="w-3 h-3 rounded-full bg-error/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-warning/50"></div>
-                  <div className="w-3 h-3 rounded-full bg-success/50"></div>
-                  <span className="text-xs font-mono ml-3 opacity-40">terminal — bash</span>
-                </div>
-                <div className="p-6 space-y-4">
-                  <div>
-                    <p className="text-primary font-bold text-xs mb-2 uppercase tracking-widest flex items-center gap-2">
-                      <Terminal size={14} /> Quick Start
-                    </p>
-                    <div className="font-mono text-xs space-y-2 bg-black/40 p-4 rounded-xl">
-                      <p><span className="text-success">git</span> clone https://github.com/akashsantra/paso.git</p>
-                      <p><span className="text-success">cd</span> paso</p>
-                      <p><span className="text-success">npm</span> install && <span className="text-success">npm</span> run dev</p>
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {item.techs.map((tech, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className="badge badge-sm bg-base-100 border-base-300 text-base-content/80 text-[11px] font-medium py-2 px-2.5"
+                        >
+                          {tech}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </section>
 
-          {/* Help Cards */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Bug Tracker */}
-            <div className="relative bg-base-200/80 rounded-2xl p-6 border border-base-300 flex flex-col justify-between hover:border-error/40 transition-all">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-error/10 flex items-center justify-center mb-4 ring-1 ring-error/20">
-                  <MessageSquare className="text-error" size={24} />
+          {/* Journey Steps & Quick Start Terminal */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            
+            {/* Steps Timeline */}
+            <div className="space-y-4">
+              <h2 className="text-base font-bold text-base-content flex items-center gap-2">
+                <Rocket className="text-primary w-5 h-5" />
+                Contributor Roadmap
+              </h2>
+
+              <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-base-200/40 border border-base-300 flex items-start gap-3.5 hover:border-primary/30 transition-all">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs flex-shrink-0">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-base-content">
+                      Fork & Clone Repository
+                    </h3>
+                    <p className="text-xs text-base-content/60 leading-relaxed mt-0.5">
+                      Fork the PASO repository to your GitHub account and clone it locally.
+                    </p>
+                  </div>
                 </div>
-                <h2 className="text-xl font-bold mb-2">Bug Reports</h2>
-                <p className="text-xs text-base-content/60 leading-relaxed">
-                  Spotted a glitch in the Socket.io flow or UI? Detail the steps to reproduce on our tracker.
-                </p>
+
+                <div className="p-4 rounded-2xl bg-base-200/40 border border-base-300 flex items-start gap-3.5 hover:border-primary/30 transition-all">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs flex-shrink-0">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-base-content">
+                      Branching Standard
+                    </h3>
+                    <p className="text-xs text-base-content/60 leading-relaxed mt-0.5">
+                      Name feature branches <code className="text-primary">feat/your-feature</code> or <code className="text-primary">fix/issue-id</code>.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-base-200/40 border border-base-300 flex items-start gap-3.5 hover:border-primary/30 transition-all">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs flex-shrink-0">
+                    3
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-base-content">
+                      Pull Request Review
+                    </h3>
+                    <p className="text-xs text-base-content/60 leading-relaxed mt-0.5">
+                      Submit your Pull Request with clear setup steps and test verifications.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 flex items-center justify-between">
+            </div>
+
+            {/* Terminal Box */}
+            <div className="space-y-4">
+              <h2 className="text-base font-bold text-base-content flex items-center gap-2">
+                <Terminal className="text-primary w-5 h-5" />
+                Development Terminal
+              </h2>
+
+              <div className="card bg-neutral text-neutral-content shadow-xl border border-white/10 rounded-2xl overflow-hidden">
+                <div className="bg-white/5 px-4 py-3 flex items-center justify-between border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-error/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-warning/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-success/80"></div>
+                    <span className="text-xs font-mono ml-2 text-white/50">bash — paso dev</span>
+                  </div>
+
+                  <button
+                    onClick={handleCopy}
+                    className="btn btn-ghost btn-xs text-white/80 hover:text-white gap-1 rounded-lg"
+                    title="Copy commands"
+                  >
+                    {copied ? (
+                      <CheckCircle2 size={14} className="text-success" />
+                    ) : (
+                      <Copy size={14} />
+                    )}
+                    <span className="text-[10px] font-mono">{copied ? "Copied" : "Copy"}</span>
+                  </button>
+                </div>
+
+                <div className="p-5 font-mono text-xs space-y-3 bg-black/60 text-emerald-400 select-all">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/30 select-none">1</span>
+                    <p><span className="text-white/40">$</span> git clone https://github.com/akashsantra/paso.git</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/30 select-none">2</span>
+                    <p><span className="text-white/40">$</span> cd paso</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/30 select-none">3</span>
+                    <p><span className="text-white/40">$</span> npm install</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/30 select-none">4</span>
+                    <p><span className="text-white/40">$</span> npm run dev</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          {/* Action Cards */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {/* Bug Reports */}
+            <div className="group bg-base-200/40 rounded-2xl p-5 border border-base-300 flex flex-col justify-between hover:border-error/40 hover:bg-base-200/70 transition-all duration-200">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-error/10 text-error flex items-center justify-center ring-1 ring-error/20">
+                  <MessageSquare size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-base-content group-hover:text-error transition-colors">
+                    Bug Reports
+                  </h3>
+                  <p className="text-xs text-base-content/60 leading-relaxed mt-1">
+                    Spotted a issue with WebSockets, audio calls, or UI layout? Report it on GitHub.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-5 pt-2">
                 <a
                   href="https://github.com/Akash504-ai/Chat-app/issues"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn btn-error btn-outline btn-xs rounded-full px-4"
+                  className="btn btn-error btn-outline btn-xs rounded-xl w-full gap-2"
                 >
-                  Open Tracker
+                  <span>Open Issue Tracker</span>
+                  <ExternalLink size={12} />
                 </a>
-                <Share2 size={16} className="opacity-30" />
               </div>
             </div>
 
-            {/* Feature Requests */}
-            <div className="relative bg-base-200/80 rounded-2xl p-6 border border-base-300 flex flex-col justify-between hover:border-secondary/40 transition-all">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-4 ring-1 ring-secondary/20">
-                  <Lightbulb className="text-secondary" size={24} />
+            {/* Feature Ideas */}
+            <div className="group bg-base-200/40 rounded-2xl p-5 border border-base-300 flex flex-col justify-between hover:border-secondary/40 hover:bg-base-200/70 transition-all duration-200">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center ring-1 ring-secondary/20">
+                  <Lightbulb size={20} />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Feature Requests</h2>
-                <p className="text-xs text-base-content/60 leading-relaxed">
-                  Have a vision for AI-driven real-time features? Pitch ideas to the community roadmap.
-                </p>
+                <div>
+                  <h3 className="font-bold text-sm text-base-content group-hover:text-secondary transition-colors">
+                    Feature Discussions
+                  </h3>
+                  <p className="text-xs text-base-content/60 leading-relaxed mt-1">
+                    Have an idea for AI capabilities or custom theme extensions? Pitch ideas to the community.
+                  </p>
+                </div>
               </div>
-              <div className="mt-6">
+              <div className="mt-5 pt-2">
                 <a
                   href="https://github.com/Akash504-ai/Chat-app/discussions"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn btn-secondary btn-outline btn-xs rounded-full px-4"
+                  className="btn btn-secondary btn-outline btn-xs rounded-xl w-full gap-2"
                 >
-                  Discussion Hub
+                  <span>Join Discussions</span>
+                  <ExternalLink size={12} />
                 </a>
               </div>
             </div>
 
-            {/* Security Policy */}
-            <div className="relative bg-base-200/80 rounded-2xl p-6 border border-base-300 flex flex-col justify-between hover:border-accent/40 transition-all">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 ring-1 ring-accent/20">
-                  <ShieldCheck className="text-accent" size={24} />
+            {/* Security */}
+            <div className="group bg-base-200/40 rounded-2xl p-5 border border-base-300 flex flex-col justify-between hover:border-accent/40 hover:bg-base-200/70 transition-all duration-200">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center ring-1 ring-accent/20">
+                  <ShieldCheck size={20} />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Security</h2>
-                <p className="text-xs text-base-content/60 leading-relaxed">
-                  Found a vulnerability? Please reach out via private channels for coordinated disclosure.
-                </p>
+                <div>
+                  <h3 className="font-bold text-sm text-base-content group-hover:text-accent transition-colors">
+                    Security Policy
+                  </h3>
+                  <p className="text-xs text-base-content/60 leading-relaxed mt-1">
+                    Found a security vulnerability? Follow our disclosure policy for private reporting.
+                  </p>
+                </div>
               </div>
-              <div className="mt-6">
+              <div className="mt-5 pt-2">
                 <a
                   href="https://github.com/Akash504-ai/Chat-app/tree/main?tab=security-ov-file"
                   target="_blank"
                   rel="noreferrer"
-                  className="btn btn-accent btn-outline btn-xs rounded-full px-4"
+                  className="btn btn-accent btn-outline btn-xs rounded-xl w-full gap-2"
                 >
-                  View Policy
+                  <span>View Security Policy</span>
+                  <ExternalLink size={12} />
                 </a>
               </div>
             </div>
+
           </section>
 
           {/* Footer */}
-          <footer className="text-center pb-6 pt-4 border-t border-base-200">
-            <p className="font-medium text-sm flex items-center justify-center gap-1.5 text-base-content/70">
-              Made with{" "}
-              <Heart
-                size={16}
-                className="text-red-500 fill-red-500 animate-pulse"
-              />{" "}
+          <footer className="text-center pb-4 pt-2 border-t border-base-200">
+            <p className="font-medium text-xs flex items-center justify-center gap-1.5 text-base-content/60">
+              Crafted with{" "}
+              <Heart size={14} className="text-red-500 fill-red-500 animate-pulse" />{" "}
               by Akash Santra
             </p>
           </footer>
