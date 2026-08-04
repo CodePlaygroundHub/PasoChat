@@ -1,5 +1,3 @@
-import Navbar from "./components/Navbar";
-
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -12,7 +10,7 @@ import { useChatStore } from "./store/useChatStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useEffect } from "react";
 
-import { Loader, Ribbon } from "lucide-react";
+import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 import IncomingCallModal from "./components/call/IncomingCallModal.jsx";
@@ -34,10 +32,6 @@ const App = () => {
   const { theme } = useThemeStore();
 
   useEffect(() => {
-    console.log("AUTH USER:", authUser);
-  }, [authUser]);
-
-  useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
@@ -45,25 +39,24 @@ const App = () => {
     if (!authUser) return;
     subscribeToMessages();
     return () => unsubscribeFromMessages();
-  }, [authUser]);
+  }, [authUser, subscribeToMessages, unsubscribeFromMessages]);
 
   if (isCheckingAuth) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
+      <div className="flex items-center justify-center h-screen bg-base-100">
+        <Loader className="size-10 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div data-theme={theme} className="flex flex-col h-screen">
+    <div data-theme={theme} className="flex flex-col h-screen overflow-hidden bg-base-200">
       {authUser && <IncomingCallModal />}
       {authUser && <OutgoingCallModal />}
       {authUser && <CallRoom />}
-      {authUser && authUser.role !== "admin" && <Navbar />}
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 overflow-y-auto">
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 min-h-0 overflow-hidden relative">
         <Routes>
           <Route
             path="/"
@@ -86,7 +79,7 @@ const App = () => {
           />
           <Route
             path="/verify-email" 
-            element= {!authUser?<VerifyEmailPage/>: <Navigate to="/"/>}
+            element={!authUser ? <VerifyEmailPage /> : <Navigate to="/" />}
           />
           <Route
             path="/login"
@@ -98,13 +91,15 @@ const App = () => {
           />
           <Route
             path="/settings"
-            element={authUser ? <SettingsPage /> : <Navigate to="/login" />}
+            element={<SettingsPage />}
           />
           <Route
             path="/profile"
             element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
           />
           <Route path="/contribute" element={<ContributePage />} />
+
+          {/* ADMIN ROUTES */}
           <Route
             path="/admin"
             element={
@@ -115,7 +110,6 @@ const App = () => {
               </AdminRoute>
             }
           />
-
           <Route
             path="/admin/users"
             element={
@@ -126,7 +120,6 @@ const App = () => {
               </AdminRoute>
             }
           />
-
           <Route
             path="/admin/reports"
             element={
@@ -138,9 +131,9 @@ const App = () => {
             }
           />
         </Routes>
-      </div>
+      </main>
 
-      <Toaster />
+      <Toaster position="top-center" />
     </div>
   );
 };
