@@ -145,7 +145,7 @@ const ProfilePage = () => {
 
                 <div className="text-center space-y-1">
                   <p className="text-xs font-medium text-base-content/70 flex items-center justify-center gap-1">
-                    {/* <Sparkles className="w-3.5 h-3.5 text-warning" /> */}
+                    <Sparkles className="w-3.5 h-3.5 text-warning" />
                     Click camera icon to change avatar
                   </p>
                   <p className="text-[10px] text-base-content/40">
@@ -234,4 +234,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfilePage; 
