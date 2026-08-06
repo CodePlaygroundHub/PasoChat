@@ -11,6 +11,13 @@
   AI moderation, voice/video calling, Socket.IO horizontal scaling, ML automation, and enterprise analytics.
 </p>
 
+<p align="center">
+  <h3>🎥 Product Showcase</h3>
+  
+https://github.com/user-attachments/assets/a2348295-7a74-4fd6-abf0-6f16cb1f5153
+
+</p>
+
 ---
 
 ## 🌟 Quick Navigation
