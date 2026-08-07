@@ -584,6 +584,18 @@ See [ROADMAP.md](./docs/ROADMAP.md) for the complete vision and timeline.
 
 ---
 
+## Contributors
+
+PASO is built by an amazing community of contributors. Every issue, pull request, bug fix, and feature helps make the project better.
+
+<a href="https://github.com/CodePlaygroundHub/paso-chat-app/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=CodePlaygroundHub/paso-chat-app" />
+</a>
+
+Want to see your avatar here? Check out the Contributing Guide and open your first PR!
+
+---
+
 ## ⭐ Star History
 
 If PASO helps you, consider giving it a ⭐ on GitHub!
