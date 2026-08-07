@@ -77,35 +77,6 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 
 ---
 
-## Engineering Challenges Solved
-
-### 1. **Real-time Synchronization at Scale**
-**Challenge**: Synchronizing user presence, typing status, and messages across 100K+ concurrent users  
-**Solution**: Redis Pub/Sub adapter for Socket.IO enables multi-instance broadcasting without message loss  
-**Impact**: Horizontal scaling from single instance to distributed clusters
-
-### 2. **ML-Powered Moderation Pipeline**
-**Challenge**: Filtering toxic/spam content at message delivery (microsecond latency requirements)  
-**Solution**: Async FastAPI pipeline with batch processing and caching; non-blocking message flow  
-**Impact**: <50ms latency on moderation with <1% false negatives
-
-### 3. **Multi-Device Presence Management**
-**Challenge**: Supporting same user across web, mobile, desktop with consistent state  
-**Solution**: User socket mapping with device identification; coordinated logout/login flows  
-**Impact**: Seamless cross-device experience with correct presence indicators
-
-### 4. **Voice/Video Calling Integration**
-**Challenge**: Integrating third-party V2V service (ZegoCloud) with Socket.IO signaling  
-**Solution**: Hybrid approach—Socket.IO for signaling + ZegoCloud for media  
-**Impact**: Enterprise-grade call quality without building media infrastructure
-
-### 5. **Distributed File Management**
-**Challenge**: Scaling image/video uploads across multiple servers  
-**Solution**: Cloudinary CDN integration with URL-based delivery  
-**Impact**: O(1) upload performance, global CDN caching, media optimization
-
----
-
 ## System Architecture Deep Dive
 
 ### Microservices Decomposition
@@ -159,26 +130,6 @@ graph TB
     SocketServer --> ZegoCloud
     MsgService --> Cloudinary
     AuthService --> Email
-```
-
-### Data Flow Patterns
-
-**Real-time Message Flow**:
-```
-User A sends → Express API → Validation → Database → Socket.IO 
-→ Redis Pub/Sub → All connected instances → User B receives
-```
-
-**ML Moderation Flow**:
-```
-Message arrives → Queue for ML → FastAPI pipeline → 
-Toxicity/Spam scores → Cache result → Delivery decision
-```
-
-**Multi-device Presence**:
-```
-Login → Register socket → Redis cache → Broadcast online status →
-Other clients receive update → UI reflects presence
 ```
 
 ---
