@@ -3,44 +3,21 @@
 </p>
 
 <h1 align="center">
-  PASO - Enterprise-Grade AI-Powered Realtime Chat Platform
+  PASO — Enterprise-Grade AI-Powered Realtime Chat Platform
 </h1>
 
 <p align="center">
-  <strong>Production-ready distributed communication system with</strong><br/>
-  AI moderation, voice/video calling, Socket.IO horizontal scaling, ML automation, and enterprise analytics.
+  <b>A production-ready distributed communication system featuring AI moderation, voice/video calling, horizontal Socket.IO scaling, ML automation, and enterprise analytics.</b>
 </p>
 
 <p align="center">
-  <h3>🎥 Product Showcase</h3>
-  
-https://github.com/user-attachments/assets/a2348295-7a74-4fd6-abf0-6f16cb1f5153
-
+  <a href="https://chat-app-sooty-mu.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
+  <a href="./docs/QUICK_START.md"><img src="https://img.shields.io/badge/Quick_Start-Docs-blue?style=for-the-badge&logo=gitbook&logoColor=white" alt="Quick Start" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT" /></a>
 </p>
-
----
-
-## Quick Navigation
-
-<p align="center">
-  <a href="#why-paso-matters">Overview</a> •
-  <a href="./docs/QUICK_START.md">Quick Start</a> •
-  <a href="./docs/ARCHITECTURE.md">Architecture</a> •
-  <a href="https://chat-app-sooty-mu.vercel.app">Live Demo</a> •
-  <a href="./docs/API.md">API Docs</a> •
-  <a href="./docs/DEPLOYMENT.md">Deployment</a> •
-  <a href="./docs/CONTRIBUTOR_ONBOARDING.md">Contributing</a> •
-  <a href="./docs/COPILOT_STORY.md">Copilot Story</a>
-</p>
-
-
----
-
-## Status & Badges
 
 <p align="center">
   <img src="https://img.shields.io/badge/ECSoC-2026-blueviolet?style=flat-square" alt="ECSoC 2026 Project" />
-  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License: MIT" />
   <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg?style=flat-square" alt="Frontend CI Status" />
   <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg?style=flat-square" alt="Backend CI Status" />
   <img src="https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square" alt="Tests Passing" />
@@ -49,10 +26,14 @@ https://github.com/user-attachments/assets/a2348295-7a74-4fd6-abf0-6f16cb1f5153
   <img src="https://img.shields.io/github/contributors/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="GitHub Contributors" />
   <img src="https://img.shields.io/github/repo-size/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="Repository Size" />
   <img src="https://img.shields.io/github/last-commit/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="Last Commit" />
-  <img src="https://img.shields.io/badge/Node.js-18+-green?style=flat-square&logo=node.js" alt="Node.js" />
-  <img src="https://img.shields.io/badge/React-18+-blue?style=flat-square&logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python" alt="Python" />
-  <img src="https://img.shields.io/badge/MongoDB-7+-green?style=flat-square&logo=mongodb" alt="MongoDB" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/React-18+-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/MongoDB-7+-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Redis-7+-DC382D?style=flat-square&logo=redis&logoColor=white" alt="Redis" />
 </p>
 
 ---
