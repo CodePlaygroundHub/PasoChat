@@ -38,27 +38,42 @@
 
 ---
 
+## Quick Navigation
+
+<p align="center">
+  <a href="#why-paso-matters">Overview</a> •
+  <a href="./docs/QUICK_START.md">Quick Start</a> •
+  <a href="./docs/ARCHITECTURE.md">Architecture</a> •
+  <a href="https://chat-app-sooty-mu.vercel.app">Live Demo</a> •
+  <a href="./docs/API.md">API Docs</a> •
+  <a href="./docs/DEPLOYMENT.md">Deployment</a> •
+  <a href="./docs/CONTRIBUTOR_ONBOARDING.md">Contributing</a> •
+  <a href="./docs/COPILOT_STORY.md">Copilot Story</a>
+</p>
+
+---
+
 ## Why PASO Matters
 
 PASO demonstrates **production-grade system design** and **real-world engineering challenges** solved with modern technologies:
 
 ### Enterprise Requirements Addressed
 
-- **Real-time at Scale**: Horizontal scaling with Redis adapter for millions of concurrent users
-- **AI/ML Integration**: Moderation pipelines, intent detection, toxic message analysis
-- **Multimedia Communication**: Voice, video, file sharing, status systems
-- **Security First**: JWT authentication, rate limiting, input validation, encrypted communications
-- **Analytics & Compliance**: Admin dashboards, reporting, audit trails, user moderation
-- **High Availability**: Multi-node Socket.IO, database replication, graceful degradation
+* **Real-time at Scale:** Horizontal scaling with a Redis Pub/Sub adapter to support millions of concurrent connections.
+* **Native AI/ML Integration:** Real-time moderation pipelines, intent detection, and automated toxic message analysis.
+* **Multimedia Communication:** High-definition voice/video calling, rich file attachments, and status updates.
+* **Security First:** JWT authentication with rotation, strict rate limiting, input sanitization, and encrypted transport.
+* **Analytics & Compliance:** Admin dashboards, automated reporting, audit trails, and user moderation workflows.
+* **High Availability:** Multi-node Socket.IO setup, database replication, and graceful service degradation.
 
-### Why This Project Stands Out
+### Core System Strengths
 
- **Complete End-to-End System**: Not just CRUD app—addresses real distributed systems challenges  
- **Production Features**: Scaling, monitoring, deployment automation, CI/CD pipelines  
- **Modern Architecture**: Decoupled services, async processing, event-driven design  
- **ML/AI at the Core**: Not bolted-on—integrated into the moderation pipeline  
- **Enterprise Patterns**: Rate limiting, multi-tenancy concepts, role-based access control  
- **Thoughtful UX**: Real-time presence, typing indicators, message delivery status  
+* **End-to-End System Design:** Built from the ground up to solve distributed real-time synchronization challenges.
+* **Production Operations:** Comprehensive monitoring, deployment automation, and automated CI/CD pipelines.
+* **Decoupled Architecture:** Asynchronous worker processing and event-driven microservices.
+* **Embedded ML Engine:** Machine learning toxicity filtering integrated directly into the message queue.
+* **Granular Security Controls:** Multi-tenancy concepts, role-based access control (RBAC), and per-endpoint throttling.
+* **Polished User Experience:** Multi-device presence indicators, typing status, and read receipt tracking.
 
 ---
 
@@ -66,14 +81,14 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 
 ### Core Components
 
-| Layer | Technology | Purpose | Scale |
-|-------|-----------|---------|-------|
-| **Frontend** | React, Vite, Zustand, Socket.IO Client | Real-time UI, state management | CDN + Edge |
-| **API** | Express.js, JWT, Rate Limiting | RESTful API layer | Horizontal |
-| **Real-time** | Socket.IO + Redis Adapter | Multi-node messaging | 100K+ CCU |
-| **Database** | MongoDB + Redis | Persistence + Cache | Sharded |
-| **ML** | FastAPI + Scikit-learn | Moderation, Intent | Async Processing |
-| **External** | Groq, ZegoCloud, Cloudinary | AI, V2V, Media | Third-party APIs |
+| Layer | Technology | Purpose | Scale Strategy |
+| :--- | :--- | :--- | :--- |
+| **Frontend** | React 18, Vite, Zustand, Tailwind CSS | Interactive UI & state management | Edge CDN Delivery |
+| **API Gateway** | Express.js, Node.js, JWT, Rate Limiting | RESTful API & business logic | Horizontal Auto-scaling |
+| **Real-time Engine** | Socket.IO + Redis Pub/Sub Adapter | Bi-directional stateful messaging | Multi-instance Cluster |
+| **Database & Cache** | MongoDB 7+ & Redis 7+ | Persistence, caching & session state | Sharding & Replication |
+| **ML & Moderation** | FastAPI, Scikit-learn, Python 3.10+ | Content moderation & intent analysis | Container Worker Scaling |
+| **Integrations** | Groq API, ZegoCloud, Cloudinary, Brevo | Smart replies, HD V2V, CDN assets, emails | Third-party Edge APIs |
 
 ---
 
@@ -136,91 +151,83 @@ graph TB
 
 ## Core Features
 
-### Messaging System
--  Real-time 1:1 and group messaging
--  Message search with full-text indexing
--  Message reactions (emoji) with conflict-free sync
--  Delete for self / Delete for everyone
--  Message seen status with per-user tracking
--  Custom chat wallpapers per conversation
+<details>
+<summary><b>Messaging & Realtime Communication</b></summary>
 
-### Communication Features
--  Voice calling with ZegoCloud integration
--  Video calling with HD quality
--  Typing indicators (real-time)
--  Online/offline presence
--  Status system (stories with expiry)
--  File sharing with CDN delivery
+<br/>
 
-### AI & ML Features
--  Groq API LLM integration for smart replies
--  Toxicity detection (0-1 confidence score)
--  Spam classification (bayesian ML)
--  Intent detection for auto-responses
--  Smart reply suggestions
--  Message auto-flagging for moderation
+* **Chat Engine:** Real-time 1:1 direct messaging and multi-user group channels.
+* **Audio & Video:** HD voice and video calling powered by ZegoCloud WebRTC integration.
+* **Search:** Full-text indexing for cross-conversation message search.
+* **Reactions & Management:** Conflict-free emoji reactions, message editing, soft-delete for self, and hard-delete for everyone.
+* **Receipts & Presence:** Per-user message seen status, real-time typing indicators, and multi-device online status.
+* **Customization:** Per-conversation custom wallpapers and dynamic themes.
+* **Ephemeral Media:** Status system supporting stories with 24-hour expiration.
 
-### Admin & Moderation
--  Admin dashboard with analytics
--  User reports system
--  Message flagging workflow
--  User suspension/warnings
--  Audit logs with IP tracking
--  Moderation queue visualization
+</details>
 
-### Enterprise Features
--  Role-based access control (Admin/User)
--  Rate limiting (per-user, per-endpoint)
--  JWT authentication with refresh tokens
--  Email verification
--  Security questions for password reset
--  Session management with cookie security
+<details>
+<summary><b>AI Moderation & Automation</b></summary>
+
+<br/>
+
+* **Smart Responses:** Contextual reply suggestions generated via Groq API (LLM).
+* **Toxicity Scoring:** Inline message scoring returning a 0–1 confidence threshold.
+* **Spam Filtering:** Bayesian classification for automated spam mitigation.
+* **Intent Detection:** Automated query classification for instant bot responses.
+* **Auto-Moderation:** Automated flagging of policy-violating content for administrative review.
+
+</details>
+
+<details>
+<summary><b>Enterprise Security & Administration</b></summary>
+
+<br/>
+
+* **Admin Dashboard:** System analytics, user reports queue, and moderation visualization.
+* **Access Control:** Granular Role-Based Access Control (RBAC) separating Admins and standard Users.
+* **User Governance:** Account warnings, temporary suspensions, and audit logging with IP tracking.
+* **Authentication Security:** Refresh token rotation, bcrypt password hashing, and cookie protection.
+* **Rate Limiting:** Granular per-user and per-endpoint request throttling.
+
+</details>
 
 ---
 
 ## Project Structure
 
-```
+```text
 PASO/
-├── frontend/                      # React + Vite application
+├── frontend/                   # React 18 + Vite web client
 │   ├── src/
-│   │   ├── components/           # Reusable React components
-│   │   ├── pages/                # Route-level pages
-│   │   ├── store/                # Zustand state management
-│   │   ├── lib/                  # Utilities & axios config
-│   │   └── App.jsx
+│   │   ├── components/         # UI components and modals
+│   │   ├── pages/              # View routes (Chat, Dashboard, Admin)
+│   │   ├── store/              # Zustand global application state
+│   │   └── lib/                # Axios instance & Socket.IO client
 │   ├── vite.config.js
 │   └── tailwind.config.js
 │
-├── backend/                       # Express.js + Node.js
+├── backend/                    # Express.js core API & Socket server
 │   ├── src/
-│   │   ├── controllers/          # API request handlers
-│   │   ├── models/               # MongoDB schemas
-│   │   ├── routes/               # Express route definitions
-│   │   ├── middleware/           # Auth, rate limiting, etc.
-│   │   ├── services/             # Business logic
-│   │   ├── lib/                  # Database, socket, integrations
-│   │   └── index.js              # Server entry point
-│   ├── test/                     # Jest integration tests
-│   └── jest.config.js
+│   │   ├── controllers/        # REST route handlers
+│   │   ├── models/             # Mongoose schemas (User, Message, Room)
+│   │   ├── routes/             # Express API endpoints
+│   │   ├── middleware/         # Auth, RBAC, and rate limiters
+│   │   ├── services/           # Core domain logic
+│   │   └── lib/                # Database, Redis, and Socket initializers
+│   └── test/                   # Jest integration and unit test suite
 │
-├── ml-service/                    # FastAPI service
-│   ├── app.py                    # Main FastAPI app
-│   ├── requirements.txt
-│   └── models/                   # Trained ML models (pkl files)
+├── ml-service/                 # FastAPI Machine Learning microservice
+│   ├── app.py                  # API entrypoint for ML inference
+│   ├── requirements.txt        # Python dependency manifest
+│   └── models/                 # Pre-trained classification models (.pkl)
 │
-└── docs/                          # Comprehensive documentation
-    ├── README.md                 # Main documentation index
-    ├── ARCHITECTURE.md           # System design deep dive
-    ├── API.md                    # RESTful API reference
-    ├── SOCKETS.md                # WebSocket events & patterns
-    ├── DEPLOYMENT.md             # Production deployment guide
-    ├── SCALING.md                # Horizontal scaling guide
-    ├── SECURITY_BEST_PRACTICES.md
-    ├── TESTING.md                # Testing strategy
-    ├── PERFORMANCE.md            # Performance optimization
-    ├── ROADMAP.md                # Future features
-    └── COPILOT_STORY.md          # GitHub Copilot integration narrative
+└── docs/                       # Technical documentation
+    ├── ARCHITECTURE.md         # System design & data flow diagrams
+    ├── API.md                  # RESTful API specifications
+    ├── SOCKETS.md              # WebSocket event contracts
+    ├── DEPLOYMENT.md           # Docker & Cloud deployment guides
+    └── SCALING.md              # Multi-node scaling & Redis caching
 ```
 
 ---
