@@ -64,65 +64,6 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 
 ## Technical Stack & Architecture
 
-### Technology Overview
-
-```mermaid
-flowchart LR
-
-%% Frontend
-subgraph FE["Frontend"]
-    FE1["React"]
-    FE2["Vite"]
-    FE3["Tailwind"]
-    FE4["Zustand"]
-    FE5["Socket.IO Client"]
-end
-
-%% Backend
-subgraph BE["Backend"]
-    BE1["Express API"]
-    BE2["JWT Auth"]
-    BE3["REST APIs"]
-    BE4["Rate Limiting"]
-end
-
-%% Realtime
-subgraph RT["Realtime"]
-    RT1["Socket.IO"]
-    RT2["Redis Adapter"]
-    RT3["Horizontal Scaling"]
-end
-
-%% Database
-subgraph DB["Database"]
-    DB1["MongoDB"]
-    DB2["Redis Cache"]
-end
-
-%% AI Services
-subgraph AI["AI / ML"]
-    AI1["FastAPI"]
-    AI2["Toxicity Detection"]
-    AI3["Spam Filtering"]
-    AI4["Smart Replies"]
-end
-
-%% External
-subgraph EXT["Integrations"]
-    EXT1["Groq API"]
-    EXT2["ZegoCloud"]
-    EXT3["Cloudinary"]
-    EXT4["Brevo"]
-end
-
-FE --> BE
-BE --> RT
-BE --> DB
-BE --> AI
-AI --> EXT
-RT --> DB
-```
-
 ### Core Components
 
 | Layer | Technology | Purpose | Scale |
