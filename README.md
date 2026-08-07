@@ -20,7 +20,7 @@ https://github.com/user-attachments/assets/a2348295-7a74-4fd6-abf0-6f16cb1f5153
 
 ---
 
-## 🌟 Quick Navigation
+## Quick Navigation
 
 <p align="center">
   <a href="#why-paso-matters">Overview</a> •
@@ -81,7 +81,7 @@ PASO demonstrates **production-grade system design** and **real-world engineerin
 
 ---
 
-## ⚙️ Technical Stack & Architecture
+## Technical Stack & Architecture
 
 ### Technology Overview
 
@@ -184,7 +184,7 @@ RT --> DB
 
 ---
 
-## 🏗️ System Architecture Deep Dive
+## System Architecture Deep Dive
 
 ### Microservices Decomposition
 
