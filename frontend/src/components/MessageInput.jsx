@@ -8,11 +8,15 @@ import {
   StopCircle,
   Smile,
   Clapperboard,
+  BarChart2,
 } from "lucide-react";
+
 import toast from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
 import EmojiPicker from "emoji-picker-react";
 import GifPicker from "./GifPicker";
+import PollCreatorModal from "./PollCreatorModal";
+
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -23,6 +27,8 @@ const MessageInput = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [showPollModal, setShowPollModal] = useState(false);
+
 
   const emojiRef = useRef(null);
   const gifRef = useRef(null);
@@ -38,12 +44,14 @@ const MessageInput = () => {
     sendMessageToAI,
     selectedChatType,
     selectedUser,
+    selectedGroup,
     startTyping,
     stopTyping,
     replyingTo,
     clearReplyingTo,
     smartReplies,
   } = useChatStore();
+
 
   const isAI = selectedChatType === "private" && selectedUser?.isAI;
 
@@ -483,6 +491,19 @@ const MessageInput = () => {
                 >
                   <Paperclip size={18} />
                 </button>
+
+                {/* Poll button — group chats only */}
+                {selectedChatType === "group" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPollModal(true)}
+                    className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                    title="Create poll"
+                  >
+                    <BarChart2 size={18} />
+                  </button>
+                )}
+
               </div>
             )}
           </div>
@@ -524,6 +545,13 @@ const MessageInput = () => {
           </button>
         </div>
       </form>
+
+      {/* Poll creator modal — rendered outside form to avoid nesting issues */}
+      <PollCreatorModal
+        isOpen={showPollModal}
+        onClose={() => setShowPollModal(false)}
+        groupId={selectedGroup?._id}
+      />
     </div>
   );
 };
@@ -541,3 +569,4 @@ const Preview = ({ children, onRemove }) => (
 );
 
 export default MessageInput;
+

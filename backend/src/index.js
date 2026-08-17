@@ -15,6 +15,7 @@ import adminRoutes from "./routes/admin.routes.js";
 import reportRoutes from "./routes/report.routes.js";
 import gifRoutes from "./routes/gif.routes.js";
 import userRoutes from "./routes/user.route.js";
+import pollRoutes from "./routes/poll.routes.js";
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/gif", gifRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/polls", pollRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
