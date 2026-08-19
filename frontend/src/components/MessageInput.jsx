@@ -10,13 +10,11 @@ import {
   Clapperboard,
   BarChart2,
 } from "lucide-react";
-
 import toast from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
 import EmojiPicker from "emoji-picker-react";
 import GifPicker from "./GifPicker";
 import PollCreatorModal from "./PollCreatorModal";
-
 
 const MessageInput = () => {
   const [text, setText] = useState("");
@@ -28,7 +26,6 @@ const MessageInput = () => {
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showPollModal, setShowPollModal] = useState(false);
-
 
   const emojiRef = useRef(null);
   const gifRef = useRef(null);
@@ -52,8 +49,8 @@ const MessageInput = () => {
     smartReplies,
   } = useChatStore();
 
-
   const isAI = selectedChatType === "private" && selectedUser?.isAI;
+  const hasContent = Boolean(text.trim() || imagePreview || fileData || audioData);
 
   useEffect(() => {
     return () => {
@@ -133,7 +130,7 @@ const MessageInput = () => {
         const reader = new FileReader();
         reader.onload = () => setAudioData(reader.result);
         reader.readAsDataURL(blob);
-        stream.getTracks().forEach((track) => track.stop()); // Clean up hardware use
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorder.start();
@@ -164,7 +161,7 @@ const MessageInput = () => {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview && !fileData && !audioData) return;
+    if (!hasContent) return;
 
     stopTyping();
 
@@ -184,13 +181,10 @@ const MessageInput = () => {
         : await sendMessage(payload);
     }
 
-    // Reset all states
     setText("");
     setImagePreview(null);
     setFileData(null);
     setAudioData(null);
-
-    // useChatStore.setState({ smartReplies: [] });
   };
 
   const handleDragOver = (e) => {
@@ -229,55 +223,57 @@ const MessageInput = () => {
 
   return (
     <div
-      className={`relative border-t border-base-300 p-2 sm:p-4 w-full shrink-0 bg-base-100 ${
+      className={`relative border-t border-base-200/80 dark:border-base-800 px-4 py-3 w-full shrink-0 bg-base-100/80 backdrop-blur-md ${
         dragActive ? "bg-primary/10 border-primary" : ""
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Drop Zone Overlay */}
       {dragActive && (
-        <div className="absolute inset-0 flex items-center justify-center bg-base-200/70 backdrop-blur-sm z-40 rounded-xl">
-          <p className="text-lg font-semibold text-primary">
-            Drop file to upload
+        <div className="absolute inset-0 flex items-center justify-center bg-base-100/90 backdrop-blur-md z-40 rounded-2xl border-2 border-dashed border-primary m-2">
+          <p className="text-sm font-bold text-primary animate-pulse">
+            Drop file here to upload
           </p>
         </div>
       )}
+
+      {/* Replying Banner */}
       {replyingTo && (
-        <div className="mb-2 flex items-center justify-between rounded-lg bg-base-200 px-3 py-2 text-sm">
-          <div className="truncate">
-            <span className="text-primary font-medium mr-1">Replying to</span>
-            {replyingTo.text || "Media message"}
+        <div className="mb-2 flex items-center justify-between rounded-xl bg-base-200/70 border border-base-300/40 px-3.5 py-2 text-xs">
+          <div className="truncate flex items-center gap-1.5">
+            <span className="text-primary font-bold">Replying to:</span>
+            <span className="text-base-content/70 truncate">{replyingTo.text || "Media attachment"}</span>
           </div>
           <button
             onClick={clearReplyingTo}
-            className="btn btn-ghost btn-xs"
+            className="w-5 h-5 rounded-full flex items-center justify-center text-base-content/50 hover:bg-base-300 hover:text-base-content transition-colors"
             type="button"
           >
-            <X size={14} />
+            <X size={13} />
           </button>
         </div>
       )}
 
+      {/* Media & Attachment Previews */}
       {(imagePreview || fileData || audioData) && (
-        <div className="mb-3 flex flex-wrap gap-2 animate-in fade-in slide-in-from-bottom-2">
+        <div className="mb-2.5 flex flex-wrap gap-2 animate-in fade-in slide-in-from-bottom-2">
           {imagePreview && (
             <Preview onRemove={() => setImagePreview(null)}>
-              <div className="relative group">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="h-14 w-14 sm:h-20 sm:w-20 rounded-lg object-cover border border-base-300"
-                />
-              </div>
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="h-16 w-16 rounded-xl object-cover border border-base-300 shadow-sm"
+              />
             </Preview>
           )}
 
           {fileData && (
             <Preview onRemove={() => setFileData(null)}>
-              <div className="flex items-center gap-2 text-xs sm:text-sm bg-base-300/50 p-2 rounded-lg">
+              <div className="flex items-center gap-2 text-xs bg-base-200 border border-base-300 px-3 py-2 rounded-xl shadow-sm">
                 <Paperclip size={14} className="text-primary" />
-                <span className="truncate max-w-[120px] sm:max-w-[200px] font-medium">
+                <span className="truncate max-w-[150px] font-medium text-base-content/80">
                   {fileData.name}
                 </span>
               </div>
@@ -286,51 +282,31 @@ const MessageInput = () => {
 
           {audioData && (
             <Preview onRemove={() => setAudioData(null)}>
-              <div className="flex items-center gap-2 text-xs sm:text-sm bg-primary/10 text-primary p-2 rounded-lg">
+              <div className="flex items-center gap-2 text-xs bg-primary/10 text-primary border border-primary/20 px-3 py-2 rounded-xl">
                 <Mic size={14} />
-                <span className="font-medium">Voice message</span>
+                <span className="font-semibold">Voice memo attached</span>
               </div>
             </Preview>
           )}
         </div>
       )}
 
+      {/* Smart Replies */}
       {smartReplies?.length > 0 && !isAI && (
-        <div
-          className="
-      mb-4 relative overflow-hidden
-      rounded-2xl p-4
-      bg-base-100/60 backdrop-blur-xl
-      border border-base-300/50
-      shadow-lg shadow-primary/5
-      animate-in fade-in slide-in-from-bottom-4 duration-300
-    "
-        >
-          {/* Glow Background Effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-40 pointer-events-none" />
-
-          {/* Close Button */}
-          <button
-            type="button"
-            onClick={() => useChatStore.setState({ smartReplies: [] })}
-            className="
-        absolute top-3 right-3
-        w-6 h-6 flex items-center justify-center
-        rounded-full text-xs
-        bg-base-200 hover:bg-error hover:text-white
-        transition-all duration-200
-      "
-          >
-            ✕
-          </button>
-
-          {/* Title */}
-          <p className="text-xs font-semibold text-base-content/50 mb-3 uppercase tracking-wider">
-            Suggested Replies
-          </p>
-
-          {/* Replies */}
-          <div className="flex flex-wrap gap-3">
+        <div className="mb-3 relative overflow-hidden rounded-2xl p-3 bg-base-200/50 border border-base-300/40">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold text-base-content/50 uppercase tracking-wider">
+              Suggested Replies
+            </span>
+            <button
+              type="button"
+              onClick={() => useChatStore.setState({ smartReplies: [] })}
+              className="text-base-content/40 hover:text-error transition-colors"
+            >
+              <X size={12} />
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
             {smartReplies.map((reply, index) => (
               <button
                 key={index}
@@ -339,23 +315,7 @@ const MessageInput = () => {
                   setText(reply);
                   useChatStore.setState({ smartReplies: [] });
                 }}
-                className="
-            group relative
-            px-4 py-2 rounded-full
-            bg-gradient-to-r from-primary/10 to-primary/5
-            text-primary
-            border border-primary/20
-            text-sm font-medium
-            transition-all duration-300
-            hover:scale-105 hover:bg-primary hover:text-white
-            hover:shadow-lg hover:shadow-primary/30
-            active:scale-95
-          "
-                style={{
-                  animation: `fadeSlideUp 0.4s ease forwards`,
-                  animationDelay: `${index * 70}ms`,
-                  opacity: 0,
-                }}
+                className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 transition-all duration-200 active:scale-95"
               >
                 {reply}
               </button>
@@ -364,189 +324,146 @@ const MessageInput = () => {
         </div>
       )}
 
-      <form onSubmit={handleSend} className="flex items-end gap-2">
-        <div className="flex-1 flex flex-col gap-2 min-w-0">
-          <div className="relative flex items-center bg-base-200 rounded-xl px-3 py-1 sm:py-2">
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => handleTyping(e.target.value)}
-              onBlur={stopTyping}
-              placeholder={isAI ? "Ask AI assistant…" : "Message"}
-              disabled={recording}
-              className="
-    w-full min-w-0
-    h-11 sm:h-12
-    px-3 sm:px-4
-    text-sm sm:text-base
-    rounded-full
-    bg-base-200/70
-    placeholder:text-base-content/40
-    focus:outline-none
-    focus:bg-base-100
-    focus:ring-2
-    focus:ring-primary/30
-    transition-all
-    disabled:opacity-50
-    disabled:cursor-not-allowed
-  "
-            />
+      {/* Main Bar */}
+      <form onSubmit={handleSend} className="flex items-center gap-2">
+        {/* Unified Input Bar */}
+        <div className="flex-1 flex items-center bg-base-200/60 dark:bg-base-800/50 border border-base-300/50 dark:border-white/5 rounded-2xl px-2.5 py-1 focus-within:border-primary/50 focus-within:bg-base-100 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+          <input
+            type="text"
+            value={text}
+            onChange={(e) => handleTyping(e.target.value)}
+            onBlur={stopTyping}
+            placeholder={isAI ? "Ask AI assistant…" : "Type a message…"}
+            disabled={recording}
+            className="flex-1 bg-transparent px-2.5 py-2 text-sm text-base-content placeholder:text-base-content/40 outline-none disabled:opacity-50"
+          />
 
-{!isAI && (
-              <div className="flex items-center gap-0.5 sm:gap-1 ml-2">
-                <input
-                  ref={imageRef}
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={handleImageChange}
-                />
-                <input
-                  ref={fileRef}
-                  type="file"
-                  hidden
-                  onChange={handleFileChange}
-                />
+          {!isAI && (
+            <div className="flex items-center gap-0.5 text-base-content/50">
+              <input
+                ref={imageRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={handleImageChange}
+              />
+              <input
+                ref={fileRef}
+                type="file"
+                hidden
+                onChange={handleFileChange}
+              />
 
-                <div className="relative" ref={emojiRef}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                   setShowGifPicker(false);
-                   setShowEmojiPicker((prev) => !prev);
-                   }}
-                    className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
-                  >
-                    <Smile size={18} />
-                  </button>
+              {/* Emoji Picker Button */}
+              <div className="relative" ref={emojiRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGifPicker(false);
+                    setShowEmojiPicker((prev) => !prev);
+                  }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+                >
+                  <Smile size={18} />
+                </button>
 
-                  {showEmojiPicker && (
-                  <div
-                    className="
-                      fixed sm:absolute
-                      bottom-0 sm:bottom-12
-                      left-0 sm:left-auto
-                      right-0
-                      z-50
-                      w-full sm:w-auto
-                      bg-base-100
-                      border-t sm:border sm:rounded-xl
-                      shadow-lg
-                    "
-                  >
+                {showEmojiPicker && (
+                  <div className="fixed sm:absolute bottom-16 sm:bottom-12 right-4 sm:right-0 z-50 shadow-2xl rounded-2xl overflow-hidden border border-base-300">
                     <EmojiPicker
                       onEmojiClick={handleEmojiClick}
-                      width="100%"
-                      height={320}
+                      width={320}
+                      height={360}
                     />
                   </div>
                 )}
-                </div>
+              </div>
 
+              {/* Image Button */}
+              <button
+                type="button"
+                onClick={() => imageRef.current.click()}
+                className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+              >
+                <Image size={18} />
+              </button>
+
+              {/* GIF Picker Button */}
+              <div className="relative" ref={gifRef}>
                 <button
                   type="button"
-                  onClick={() => imageRef.current.click()}
-                  className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
-                >
-                  <Image size={18} />
-                </button>
-
-                <div className="relative" ref={gifRef}>
-                  <button
-                    type="button"
-                    onClick={() => {
+                  onClick={() => {
                     setShowEmojiPicker(false);
                     setShowGifPicker((prev) => !prev);
-                    }}
-                    className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
-                  >
-                    <Clapperboard size={18} />
-                  </button>
-
-                  {showGifPicker && (
-                    <div
-                      className="
-                        fixed sm:absolute
-                        bottom-0 sm:bottom-12
-                        left-0 sm:left-auto
-                        right-0
-                        z-50
-                        w-full sm:w-auto
-                        sm:border sm:rounded-xl
-                        shadow-lg
-                      "
-                    >
-                      <GifPicker
-                        onSelect={handleGifSelect}
-                        onClose={() => setShowGifPicker(false)}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => fileRef.current.click()}
-                  className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                  }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
                 >
-                  <Paperclip size={18} />
+                  <Clapperboard size={18} />
                 </button>
 
-                {/* Poll button — group chats only */}
-                {selectedChatType === "group" && (
-                  <button
-                    type="button"
-                    onClick={() => setShowPollModal(true)}
-                    className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
-                    title="Create poll"
-                  >
-                    <BarChart2 size={18} />
-                  </button>
+                {showGifPicker && (
+                  <div className="fixed sm:absolute bottom-16 sm:bottom-12 right-4 sm:right-0 z-50 shadow-2xl rounded-2xl overflow-hidden border border-base-300">
+                    <GifPicker
+                      onSelect={handleGifSelect}
+                      onClose={() => setShowGifPicker(false)}
+                    />
+                  </div>
                 )}
-
               </div>
-            )}
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2 mb-[7px]">
-          {!isAI && (
-            <div className="flex items-center">
-              {!recording ? (
+              {/* Attachment Button */}
+              <button
+                type="button"
+                onClick={() => fileRef.current.click()}
+                className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+              >
+                <Paperclip size={18} />
+              </button>
+
+              {/* Poll Button (Group chats only) */}
+              {selectedChatType === "group" && (
                 <button
                   type="button"
-                  onClick={startRecording}
-                  className="btn btn-ghost btn-circle btn-sm sm:btn-md"
+                  onClick={() => setShowPollModal(true)}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-primary/80 hover:text-primary hover:bg-primary/10 transition-colors"
+                  title="Create Poll"
                 >
-                  <Mic size={22} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={stopRecording}
-                  className="btn btn-error btn-circle btn-sm sm:btn-md animate-pulse"
-                >
-                  <StopCircle size={22} />
+                  <BarChart2 size={18} />
                 </button>
               )}
             </div>
           )}
+        </div>
 
+        {/* Audio Recording / Mic Button */}
+        {!isAI && (
           <button
-            type="submit"
-            disabled={!text.trim() && !imagePreview && !fileData && !audioData}
-            className={`btn btn-primary btn-circle btn-sm sm:btn-md ${
-              !text.trim() && !imagePreview && !fileData && !audioData
-                ? "btn-disabled opacity-50"
-                : ""
+            type="button"
+            onClick={recording ? stopRecording : startRecording}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
+              recording
+                ? "bg-error text-white shadow-lg shadow-error/30 animate-pulse"
+                : "bg-base-200/70 hover:bg-base-300/80 text-base-content/70"
             }`}
           >
-            <Send size={20} />
+            {recording ? <StopCircle size={20} /> : <Mic size={20} />}
           </button>
-        </div>
+        )}
+
+        {/* Send Button */}
+        <button
+          type="submit"
+          disabled={!hasContent}
+          className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200 ${
+            hasContent
+              ? "bg-primary text-primary-content shadow-lg shadow-primary/30 hover:scale-105 active:scale-95"
+              : "bg-base-200/50 text-base-content/30 cursor-not-allowed"
+          }`}
+        >
+          <Send size={18} className={hasContent ? "translate-x-0.5" : ""} />
+        </button>
       </form>
 
-      {/* Poll creator modal — rendered outside form to avoid nesting issues */}
+      {/* Poll Creator Modal */}
       <PollCreatorModal
         isOpen={showPollModal}
         onClose={() => setShowPollModal(false)}
@@ -561,12 +478,12 @@ const Preview = ({ children, onRemove }) => (
     {children}
     <button
       onClick={onRemove}
+      type="button"
       className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-base-300 flex items-center justify-center border border-base-100 shadow-sm hover:bg-error hover:text-white transition-colors"
     >
-      <X size={12} />
+      <X size={11} />
     </button>
   </div>
 );
 
 export default MessageInput;
-
