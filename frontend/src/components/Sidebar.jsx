@@ -1,4 +1,13 @@
-import { CircleDot, Pin, Plus, Trash2, Users, UsersRound } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  CircleDot,
+  Pin,
+  Plus,
+  Sparkles,
+  Trash2,
+  Users,
+  UsersRound,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import CreateGroupModal from "./CreateGroupModal";
@@ -89,15 +98,15 @@ const Sidebar = ({ setActiveTab }) => {
     <>
       <aside className="flex h-full flex-col border-r border-base-300 bg-base-100 w-full md:w-20 lg:w-72 transition-all duration-300 select-none">
         {/* Header Section */}
-        <div className="border-b border-base-300 p-3 lg:p-4">
+        <div className="border-b border-base-300 px-4 py-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary">
+              <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-semibold">
                 <Users className="h-5 w-5" />
               </div>
-              <span className="font-semibold text-base block md:hidden lg:block tracking-wide">
-                Chats
-              </span>
+              <div className="hidden lg:block leading-tight">
+                <h2 className="font-bold text-base text-base-content">Chats</h2>
+              </div>
             </div>
 
             <div className="flex items-center gap-1">
@@ -120,7 +129,7 @@ const Sidebar = ({ setActiveTab }) => {
           </div>
 
           {/* Online Filter Toggle */}
-          <div className="mt-3 flex md:hidden lg:flex items-center justify-between px-1">
+          <div className="mt-3 hidden lg:flex items-center justify-between px-0.5">
             <label className="cursor-pointer flex items-center gap-2 text-xs font-medium text-base-content/70 hover:text-base-content transition-colors">
               <input
                 type="checkbox"
@@ -137,11 +146,11 @@ const Sidebar = ({ setActiveTab }) => {
         </div>
 
         {/* Chat List Container */}
-        <div className="flex-1 overflow-y-auto px-1.5 py-2 space-y-4 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-2 py-2.5 space-y-4 custom-scrollbar">
           {/* GROUPS SECTION */}
           {groups.length > 0 && (
             <div className="space-y-1">
-              <div className="px-3 py-1 flex items-center justify-between text-[11px] font-bold tracking-wider text-base-content/50 uppercase">
+              <div className="px-2.5 py-1 flex items-center justify-between text-[11px] font-bold tracking-wider text-base-content/45 uppercase">
                 <span className="block md:hidden lg:block">Groups</span>
                 <span className="hidden md:block lg:hidden text-center w-full">GRP</span>
               </div>
@@ -160,10 +169,11 @@ const Sidebar = ({ setActiveTab }) => {
                       isActive
                         ? "bg-primary/15 text-primary font-medium"
                         : "hover:bg-base-200/70 text-base-content/80 hover:text-base-content"
-                    } ${pinned ? "border-l-2 border-warning/80 bg-base-200/40" : ""}`}
+                    }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative flex-shrink-0">
+                      {/* Avatar with Floating Pin Badge */}
+                      <div className="relative shrink-0">
                         {group.avatar ? (
                           <img
                             src={group.avatar}
@@ -171,26 +181,31 @@ const Sidebar = ({ setActiveTab }) => {
                             className="h-10 w-10 rounded-full object-cover ring-1 ring-base-300"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold">
+                          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
                             <UsersRound className="h-5 w-5" />
                           </div>
                         )}
+
+                        {pinned && (
+                          <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-md ring-2 ring-base-100 z-10">
+                            <Pin size={11} className="fill-black" />
+                          </span>
+                        )}
                       </div>
 
-                      <div className="block md:hidden lg:block text-left truncate">
-                        <p className="text-sm font-medium leading-snug truncate">
+                      <div className="hidden md:hidden lg:block text-left truncate">
+                        <p className="text-sm font-semibold truncate leading-snug">
                           {group.name}
                         </p>
                         <p className="text-xs text-base-content/50 truncate">
-                          Group chat
+                          {group.members?.length || 0} members
                         </p>
                       </div>
                     </div>
 
-                    {/* Actions & Badges (Visible on mobile & lg, hidden on md) */}
-                    <div className="flex md:hidden lg:flex items-center gap-1 flex-shrink-0">
-                      {/* Mobile Always-Visible / Desktop Hover Actions */}
-                      <div className="flex items-center opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {/* Actions & Badges */}
+                    <div className="hidden md:hidden lg:flex items-center gap-1 shrink-0">
+                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <span
                           onClick={(e) => handlePin(e, group._id, "group")}
                           className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-warning"
@@ -213,7 +228,6 @@ const Sidebar = ({ setActiveTab }) => {
                         )}
                       </div>
 
-                      {/* Unread Badge */}
                       {unread > 0 && (
                         <span className="badge badge-error badge-sm text-[10px] font-bold h-5 min-w-[20px] px-1">
                           {unread > 9 ? "9+" : unread}
@@ -226,9 +240,9 @@ const Sidebar = ({ setActiveTab }) => {
             </div>
           )}
 
-          {/* USERS SECTION */}
+          {/* DIRECT MESSAGES SECTION */}
           <div className="space-y-1">
-            <div className="px-3 py-1 flex items-center justify-between text-[11px] font-bold tracking-wider text-base-content/50 uppercase">
+            <div className="px-2.5 py-1 flex items-center justify-between text-[11px] font-bold tracking-wider text-base-content/45 uppercase">
               <span className="block md:hidden lg:block">Direct Messages</span>
               <span className="hidden md:block lg:hidden text-center w-full">DM</span>
             </div>
@@ -238,6 +252,7 @@ const Sidebar = ({ setActiveTab }) => {
               const isOnline = onlineSet.has(String(user._id));
               const pinned = isPinned(user._id, "user");
               const unread = unreadCounts[user._id] || 0;
+              const isAI = user.isAI;
 
               return (
                 <button
@@ -247,38 +262,63 @@ const Sidebar = ({ setActiveTab }) => {
                     isSelected
                       ? "bg-primary/15 text-primary font-medium"
                       : "hover:bg-base-200/70 text-base-content/80 hover:text-base-content"
-                  } ${pinned ? "border-l-2 border-warning/80 bg-base-200/40" : ""}`}
+                  }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={user.profilePic || "/avatar.png"}
-                        alt={user.fullName}
-                        className="h-10 w-10 rounded-full object-cover ring-1 ring-base-300"
-                      />
-                      {isOnline && (
-                        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-success ring-2 ring-base-100" />
+                    {/* Avatar with Floating Pin Badge */}
+                    <div className="relative shrink-0">
+                      {isAI ? (
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-primary/20 via-primary/10 to-base-200 flex items-center justify-center border border-primary/25 text-primary shadow-sm">
+                          <Sparkles className="h-5 w-5 animate-pulse" />
+                        </div>
+                      ) : (
+                        <img
+                          src={user.profilePic || "/avatar.png"}
+                          alt={user.fullName}
+                          className="h-10 w-10 rounded-full object-cover ring-1 ring-base-300"
+                        />
+                      )}
+
+                      {/* Top-Right Yellow Pin Badge */}
+                      {pinned && (
+                        <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-md ring-2 ring-base-100 z-10">
+                          <Pin size={11} className="fill-black" />
+                        </span>
+                      )}
+
+                      {/* Bottom-Right Online Green Dot */}
+                      {isOnline && !isAI && (
+                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-base-100" />
                       )}
                     </div>
 
-                    <div className="block md:hidden lg:block text-left truncate">
-                      <p className="text-sm font-medium leading-snug truncate">
-                        {user.fullName}
-                      </p>
+                    <div className="hidden md:hidden lg:block text-left truncate">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <p className="text-sm font-semibold truncate leading-snug">
+                          {isAI ? "Meta AI" : user.fullName}
+                        </p>
+                        {isAI && (
+                          <Sparkles size={13} className="text-primary shrink-0" />
+                        )}
+                      </div>
                       <p className="text-xs text-base-content/50 truncate">
-                        {user.isAI
+                        {isAI
                           ? "Always Active"
                           : isOnline
                           ? "Online"
+                          : user.lastSeen
+                          ? `Last seen ${new Date(user.lastSeen).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}`
                           : "Offline"}
                       </p>
                     </div>
                   </div>
 
                   {/* Actions & Badges */}
-                  <div className="flex md:hidden lg:flex items-center gap-1 flex-shrink-0">
-                    {/* Mobile Always-Visible / Desktop Hover Action */}
-                    <div className="flex items-center opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="hidden md:hidden lg:flex items-center gap-1 shrink-0">
+                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <span
                         onClick={(e) => handlePin(e, user._id, "user")}
                         className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-warning"
@@ -291,7 +331,6 @@ const Sidebar = ({ setActiveTab }) => {
                       </span>
                     </div>
 
-                    {/* Unread Message Counter Badge */}
                     {unread > 0 && (
                       <span className="badge badge-error badge-sm text-[10px] font-bold h-5 min-w-[20px] px-1">
                         {unread > 9 ? "9+" : unread}
@@ -305,9 +344,11 @@ const Sidebar = ({ setActiveTab }) => {
         </div>
       </aside>
 
-      {showCreateGroup && (
-        <CreateGroupModal onClose={() => setShowCreateGroup(false)} />
-      )}
+      <AnimatePresence>
+        {showCreateGroup && (
+          <CreateGroupModal onClose={() => setShowCreateGroup(false)} />
+        )}
+      </AnimatePresence>
     </>
   );
 };
