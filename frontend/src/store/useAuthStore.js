@@ -46,6 +46,14 @@ export const useAuthStore = create((set, get) => ({
     set({ isSigningUp: true });
     try {
       const res = await axiosInstance.post("/auth/signup", data);
+      // Development signup can return an authenticated user when email
+      // verification is deliberately bypassed. Persist that session just as
+      // the regular login flow does.
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        set({ authUser: res.data });
+        get().connectSocket();
+      }
       toast.success(res.data.message || "Account created. Please verify your Email.");
       return res.data;
     } catch (error) {

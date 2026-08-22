@@ -16,6 +16,7 @@ import reportRoutes from "./routes/report.routes.js";
 import statusRoutes from "./routes/status.routes.js";
 import userRoutes from "./routes/user.route.js";
 import seedAIUser from "./seeds/seedAIUser.js";
+import pollRoutes from "./routes/poll.routes.js";
 
 dotenv.config();
 

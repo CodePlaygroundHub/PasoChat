@@ -58,6 +58,13 @@ const SignUpPage = () => {
     if (!validateForm()) return;
     const result = await signup(formData);
     if (result) {
+      // A development OTP bypass returns an authenticated session directly.
+      // Only show the verification screen when the backend requests it.
+      if (result.token) {
+        navigate("/");
+        return;
+      }
+
       const email = result.email || formData.email.trim();
       sessionStorage.setItem("pendingVerificationEmail", email);
       navigate("/verify-email", { state: { email } });
