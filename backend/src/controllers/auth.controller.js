@@ -1,11 +1,11 @@
-import bcrypt from "bcryptjs";
-import crypto from "crypto";
 import { OAuth2Client } from "google-auth-library";
-import jwt from "jsonwebtoken";
-import cloudinary from "../lib/cloudinary.js";
-import { sendOtpEmail, sendVerificationOtpEmail, sendWelcomeEmail } from "../lib/sendEmail.js";
-import { generateRefreshToken, generateToken } from "../lib/utils.js";
+import { generateToken, generateRefreshToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
+import cloudinary from "../lib/cloudinary.js";
+import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 // Google OAuth client used to verify Google ID tokens.
 const googleClient = process.env.GOOGLE_CLIENT_ID
@@ -89,50 +89,6 @@ export const signup = async (req, res) => {
         ),
       }))
     );
-    // Test-only bypass. It requires an explicit opt-in and can never run in
-    // production, even if the environment flag is set accidentally.
-    const isEmailVerificationBypassed =
-      process.env.NODE_ENV === "development" &&
-      process.env.BYPASS_EMAIL_VERIFICATION === "true";
-
-    if (isEmailVerificationBypassed) {
-      // Auto-verify the user and log them in immediately
-      const newUser = await User.create({
-        fullName,
-        email: normalizedEmail,
-        password: hashedPassword,
-        securityQuestions: hashedQuestions,
-        role: "user",
-        isVerified: true, // skip email verification
-      });
-
-      const token = generateToken(newUser._id);
-      const refreshToken = generateRefreshToken(newUser._id);
-      const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
-      newUser.refreshTokenHash = refreshTokenHash;
-      await newUser.save();
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        sameSite: "strict",
-        secure: false,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      console.log("[DEV MODE] User auto-verified, no OTP email sent.");
-
-      return res.status(201).json({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-        role: newUser.role,
-        token,
-        message: "[DEV] Account created and verified automatically (dev mode).",
-      });
-    }
-    // --- END DEV MODE BYPASS ---
-
     const verificationOtp = crypto.randomInt(100000, 1000000).toString();
 
     const hashedVerificationOtp = await bcrypt.hash(
@@ -221,16 +177,20 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    const isDevBypass =
-      process.env.NODE_ENV === "development" &&
-      (process.env.BYPASS_EMAIL_VERIFICATION === "true" || otp === "123456");
+    if (
+      !user.emailVerificationOtp ||
+      !user.emailVerificationOtpExpiry ||
+      user.emailVerificationOtpExpiry < new Date()
+    ) {
+      return res.status(400).json({
+        message: genericErrorMessage,
+      });
+    }
 
-    const isOtpValid =
-      isDevBypass ||
-      (user.emailVerificationOtp &&
-        user.emailVerificationOtpExpiry &&
-        user.emailVerificationOtpExpiry >= new Date() &&
-        (await bcrypt.compare(otp, user.emailVerificationOtp)));
+    const isOtpValid = await bcrypt.compare(
+      otp,
+      user.emailVerificationOtp
+    );
 
     if (!isOtpValid) {
       return res.status(400).json({
@@ -638,7 +598,7 @@ export const setupSecurityQuestions =
         message:
           "Security questions saved",
       });
-    } catch {
+    } catch  {
       res.status(500).json({
         message:
           "Internal Server Error",
@@ -1126,7 +1086,7 @@ export const googleAuth = async (req, res) => {
   try {
     if (!googleClient) {
       return res.status(500).json({
-        message: "Google OAuth is not configured.",
+          message: "Google OAuth is not configured.",
       });
     }
     // Implementation will be added incrementally.
