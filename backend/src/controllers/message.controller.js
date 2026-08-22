@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import User from "../models/user.model.js";
-import Message from "../models/message.model.js";
-import Group from "../models/group.model.js";
 import cloudinary from "../lib/cloudinary.js";
-import { emitToUser, io } from "../lib/socket.js";
 import analyzeMessage from "../lib/mlService.js";
+import { emitToUser, io } from "../lib/socket.js";
+import Group from "../models/group.model.js";
+import Message from "../models/message.model.js";
+import User from "../models/user.model.js";
 
 export const updateChatWallpaper = async (req, res) => {
   try {
@@ -90,7 +90,7 @@ export const getMessages = async (req, res) => {
       deletedForEveryone: false,
       deletedFor: { $ne: myId },
     })
-      .populate("replyTo", "text image senderId")
+      .populate("replyTo", "text image sticker senderId")
       .sort({ createdAt: 1 });
 
     await Message.updateMany(
@@ -117,7 +117,7 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image, audio, file, replyTo } = req.body;
+    const { text, image, audio, file, sticker, replyTo } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
@@ -137,7 +137,7 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    if (!text && !image && !audio && !file) {
+    if (!text && !image && !audio && !file && !sticker) {
       return res.status(400).json({ message: "Message cannot be empty" });
     }
 
@@ -189,6 +189,7 @@ export const sendMessage = async (req, res) => {
       image: imageUrl,
       audio: audioUrl,
       file: fileData,
+      sticker: sticker || "",
       replyTo: replyTo || null,
       status: "sent",
 
@@ -201,7 +202,7 @@ export const sendMessage = async (req, res) => {
 
     message = await message.populate({
       path: "replyTo",
-      select: "text image senderId",
+      select: "text image sticker senderId",
       populate: {
         path: "senderId",
         select: "fullName profilePic",
@@ -249,7 +250,7 @@ export const getGroupMessages = async (req, res) => {
       deletedFor: { $ne: userId },
     })
       .populate("senderId", "fullName profilePic")
-      .populate("replyTo", "text image senderId")
+      .populate("replyTo", "text image sticker senderId")
       .sort({ createdAt: 1 });
 
     res.status(200).json(messages);
@@ -262,7 +263,7 @@ export const sendGroupMessage = async (req, res) => {
   try {
     const { groupId } = req.params;
     const senderId = req.user._id;
-    const { text, image, audio, file, replyTo } = req.body;
+    const { text, image, audio, file, sticker, replyTo } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(groupId)) {
       return res.status(400).json({ message: "Invalid group id" });
@@ -280,6 +281,10 @@ export const sendGroupMessage = async (req, res) => {
     );
     if (!isMember)
       return res.status(403).json({ message: "Not a group member" });
+
+    if (!text && !image && !audio && !file && !sticker) {
+      return res.status(400).json({ message: "Message cannot be empty" });
+    }
 
     let imageUrl = "";
     let audioUrl = "";
@@ -329,6 +334,7 @@ export const sendGroupMessage = async (req, res) => {
       image: imageUrl,
       audio: audioUrl,
       file: fileData,
+      sticker: sticker || "",
       replyTo: replyTo || null,
       status: "sent",
 
@@ -449,6 +455,7 @@ export const forwardMessage = async (req, res) => {
         image: originalMessage.image,
         audio: originalMessage.audio,
         file: safeFile,
+        sticker: originalMessage.sticker || "",
         isForwarded: true,
         originalMessageId: originalMessage._id,
       });

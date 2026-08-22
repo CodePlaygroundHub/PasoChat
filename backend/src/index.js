@@ -1,26 +1,27 @@
-import express from "express";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
 import path from "path";
 import { connectDB } from "./lib/db.js";
 import { app, server } from "./lib/socket.js";
-import authRoutes from "./routes/auth.route.js";
-import messageRoutes from "./routes/message.route.js";
-import groupRoutes from "./routes/group.routes.js";
-import aiRoutes from "./routes/ai.routes.js";
-import seedAIUser from "./seeds/seedAIUser.js";
-import statusRoutes from "./routes/status.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
-import reportRoutes from "./routes/report.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
+import authRoutes from "./routes/auth.route.js";
 import gifRoutes from "./routes/gif.routes.js";
-import userRoutes from "./routes/user.route.js";
+import groupRoutes from "./routes/group.routes.js";
+import messageRoutes from "./routes/message.route.js";
 import pollRoutes from "./routes/poll.routes.js";
+import reportRoutes from "./routes/report.routes.js";
+import statusRoutes from "./routes/status.routes.js";
+import stickerRoutes from "./routes/sticker.routes.js";
+import userRoutes from "./routes/user.route.js";
+import seedAIUser from "./seeds/seedAIUser.js";
 
 dotenv.config();
-
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
+
 app.set("trust proxy", 1);
 
 app.use(
@@ -33,9 +34,7 @@ app.use(
     credentials: true,
   })
 );
-
 // app.options("*", cors());
-
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
@@ -49,11 +48,11 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/gif", gifRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/stickers", stickerRoutes);
 app.use("/api/polls", pollRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
   app.get("*", (req, res) => {
     res.sendFile(
       path.join(__dirname, "../frontend", "dist", "index.html")
@@ -64,7 +63,6 @@ if (process.env.NODE_ENV === "production") {
 const startServer = async () => {
   await connectDB();
   await seedAIUser();
-
   server.listen(PORT, () => {
     console.log(`Server running on PORT: ${PORT}`);
   });

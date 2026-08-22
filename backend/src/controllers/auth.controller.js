@@ -89,50 +89,6 @@ export const signup = async (req, res) => {
         ),
       }))
     );
-    // Test-only bypass. It requires an explicit opt-in and can never run in
-    // production, even if the environment flag is set accidentally.
-    const isEmailVerificationBypassed =
-      process.env.NODE_ENV === "development" &&
-      process.env.BYPASS_EMAIL_VERIFICATION === "true";
-
-    if (isEmailVerificationBypassed) {
-      // Auto-verify the user and log them in immediately
-      const newUser = await User.create({
-        fullName,
-        email: normalizedEmail,
-        password: hashedPassword,
-        securityQuestions: hashedQuestions,
-        role: "user",
-        isVerified: true, // skip email verification
-      });
-
-      const token = generateToken(newUser._id);
-      const refreshToken = generateRefreshToken(newUser._id);
-      const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
-      newUser.refreshTokenHash = refreshTokenHash;
-      await newUser.save();
-
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        sameSite: "strict",
-        secure: false,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      console.log("[DEV MODE] User auto-verified, no OTP email sent.");
-
-      return res.status(201).json({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-        role: newUser.role,
-        token,
-        message: "[DEV] Account created and verified automatically (dev mode).",
-      });
-    }
-    // --- END DEV MODE BYPASS ---
-
     const verificationOtp = crypto.randomInt(100000, 1000000).toString();
 
     const hashedVerificationOtp = await bcrypt.hash(

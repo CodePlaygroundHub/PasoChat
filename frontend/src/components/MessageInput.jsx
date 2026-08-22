@@ -9,9 +9,11 @@ import {
   Smile,
   Clapperboard,
   BarChart2,
+  Sticker as StickerIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
+import StickerPicker from './StickerPicker';
 import EmojiPicker from "emoji-picker-react";
 import GifPicker from "./GifPicker";
 import PollCreatorModal from "./PollCreatorModal";
@@ -24,11 +26,13 @@ const MessageInput = () => {
   const [recording, setRecording] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showPollModal, setShowPollModal] = useState(false);
 
   const emojiRef = useRef(null);
   const gifRef = useRef(null);
+  const stickerRef = useRef(null);
   const fileRef = useRef(null);
   const imageRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -67,6 +71,9 @@ const MessageInput = () => {
       if (gifRef.current && !gifRef.current.contains(event.target)) {
         setShowGifPicker(false);
       }
+      if (stickerRef.current && !stickerRef.current.contains(event.target)) {
+        setShowStickerPicker(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -93,6 +100,28 @@ const MessageInput = () => {
   const handleGifSelect = (gifUrl) => {
     setImagePreview(gifUrl);
     setShowGifPicker(false);
+  };
+
+  const handleStickerSelect = async (stickerUrl) => {
+    setShowStickerPicker(false);
+    if (isAI) {
+      toast.error("AI assistant cannot receive stickers");
+      return;
+    }
+
+    const payload = {
+      text: "",
+      sticker: stickerUrl,
+      replyTo: replyingTo?._id || null,
+    };
+
+    try {
+      selectedChatType === "group"
+        ? await sendGroupMessage(payload)
+        : await sendMessage(payload);
+    } catch (error) {
+      toast.error("Failed to send sticker");
+    }
   };
 
   const handleFileChange = (e) => {
@@ -360,6 +389,7 @@ const MessageInput = () => {
                   type="button"
                   onClick={() => {
                     setShowGifPicker(false);
+                    setShowStickerPicker(false);
                     setShowEmojiPicker((prev) => !prev);
                   }}
                   className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
@@ -393,6 +423,7 @@ const MessageInput = () => {
                   type="button"
                   onClick={() => {
                     setShowEmojiPicker(false);
+                    setShowStickerPicker(false);
                     setShowGifPicker((prev) => !prev);
                   }}
                   className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
@@ -405,6 +436,31 @@ const MessageInput = () => {
                     <GifPicker
                       onSelect={handleGifSelect}
                       onClose={() => setShowGifPicker(false)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Sticker Picker Button */}
+              <div className="relative" ref={stickerRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEmojiPicker(false);
+                    setShowGifPicker(false);
+                    setShowStickerPicker((prev) => !prev);
+                  }}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+                  title="Stickers"
+                >
+                  <StickerIcon size={18} />
+                </button>
+
+                {showStickerPicker && (
+                  <div className="fixed sm:absolute bottom-16 sm:bottom-12 right-4 sm:right-0 z-50 shadow-2xl rounded-2xl overflow-hidden border border-base-300">
+                    <StickerPicker
+                      onSelect={handleStickerSelect}
+                      onClose={() => setShowStickerPicker(false)}
                     />
                   </div>
                 )}

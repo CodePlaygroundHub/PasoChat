@@ -52,6 +52,14 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
   const canDeleteForEveryone = isMe && !message.deletedForEveryone;
   const isAI = sender?.isAI;
 
+  const isStickerOnly =
+    !message.text &&
+    !message.image &&
+    !message.audio &&
+    !message.file?.url &&
+    !message.replyTo &&
+    message.sticker;
+
   const highlightedText = useMemo(() => {
     if (!searchQuery || !message.text) return message.text;
     const regex = new RegExp(`(${searchQuery})`, "ig");
@@ -352,7 +360,19 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                 </div>
               )}
 
-              <div
+              <motion.div
+                animate={
+                  isAI
+                    ? {
+                        boxShadow: [
+                          "0px 0px 0px rgba(59, 130, 246, 0)",
+                          "0px 0px 12px rgba(59, 130, 246, 0.2)",
+                          "0px 0px 0px rgba(59, 130, 246, 0)",
+                        ],
+                      }
+                    : {}
+                }
+                transition={{ repeat: Infinity, duration: 3 }}
                 className={`relative px-4 py-2.5 rounded-2xl transition-all shadow-xs ${
                   highlightedMessageId === message._id
                     ? "ring-2 ring-primary ring-offset-2"
@@ -360,6 +380,8 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                 } ${
                   message.deletedForEveryone
                     ? "bg-base-200/60 border border-base-content/10 text-base-content/50 italic text-xs sm:text-sm"
+                    : isStickerOnly
+                    ? "bg-transparent shadow-none border-none !p-0"
                     : isMe
                     ? "bg-primary text-primary-content rounded-tr-xs"
                     : isAI
@@ -422,8 +444,27 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                           {message.replyTo.senderId?.fullName || "User"}
                         </div>
                         <div className="truncate opacity-80 text-[11px]">
-                          {message.replyTo.text || "Media attachment"}
+                          {message.replyTo.text ||
+                            (message.replyTo.sticker
+                              ? "✨ Sticker"
+                              : "Media attachment")}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Sticker */}
+                    {message.sticker && (
+                      <div
+                        className={`flex ${
+                          isMe ? "justify-end" : "justify-start"
+                        } my-1`}
+                      >
+                        <img
+                          src={message.sticker}
+                          alt="Sticker"
+                          className="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-md hover:scale-110 transition-transform duration-200 cursor-pointer"
+                          loading="lazy"
+                        />
                       </div>
                     )}
 
@@ -525,7 +566,7 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                     ))}
                   </motion.div>
                 )}
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>

@@ -101,6 +101,16 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
 
+    favoriteStickers: {
+      type: [String],
+      default: [],
+    },
+
+    recentStickers: {
+      type: [String],
+      default: [],
+    },
+
     // Security Questions (Max 3)
     securityQuestions: {
       type: [securityQuestionSchema],
