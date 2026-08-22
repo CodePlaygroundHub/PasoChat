@@ -312,11 +312,13 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                     ${highlightedMessageId === message._id ? "ring-2 ring-primary ring-offset-2 bg-primary/10" : ""}
                     ${message.deletedForEveryone
                     ? "bg-base-200/50 border border-base-300 text-base-content/40 italic"
-                    : isMe
-                      ? "bg-primary text-primary-content rounded-tr-none shadow-md"
-                      : isAI
-                        ? "bg-base-100 border-2 border-primary/20 text-base-content rounded-tl-none shadow-lg shadow-primary/5"
-                        : "bg-base-100 border border-base-200 text-base-content rounded-tl-none shadow-sm"
+                    : (!message.text && !message.image && !message.audio && !message.file?.url && !message.replyTo && message.sticker)
+                      ? "bg-transparent shadow-none border-none !p-0"
+                      : isMe
+                        ? "bg-primary text-primary-content rounded-tr-none shadow-md"
+                        : isAI
+                          ? "bg-base-100 border-2 border-primary/20 text-base-content rounded-tl-none shadow-lg shadow-primary/5"
+                          : "bg-base-100 border border-base-200 text-base-content rounded-tl-none shadow-sm"
                   }
                 `}
               >
@@ -353,7 +355,18 @@ const MessageBubble = ({ message, sender, isMe, chatId }) => {
                         className="mb-1.5 px-2 py-1.5 rounded-lg bg-black/5 text-[12px] border-l-4 border-primary cursor-pointer hover:bg-black/10 transition"
                       >
                         <div className="font-bold text-primary truncate">{message.replyTo.senderId?.fullName || "User"}</div>
-                        <div className="truncate opacity-80">{message.replyTo.text || "Media message"}</div>
+                        <div className="truncate opacity-80">{message.replyTo.text || (message.replyTo.sticker ? "✨ Sticker" : "Media message")}</div>
+                      </div>
+                    )}
+
+                    {message.sticker && (
+                      <div className={`flex ${isMe ? "justify-end" : "justify-start"} my-1`}>
+                        <img
+                          src={message.sticker}
+                          alt="Sticker"
+                          className="w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-md hover:scale-110 transition-transform duration-200 cursor-pointer"
+                          loading="lazy"
+                        />
                       </div>
                     )}
 

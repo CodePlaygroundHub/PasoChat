@@ -8,9 +8,15 @@ import {
   StopCircle,
   Smile,
   Clapperboard,
+<<<<<<< HEAD
+=======
+  BarChart2,
+  Sticker as StickerIcon,
+>>>>>>> 51e2f7a (feat/added stickers using svg support)
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useChatStore } from "../store/useChatStore";
+import StickerPicker from './StickerPicker';
 import EmojiPicker from "emoji-picker-react";
 import GifPicker from "./GifPicker";
 
@@ -22,10 +28,12 @@ const MessageInput = () => {
   const [recording, setRecording] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
+  const [showStickerPicker, setShowStickerPicker] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const emojiRef = useRef(null);
   const gifRef = useRef(null);
+  const stickerRef = useRef(null);
   const fileRef = useRef(null);
   const imageRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -62,6 +70,9 @@ const MessageInput = () => {
       if (gifRef.current && !gifRef.current.contains(event.target)) {
         setShowGifPicker(false);
       }
+      if (stickerRef.current && !stickerRef.current.contains(event.target)) {
+        setShowStickerPicker(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -88,6 +99,28 @@ const MessageInput = () => {
   const handleGifSelect = (gifUrl) => {
     setImagePreview(gifUrl);
     setShowGifPicker(false);
+  };
+
+  const handleStickerSelect = async (stickerUrl) => {
+    setShowStickerPicker(false);
+    if (isAI) {
+      toast.error("AI assistant cannot receive stickers");
+      return;
+    }
+
+    const payload = {
+      text: "",
+      sticker: stickerUrl,
+      replyTo: replyingTo?._id || null,
+    };
+
+    try {
+      selectedChatType === "group"
+        ? await sendGroupMessage(payload)
+        : await sendMessage(payload);
+    } catch (error) {
+      toast.error("Failed to send sticker");
+    }
   };
 
   const handleFileChange = (e) => {
@@ -404,41 +437,44 @@ const MessageInput = () => {
                   <button
                     type="button"
                     onClick={() => {
-                   setShowGifPicker(false);
-                   setShowEmojiPicker((prev) => !prev);
-                   }}
+                      setShowGifPicker(false);
+                      setShowStickerPicker(false);
+                      setShowEmojiPicker((prev) => !prev);
+                    }}
                     className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                    title="Emojis"
                   >
                     <Smile size={18} />
                   </button>
 
                   {showEmojiPicker && (
-                  <div
-                    className="
-                      fixed sm:absolute
-                      bottom-0 sm:bottom-12
-                      left-0 sm:left-auto
-                      right-0
-                      z-50
-                      w-full sm:w-auto
-                      bg-base-100
-                      border-t sm:border sm:rounded-xl
-                      shadow-lg
-                    "
-                  >
-                    <EmojiPicker
-                      onEmojiClick={handleEmojiClick}
-                      width="100%"
-                      height={320}
-                    />
-                  </div>
-                )}
+                    <div
+                      className="
+                        fixed sm:absolute
+                        bottom-0 sm:bottom-12
+                        left-0 sm:left-auto
+                        right-0
+                        z-50
+                        w-full sm:w-auto
+                        bg-base-100
+                        border-t sm:border sm:rounded-xl
+                        shadow-lg
+                      "
+                    >
+                      <EmojiPicker
+                        onEmojiClick={handleEmojiClick}
+                        width="100%"
+                        height={320}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => imageRef.current.click()}
                   className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                  title="Upload Image"
                 >
                   <Image size={18} />
                 </button>
@@ -447,10 +483,12 @@ const MessageInput = () => {
                   <button
                     type="button"
                     onClick={() => {
-                    setShowEmojiPicker(false);
-                    setShowGifPicker((prev) => !prev);
+                      setShowEmojiPicker(false);
+                      setShowStickerPicker(false);
+                      setShowGifPicker((prev) => !prev);
                     }}
                     className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                    title="GIFs"
                   >
                     <Clapperboard size={18} />
                   </button>
@@ -476,10 +514,46 @@ const MessageInput = () => {
                   )}
                 </div>
 
+                <div className="relative" ref={stickerRef}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEmojiPicker(false);
+                      setShowGifPicker(false);
+                      setShowStickerPicker((prev) => !prev);
+                    }}
+                    className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                    title="Stickers"
+                  >
+                    <StickerIcon size={18} />
+                  </button>
+
+                  {showStickerPicker && (
+                    <div
+                      className="
+                        fixed sm:absolute
+                        bottom-0 sm:bottom-12
+                        left-0 sm:left-auto
+                        right-0
+                        z-50
+                        w-full sm:w-auto
+                        sm:border sm:rounded-xl
+                        shadow-lg
+                      "
+                    >
+                      <StickerPicker
+                        onSelect={handleStickerSelect}
+                        onClose={() => setShowStickerPicker(false)}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="button"
                   onClick={() => fileRef.current.click()}
                   className="btn btn-ghost btn-circle btn-xs sm:btn-sm"
+                  title="Attach File"
                 >
                   <Paperclip size={18} />
                 </button>

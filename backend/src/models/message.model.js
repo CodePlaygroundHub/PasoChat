@@ -41,6 +41,11 @@ const messageSchema = new mongoose.Schema(
       default: "",
     },
 
+    sticker: {
+      type: String,
+      default: "",
+    },
+
     // Reply to message
     replyTo: {
       type: mongoose.Schema.Types.ObjectId,

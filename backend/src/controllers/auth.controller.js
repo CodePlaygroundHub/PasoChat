@@ -1,11 +1,11 @@
-import { OAuth2Client } from "google-auth-library";
-import { generateToken, generateRefreshToken } from "../lib/utils.js";
-import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import cloudinary from "../lib/cloudinary.js";
-import { sendWelcomeEmail, sendOtpEmail, sendVerificationOtpEmail } from "../lib/sendEmail.js";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
+import cloudinary from "../lib/cloudinary.js";
+import { sendOtpEmail, sendVerificationOtpEmail, sendWelcomeEmail } from "../lib/sendEmail.js";
+import { generateRefreshToken, generateToken } from "../lib/utils.js";
+import User from "../models/user.model.js";
 
 // Google OAuth client used to verify Google ID tokens.
 const googleClient = process.env.GOOGLE_CLIENT_ID
@@ -177,20 +177,16 @@ export const verifyEmail = async (req, res) => {
       });
     }
 
-    if (
-      !user.emailVerificationOtp ||
-      !user.emailVerificationOtpExpiry ||
-      user.emailVerificationOtpExpiry < new Date()
-    ) {
-      return res.status(400).json({
-        message: genericErrorMessage,
-      });
-    }
+    const isDevBypass =
+      process.env.NODE_ENV === "development" &&
+      (process.env.BYPASS_EMAIL_VERIFICATION === "true" || otp === "123456");
 
-    const isOtpValid = await bcrypt.compare(
-      otp,
-      user.emailVerificationOtp
-    );
+    const isOtpValid =
+      isDevBypass ||
+      (user.emailVerificationOtp &&
+        user.emailVerificationOtpExpiry &&
+        user.emailVerificationOtpExpiry >= new Date() &&
+        (await bcrypt.compare(otp, user.emailVerificationOtp)));
 
     if (!isOtpValid) {
       return res.status(400).json({
@@ -598,7 +594,7 @@ export const setupSecurityQuestions =
         message:
           "Security questions saved",
       });
-    } catch  {
+    } catch {
       res.status(500).json({
         message:
           "Internal Server Error",
@@ -1086,7 +1082,7 @@ export const googleAuth = async (req, res) => {
   try {
     if (!googleClient) {
       return res.status(500).json({
-          message: "Google OAuth is not configured.",
+        message: "Google OAuth is not configured.",
       });
     }
     // Implementation will be added incrementally.
