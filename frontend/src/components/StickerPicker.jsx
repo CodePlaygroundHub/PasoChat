@@ -436,6 +436,7 @@ const StickerTile = ({ sticker, isFavorite, onSelect, onToggleFavorite }) => {
           alt={sticker.name || "Sticker"}
           loading="lazy"
           onLoad={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)}
           className={`w-full h-full object-contain transition-transform duration-200 group-hover:scale-110 ${
             imageLoaded ? "opacity-100" : "opacity-0"
           }`}
