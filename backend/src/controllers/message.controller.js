@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import User from "../models/user.model.js";
-import Message from "../models/message.model.js";
-import Group from "../models/group.model.js";
 import cloudinary from "../lib/cloudinary.js";
-import { emitToUser, io } from "../lib/socket.js";
 import analyzeMessage from "../lib/mlService.js";
+import { emitToUser, io } from "../lib/socket.js";
+import Group from "../models/group.model.js";
+import Message from "../models/message.model.js";
+import User from "../models/user.model.js";
 
 export const updateChatWallpaper = async (req, res) => {
   try {

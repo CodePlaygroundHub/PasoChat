@@ -11,9 +11,9 @@ import authRoutes from "./routes/auth.route.js";
 import gifRoutes from "./routes/gif.routes.js";
 import groupRoutes from "./routes/group.routes.js";
 import messageRoutes from "./routes/message.route.js";
-import pollRoutes from "./routes/poll.routes.js";
 import reportRoutes from "./routes/report.routes.js";
 import statusRoutes from "./routes/status.routes.js";
+import stickerRoutes from "./routes/sticker.routes.js";
 import userRoutes from "./routes/user.route.js";
 import seedAIUser from "./seeds/seedAIUser.js";
 
@@ -49,7 +49,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/gif", gifRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/polls", pollRoutes);
+app.use("/api/stickers", stickerRoutes);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
