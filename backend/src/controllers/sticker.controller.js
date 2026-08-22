@@ -90,6 +90,10 @@ export const BUILTIN_STICKER_PACKS = [
   },
 ];
 
+const ALL_VALID_STICKER_URLS = new Set(
+  BUILTIN_STICKER_PACKS.flatMap((pack) => pack.stickers.map((s) => s.url))
+);
+
 // GET /api/stickers/packs
 export const getStickerPacks = async (req, res) => {
   try {
@@ -122,8 +126,8 @@ export const getUserStickerData = async (req, res) => {
 export const toggleFavoriteSticker = async (req, res) => {
   try {
     const { stickerUrl } = req.body;
-    if (!stickerUrl || typeof stickerUrl !== "string") {
-      return res.status(400).json({ message: "Valid stickerUrl is required" });
+    if (!stickerUrl || typeof stickerUrl !== "string" || !ALL_VALID_STICKER_URLS.has(stickerUrl)) {
+      return res.status(400).json({ message: "Valid stickerUrl from official sticker packs is required" });
     }
 
     const user = await User.findById(req.user._id);
@@ -158,8 +162,8 @@ export const toggleFavoriteSticker = async (req, res) => {
 export const addRecentSticker = async (req, res) => {
   try {
     const { stickerUrl } = req.body;
-    if (!stickerUrl || typeof stickerUrl !== "string") {
-      return res.status(400).json({ message: "Valid stickerUrl is required" });
+    if (!stickerUrl || typeof stickerUrl !== "string" || !ALL_VALID_STICKER_URLS.has(stickerUrl)) {
+      return res.status(400).json({ message: "Valid stickerUrl from official sticker packs is required" });
     }
 
     const user = await User.findById(req.user._id);
