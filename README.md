@@ -1,36 +1,38 @@
 <p align="center">
-  <img src="./assets/banneer.png" alt="PASO Banner" width="100%" />
+  <img src="./assets/banneer.png" alt="PASO — Realtime Communication Platform" width="100%" />
 </p>
 
 <h1 align="center">
-  PASO — Enterprise-Grade AI-Powered Realtime Chat Platform
+  PASO — AI-Powered Realtime Communication
 </h1>
 
 <p align="center">
-  <b>A production-ready distributed communication system featuring AI moderation, voice/video calling, horizontal Socket.IO scaling, ML automation, and enterprise analytics.</b>
+  <b>
+    A full-stack realtime communication platform combining messaging,
+    voice/video calling, AI moderation, intelligent automation, and
+    horizontally scalable Socket.IO infrastructure.
+  </b>
 </p>
 
 <p align="center">
-  <a href="https://chat-app-sooty-mu.vercel.app"><img src="https://img.shields.io/badge/Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
-  <a href="./docs/QUICK_START.md"><img src="https://img.shields.io/badge/Quick_Start-Docs-blue?style=for-the-badge&logo=gitbook&logoColor=white" alt="Quick Start" /></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT" /></a>
+  <a href="https://chat-app-sooty-mu.vercel.app">
+    <img src="https://img.shields.io/badge/Live_Demo-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
+  </a>
+  <a href="./docs/QUICK_START.md">
+    <img src="https://img.shields.io/badge/Quick_Start-Docs-2563EB?style=for-the-badge&logo=gitbook&logoColor=white" alt="Quick Start" />
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-16A34A?style=for-the-badge" alt="MIT License" />
+  </a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/ECSoC-2026-blueviolet?style=flat-square" alt="ECSoC 2026 Project" />
-  <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg?style=flat-square" alt="Frontend CI Status" />
-  <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg?style=flat-square" alt="Backend CI Status" />
-  <img src="https://img.shields.io/badge/tests-passing-brightgreen?style=flat-square" alt="Tests Passing" />
-  <img src="https://img.shields.io/badge/contributions-welcome-brightgreen?style=flat-square" alt="Contributions Welcome" />
-  <img src="https://img.shields.io/github/issues/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="GitHub Issues" />
-  <img src="https://img.shields.io/github/contributors/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="GitHub Contributors" />
-  <img src="https://img.shields.io/github/repo-size/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="Repository Size" />
-  <img src="https://img.shields.io/github/last-commit/CodePlaygroundHub/paso-chat-app?style=flat-square" alt="Last Commit" />
-</p>
-
-<p align="center">
+  <img src="https://img.shields.io/badge/ECSoC-2026-7C3AED?style=flat-square" alt="ECSoC 2026" />
+  <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/frontend-ci.yml/badge.svg?style=flat-square" alt="Frontend CI" />
+  <img src="https://github.com/CodePlaygroundHub/paso-chat-app/actions/workflows/backend-ci.yml/badge.svg?style=flat-square" alt="Backend CI" />
+  <img src="https://img.shields.io/badge/tests-passing-22C55E?style=flat-square" alt="Tests Passing" />
   <img src="https://img.shields.io/badge/Node.js-18+-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" />
-  <img src="https://img.shields.io/badge/React-18+-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/MongoDB-7+-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
   <img src="https://img.shields.io/badge/Redis-7+-DC382D?style=flat-square&logo=redis&logoColor=white" alt="Redis" />
@@ -38,159 +40,280 @@
 
 ---
 
+## Overview
+
+PASO is a realtime communication platform built around a simple idea:
+
+> **Communication should remain realtime, intelligent, and manageable as the system grows.**
+
+The platform combines conventional chat functionality with distributed realtime infrastructure, AI-assisted communication, automated moderation, voice/video calling, and administrative controls.
+
+It supports:
+
+- Realtime 1:1 and group messaging
+- Multi-instance Socket.IO communication through Redis
+- AI-powered smart replies and moderation
+- ML-based toxicity, spam, and intent analysis
+- Voice and video calling
+- File and media sharing
+- Presence, typing indicators, and read receipts
+- Role-based administration and moderation
+- Analytics and audit workflows
+- Automated frontend and backend CI validation
+
+PASO was developed as part of **ECSoC 2026** and is designed as a practical demonstration of modern distributed web application architecture.
+
+---
+
+## Why PASO
+
+Most realtime applications are straightforward while running on a single server. The engineering challenge becomes much more interesting when the application needs to maintain consistent state across multiple server instances while simultaneously handling authentication, messaging, presence, media, AI processing, and moderation.
+
+PASO explores those problems through:
+
+| Challenge | PASO Approach |
+| --- | --- |
+| Realtime communication | Socket.IO |
+| Multi-instance synchronization | Redis Pub/Sub |
+| Persistent application state | MongoDB |
+| AI-assisted interactions | Groq API |
+| Automated moderation | Python ML service |
+| Voice/video communication | ZegoCloud |
+| Media storage | Cloudinary |
+| Authentication | JWT + refresh tokens |
+| Authorization | Role-based access control |
+| Abuse prevention | Rate limiting + validation |
+| Operational visibility | Admin analytics + audit logs |
+| Continuous validation | GitHub Actions |
+
+---
+
 ## Quick Navigation
 
 <p align="center">
-  <a href="#why-paso-matters">Overview</a> •
-  <a href="./docs/QUICK_START.md">Quick Start</a> •
-  <a href="./docs/ARCHITECTURE.md">Architecture</a> •
-  <a href="https://chat-app-sooty-mu.vercel.app">Live Demo</a> •
-  <a href="./docs/API.md">API Docs</a> •
-  <a href="./docs/DEPLOYMENT.md">Deployment</a> •
-  <a href="./docs/CONTRIBUTOR_ONBOARDING.md">Contributing</a> •
-  <a href="./docs/COPILOT_STORY.md">Copilot Story</a>
+  <a href="#overview">Overview</a> •
+  <a href="#why-paso">Why PASO</a> •
+  <a href="#features">Features</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#technology-stack">Stack</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#documentation">Documentation</a> •
+  <a href="#deployment">Deployment</a> •
+  <a href="#testing">Testing</a> •
+  <a href="#roadmap">Roadmap</a>
 </p>
 
 ---
 
-## Why PASO Matters
-
-PASO demonstrates **production-grade system design** and **real-world engineering challenges** solved with modern technologies:
-
-### Enterprise Requirements Addressed
-
-* **Real-time at Scale:** Horizontal scaling with a Redis Pub/Sub adapter to support millions of concurrent connections.
-* **Native AI/ML Integration:** Real-time moderation pipelines, intent detection, and automated toxic message analysis.
-* **Multimedia Communication:** High-definition voice/video calling, rich file attachments, and status updates.
-* **Security First:** JWT authentication with rotation, strict rate limiting, input sanitization, and encrypted transport.
-* **Analytics & Compliance:** Admin dashboards, automated reporting, audit trails, and user moderation workflows.
-* **High Availability:** Multi-node Socket.IO setup, database replication, and graceful service degradation.
-
-### Core System Strengths
-
-* **End-to-End System Design:** Built from the ground up to solve distributed real-time synchronization challenges.
-* **Production Operations:** Comprehensive monitoring, deployment automation, and automated CI/CD pipelines.
-* **Decoupled Architecture:** Asynchronous worker processing and event-driven microservices.
-* **Embedded ML Engine:** Machine learning toxicity filtering integrated directly into the message queue.
-* **Granular Security Controls:** Multi-tenancy concepts, role-based access control (RBAC), and per-endpoint throttling.
-* **Polished User Experience:** Multi-device presence indicators, typing status, and read receipt tracking.
-
----
-
-## Technical Stack & Architecture
-
-### Core Components
-
-| Layer | Technology | Purpose | Scale Strategy |
-| :--- | :--- | :--- | :--- |
-| **Frontend** | React 18, Vite, Zustand, Tailwind CSS | Interactive UI & state management | Edge CDN Delivery |
-| **API Gateway** | Express.js, Node.js, JWT, Rate Limiting | RESTful API & business logic | Horizontal Auto-scaling |
-| **Real-time Engine** | Socket.IO + Redis Pub/Sub Adapter | Bi-directional stateful messaging | Multi-instance Cluster |
-| **Database & Cache** | MongoDB 7+ & Redis 7+ | Persistence, caching & session state | Sharding & Replication |
-| **ML & Moderation** | FastAPI, Scikit-learn, Python 3.10+ | Content moderation & intent analysis | Container Worker Scaling |
-| **Integrations** | Groq API, ZegoCloud, Cloudinary, Brevo | Smart replies, HD V2V, CDN assets, emails | Third-party Edge APIs |
-
----
-
-## System Architecture Deep Dive
-
-### Microservices Decomposition
-
-```mermaid
-graph TB
-    Client["React Client"]
-    
-    subgraph Backend["Backend Services"]
-        API["Express API<br/>(JWT Auth)"]
-        SocketServer["Socket.IO Server<br/>(Multi-node)"]
-        AuthService["Auth Service"]
-        MsgService["Message Service"]
-        GroupService["Group Service"]
-        AIService["AI Service"]
-        AdminService["Admin Service"]
-    end
-    
-    subgraph Infrastructure["Infrastructure"]
-        Redis["Redis<br/>(Pub/Sub & Cache)"]
-        MongoDB["MongoDB<br/>(Sharded)"]
-        MLService["FastAPI<br/>(ML Models)"]
-    end
-    
-    subgraph External["External Services"]
-        Groq["Groq API<br/>(LLM)"]
-        ZegoCloud["ZegoCloud<br/>(V2V)"]
-        Cloudinary["Cloudinary<br/>(CDN)"]
-        Email["Brevo<br/>(Email)"]
-    end
-    
-    Client -->|REST + WebSocket| API
-    Client -->|WebSocket| SocketServer
-    
-    API --> AuthService
-    API --> MsgService
-    API --> GroupService
-    API --> AIService
-    API --> AdminService
-    
-    AuthService --> MongoDB
-    MsgService --> MongoDB
-    GroupService --> MongoDB
-    AdminService --> MongoDB
-    
-    SocketServer --> Redis
-    MsgService --> Redis
-    
-    AIService --> MLService
-    AIService --> Groq
-    SocketServer --> ZegoCloud
-    MsgService --> Cloudinary
-    AuthService --> Email
-```
-
----
-
-## Core Features
+## Features
 
 <details>
 <summary><b>Messaging & Realtime Communication</b></summary>
 
 <br/>
 
-* **Chat Engine:** Real-time 1:1 direct messaging and multi-user group channels.
-* **Audio & Video:** HD voice and video calling powered by ZegoCloud WebRTC integration.
-* **Search:** Full-text indexing for cross-conversation message search.
-* **Reactions & Management:** Conflict-free emoji reactions, message editing, soft-delete for self, and hard-delete for everyone.
-* **Receipts & Presence:** Per-user message seen status, real-time typing indicators, and multi-device online status.
-* **Customization:** Per-conversation custom wallpapers and dynamic themes.
-* **Ephemeral Media:** Status system supporting stories with 24-hour expiration.
+- Realtime 1:1 messaging
+- Group conversations and channels
+- Message editing and deletion
+- Emoji reactions
+- Read and delivery receipts
+- Typing indicators
+- Online/offline presence
+- Multi-device presence synchronization
+- Conversation search
+- Custom conversation wallpapers and themes
+- Temporary status/stories with expiration
+- Rich file and media attachments
 
 </details>
 
 <details>
-<summary><b>AI Moderation & Automation</b></summary>
+<summary><b>AI & Machine Learning</b></summary>
 
 <br/>
 
-* **Smart Responses:** Contextual reply suggestions generated via Groq API (LLM).
-* **Toxicity Scoring:** Inline message scoring returning a 0–1 confidence threshold.
-* **Spam Filtering:** Bayesian classification for automated spam mitigation.
-* **Intent Detection:** Automated query classification for instant bot responses.
-* **Auto-Moderation:** Automated flagging of policy-violating content for administrative review.
+PASO combines external LLM capabilities with a dedicated ML service.
+
+- AI-generated contextual reply suggestions
+- Message toxicity scoring
+- Spam classification
+- Intent detection
+- Automated moderation signals
+- Policy-violation flagging
+- AI-assisted administrative workflows
+- Python-based inference service using FastAPI and Scikit-learn
+
+The AI layer is intentionally separated from the primary API so that inference workloads do not have to be tightly coupled to the main application server.
 
 </details>
 
 <details>
-<summary><b>Enterprise Security & Administration</b></summary>
+<summary><b>Voice & Video</b></summary>
 
 <br/>
 
-* **Admin Dashboard:** System analytics, user reports queue, and moderation visualization.
-* **Access Control:** Granular Role-Based Access Control (RBAC) separating Admins and standard Users.
-* **User Governance:** Account warnings, temporary suspensions, and audit logging with IP tracking.
-* **Authentication Security:** Refresh token rotation, bcrypt password hashing, and cookie protection.
-* **Rate Limiting:** Granular per-user and per-endpoint request throttling.
+- One-to-one voice calling
+- Video calling
+- Realtime call signaling
+- WebRTC-based communication through ZegoCloud
+- Call state synchronization
+- Integrated calling experience inside conversations
 
 </details>
+
+<details>
+<summary><b>Authentication & Security</b></summary>
+
+<br/>
+
+- JWT-based authentication
+- Refresh token rotation
+- Password hashing with bcrypt
+- HTTP-only cookie protection
+- Role-based access control
+- Protected API routes
+- Request validation and sanitization
+- CORS protection
+- Per-user and per-endpoint rate limiting
+- Administrative moderation controls
+- Audit logging for administrative actions
+
+</details>
+
+<details>
+<summary><b>Administration & Moderation</b></summary>
+
+<br/>
+
+Administrators can manage the communication environment through dedicated workflows for:
+
+- User management
+- Reports and moderation queues
+- Account warnings
+- Temporary suspensions
+- Content moderation
+- System analytics
+- Administrative audit logs
+- Platform activity monitoring
+
+</details>
+
+<details>
+<summary><b>Analytics & Platform Operations</b></summary>
+
+<br/>
+
+The administrative layer provides visibility into:
+
+- User activity
+- Messaging activity
+- Moderation events
+- Reports
+- System usage
+- Platform-level operational metrics
+
+The architecture also supports centralized monitoring and external observability tooling in deployment environments.
+
+</details>
+
+---
+
+## Architecture
+
+PASO separates the realtime communication layer, REST API, AI/ML processing, persistence, and external integrations.
+
+```mermaid
+flowchart TB
+
+    Client["React Client"]
+
+    subgraph Application["Application Layer"]
+        API["Express REST API"]
+        Socket["Socket.IO Realtime Server"]
+        AI["AI Service"]
+        Admin["Admin & Moderation"]
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        Redis["Redis<br/>Pub/Sub"]
+        Mongo["MongoDB"]
+        ML["FastAPI ML Service"]
+    end
+
+    subgraph Services["External Services"]
+        Groq["Groq API"]
+        Zego["ZegoCloud"]
+        Cloudinary["Cloudinary"]
+        Brevo["Brevo"]
+    end
+
+    Client --> API
+    Client --> Socket
+
+    API --> Mongo
+    API --> AI
+    API --> Admin
+
+    Socket --> Redis
+    Socket --> Mongo
+
+    AI --> ML
+    AI --> Groq
+
+    API --> Zego
+    API --> Cloudinary
+    API --> Brevo
+```
+
+### Realtime Scaling
+
+A key part of PASO is the separation between the Socket.IO server and the synchronization layer.
+
+Instead of requiring every connected client to remain on the same application instance:
+
+```text
+Client
+   │
+   ▼
+Socket.IO Instance A
+   │
+   ▼
+Redis Pub/Sub
+   │
+   ▼
+Socket.IO Instance B
+   │
+   ▼
+Client
+```
+
+Redis provides the event propagation layer required for multiple Socket.IO instances to participate in the same realtime system.
+
+This allows the realtime layer to scale horizontally behind a load balancer without making each instance an isolated communication island.
+
+---
+
+## Technology Stack
+
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| **Frontend** | React 18, Vite | Web application |
+| **State Management** | Zustand | Client-side application state |
+| **Styling** | Tailwind CSS | UI styling |
+| **API** | Node.js, Express.js | REST API and business logic |
+| **Realtime** | Socket.IO | WebSocket communication |
+| **Pub/Sub** | Redis 7+ | Cross-instance realtime synchronization |
+| **Database** | MongoDB 7+, Mongoose | Persistent application data |
+| **Authentication** | JWT, bcrypt | Identity and authentication |
+| **AI** | Groq API | LLM-powered features |
+| **ML Service** | FastAPI, Scikit-learn | Moderation and classification |
+| **Calling** | ZegoCloud | Voice/video communication |
+| **Media** | Cloudinary | Media and asset storage |
+| **Email** | Brevo | Transactional communication |
+| **Testing** | Jest / Node.js testing tools | Automated validation |
+| **CI/CD** | GitHub Actions | Build and test automation |
+| **Frontend Hosting** | Vercel | Web deployment |
+| **Backend Hosting** | Render | API deployment |
 
 ---
 
@@ -198,309 +321,655 @@ graph TB
 
 ```text
 PASO/
-├── frontend/                   # React 18 + Vite web client
+├── frontend/
 │   ├── src/
-│   │   ├── components/         # UI components and modals
-│   │   ├── pages/              # View routes (Chat, Dashboard, Admin)
-│   │   ├── store/              # Zustand global application state
-│   │   └── lib/                # Axios instance & Socket.IO client
+│   │   ├── components/          # Reusable UI components
+│   │   ├── pages/               # Application pages
+│   │   ├── store/               # Zustand state management
+│   │   └── lib/                 # API and Socket.IO clients
 │   ├── vite.config.js
 │   └── tailwind.config.js
 │
-├── backend/                    # Express.js core API & Socket server
+├── backend/
 │   ├── src/
-│   │   ├── controllers/        # REST route handlers
-│   │   ├── models/             # Mongoose schemas (User, Message, Room)
-│   │   ├── routes/             # Express API endpoints
-│   │   ├── middleware/         # Auth, RBAC, and rate limiters
-│   │   ├── services/           # Core domain logic
-│   │   └── lib/                # Database, Redis, and Socket initializers
-│   └── test/                   # Jest integration and unit test suite
+│   │   ├── controllers/         # Request handlers
+│   │   ├── models/              # Mongoose models
+│   │   ├── routes/              # REST API routes
+│   │   ├── middleware/          # Auth, RBAC, rate limiting
+│   │   ├── services/            # Application services
+│   │   └── lib/                 # Database, Redis & Socket setup
+│   └── test/                    # Backend tests
 │
-├── ml-service/                 # FastAPI Machine Learning microservice
-│   ├── app.py                  # API entrypoint for ML inference
-│   ├── requirements.txt        # Python dependency manifest
-│   └── models/                 # Pre-trained classification models (.pkl)
+├── ml-service/
+│   ├── app.py                   # FastAPI entry point
+│   ├── requirements.txt         # Python dependencies
+│   └── models/                  # ML model artifacts
 │
-└── docs/                       # Technical documentation
-    ├── ARCHITECTURE.md         # System design & data flow diagrams
-    ├── API.md                  # RESTful API specifications
-    ├── SOCKETS.md              # WebSocket event contracts
-    ├── DEPLOYMENT.md           # Docker & Cloud deployment guides
-    └── SCALING.md              # Multi-node scaling & Redis caching
+├── docs/
+│   ├── QUICK_START.md
+│   ├── ARCHITECTURE.md
+│   ├── API.md
+│   ├── SOCKETS.md
+│   ├── BACKEND.md
+│   ├── FRONTEND.md
+│   ├── ML_SERVICE.md
+│   ├── DEPLOYMENT.md
+│   ├── SCALING.md
+│   ├── SECURITY_BEST_PRACTICES.md
+│   ├── TESTING.md
+│   ├── PERFORMANCE.md
+│   ├── COPILOT_STORY.md
+│   ├── CONTRIBUTOR_ONBOARDING.md
+│   └── ROADMAP.md
+│
+├── .github/
+│   └── workflows/
+│       ├── frontend-ci.yml
+│       └── backend-ci.yml
+│
+├── .env.example
+├── package.json
+├── LICENSE
+└── README.md
 ```
 
 ---
 
-## Quick Start (5 Minutes)
+## Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm
-- Python 3.10+ and pip
+
+Make sure the following are installed:
+
+- Node.js 18+
+- npm
+- Python 3.10+
 - MongoDB 7+
 - Redis 7+
+- Git
 
-### 1. Clone Repository
+External services such as Groq, ZegoCloud, Cloudinary, and Brevo are optional depending on which features you want to run locally.
+
+### 1. Clone the repository
+
 ```bash
 git clone https://github.com/CodePlaygroundHub/paso-chat-app.git
 cd paso-chat-app
 ```
 
-### 2. Backend Setup
+### 2. Configure the backend
+
 ```bash
 cd backend
 npm install
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your credentials
-
-# Start development server
-npm run dev
-# Runs on http://localhost:5001
 ```
 
-### 3. Frontend Setup
+Create the environment file:
+
 ```bash
-cd ../frontend
+cp .env.example .env
+```
+
+Configure your database, authentication, Redis, and optional service credentials.
+
+Start the backend:
+
+```bash
+npm run dev
+```
+
+The backend runs on:
+
+```text
+http://localhost:5001
+```
+
+### 3. Configure the frontend
+
+Open another terminal:
+
+```bash
+cd frontend
 npm install
+```
 
-# Configure environment
+Create the environment file:
+
+```bash
 cp .env.example .env
-# Edit .env with API_URL=http://localhost:5001
+```
 
-# Start development server
+Configure the API URL:
+
+```env
+API_URL=http://localhost:5001
+```
+
+Start the frontend:
+
+```bash
 npm run dev
-# Runs on http://localhost:5173
 ```
 
-### 4. ML Service Setup
+The frontend runs on:
+
+```text
+http://localhost:5173
+```
+
+### 4. Configure the ML service
+
 ```bash
-cd ../ml-service
+cd ml-service
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-pip install -r requirements.txt
-python app.py
-# Runs on http://localhost:5000
 ```
 
-### 5. Verify Setup
+Activate the environment.
+
+**Windows:**
+
+```powershell
+venv\Scripts\activate
+```
+
+**macOS / Linux:**
+
 ```bash
-# In a new terminal, run health checks
-curl http://localhost:5001/health      # Backend
-curl http://localhost:5173             # Frontend
-curl http://localhost:5000/health      # ML Service
+source venv/bin/activate
 ```
 
- **All services running?** Open http://localhost:5173 and sign up!
+Install dependencies:
 
-For detailed setup instructions, see [SETUP.md](./docs/SETUP.md).
+```bash
+pip install -r requirements.txt
+```
+
+Start the service:
+
+```bash
+python app.py
+```
+
+The ML service runs on:
+
+```text
+http://localhost:5000
+```
+
+### 5. Verify the services
+
+```bash
+curl http://localhost:5001/health
+curl http://localhost:5000/health
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
 
 ---
 
-## Documentation Guide
+## Environment Configuration
 
-| Document | Purpose |
-|----------|---------|
-| [QUICK_START.md](./docs/QUICK_START.md) | 5-min setup guide with verification |
-| [ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Complete system design, data flows, decisions |
-| [API.md](./docs/API.md) | RESTful API reference with examples |
-| [SOCKETS.md](./docs/SOCKETS.md) | WebSocket events, rooms, scaling |
-| [BACKEND.md](./docs/BACKEND.md) | Backend structure, services, controllers |
-| [FRONTEND.md](./docs/FRONTEND.md) | Frontend components, state management |
-| [ML_SERVICE.md](./docs/ML_SERVICE.md) | ML pipeline, models, integration |
-| [DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Docker, Kubernetes, cloud deployment |
-| [SCALING.md](./docs/SCALING.md) | Redis, multi-node Socket.IO, databases |
-| [SECURITY_BEST_PRACTICES.md](./docs/SECURITY_BEST_PRACTICES.md) | Security hardening, best practices |
-| [TESTING.md](./docs/TESTING.md) | Unit, integration, e2e testing strategy |
-| [PERFORMANCE.md](./docs/PERFORMANCE.md) | Optimization, caching, monitoring |
-| [COPILOT_STORY.md](./docs/COPILOT_STORY.md) | GitHub Copilot-assisted development |
-| [CONTRIBUTOR_ONBOARDING.md](./docs/CONTRIBUTOR_ONBOARDING.md) | Contributing guide |
-| [ROADMAP.md](./docs/ROADMAP.md) | Future features and vision |
+The exact variables depend on the enabled services.
+
+Typical backend configuration:
+
+```env
+NODE_ENV=development
+
+PORT=5001
+
+MONGODB_URI=...
+
+JWT_SECRET=...
+JWT_REFRESH_SECRET=...
+
+REDIS_URL=...
+
+GROQ_API_KEY=...
+
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+
+BREVO_API_KEY=...
+
+ZEGO_APP_ID=...
+ZEGO_SERVER_SECRET=...
+```
+
+Frontend configuration:
+
+```env
+VITE_API_URL=http://localhost:5001
+```
+
+ML service configuration can be found in:
+
+```text
+ml-service/.env.example
+```
+
+**Never commit real API keys, database credentials, JWT secrets, or production environment files.**
 
 ---
 
-## Running in Production
+## Running the Application
 
-### Recommended Stack
-- **Frontend**: Vercel 
-- **Backend**: Render
-- **Database**: MongoDB Atlas (managed), Redis Cloud
-- **ML Service**: Separate container, auto-scaling
-- **Monitoring**: Prometheus, Grafana, Sentry
+### Development
 
-### Pre-Production Checklist
-See [PRODUCTION_CHECKLIST.md](./docs/PRODUCTION_CHECKLIST.md)
+Backend:
 
-Key steps:
-1.  Environment variable security audit
-2.  SSL/TLS certificate setup
-3.  Database backups & replication
-4.  Rate limiting configuration
-5.  Logging & monitoring setup
-6.  Load testing (see `load-test.js`)
-7.  Security penetration testing
-8.  Disaster recovery plan
+```bash
+cd backend
+npm run dev
+```
 
-For complete deployment guide, see [DEPLOYMENT.md](./docs/DEPLOYMENT.md)
+Frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+ML service:
+
+```bash
+cd ml-service
+python app.py
+```
+
+### Production Frontend Build
+
+```bash
+cd frontend
+npm run build
+```
+
+Preview the production build:
+
+```bash
+npm run preview
+```
+
+### Production Backend
+
+```bash
+cd backend
+npm start
+```
+
+---
+
+## Documentation
+
+PASO keeps deeper implementation details outside the main README so the repository stays easy to navigate.
+
+| Document | Description |
+| :--- | :--- |
+| [Quick Start](./docs/QUICK_START.md) | Local setup and verification |
+| [Architecture](./docs/ARCHITECTURE.md) | Application architecture and design decisions |
+| [API Reference](./docs/API.md) | REST API endpoints |
+| [Socket Events](./docs/SOCKETS.md) | Socket.IO events and realtime contracts |
+| [Backend Guide](./docs/BACKEND.md) | Backend services and implementation |
+| [Frontend Guide](./docs/FRONTEND.md) | React architecture and state management |
+| [ML Service](./docs/ML_SERVICE.md) | ML pipeline and inference service |
+| [Deployment](./docs/DEPLOYMENT.md) | Cloud deployment configuration |
+| [Scaling](./docs/SCALING.md) | Redis, Socket.IO and scaling strategy |
+| [Security](./docs/SECURITY_BEST_PRACTICES.md) | Security controls and hardening |
+| [Testing](./docs/TESTING.md) | Testing strategy and commands |
+| [Performance](./docs/PERFORMANCE.md) | Performance and optimization notes |
+| [Copilot Story](./docs/COPILOT_STORY.md) | AI-assisted development workflow |
+| [Contributor Guide](./docs/CONTRIBUTOR_ONBOARDING.md) | Development and contribution setup |
+| [Roadmap](./docs/ROADMAP.md) | Planned improvements |
+
+---
+
+## Deployment
+
+The reference deployment uses:
+
+| Component | Platform |
+| :--- | :--- |
+| Frontend | Vercel |
+| Backend | Render |
+| Database | MongoDB Atlas |
+| Redis | Redis Cloud |
+| ML Service | Separate Python service/container |
+| Media | Cloudinary |
+| Source Control | GitHub |
+| CI/CD | GitHub Actions |
+
+### Deployment Flow
+
+```text
+User
+  │
+  ▼
+Vercel
+  │
+  │ HTTPS
+  ▼
+Render
+  │
+  ├──► MongoDB Atlas
+  ├──► Redis
+  ├──► ML Service
+  ├──► Groq
+  ├──► Cloudinary
+  ├──► ZegoCloud
+  └──► Brevo
+```
+
+For the complete deployment process, environment configuration, and production checklist:
+
+**[Read the Deployment Guide](./docs/DEPLOYMENT.md)**
+
+---
+
+## Security
+
+PASO implements security controls across authentication, authorization, API access, and administrative operations.
+
+### Authentication
+
+- JWT authentication
+- Refresh token rotation
+- bcrypt password hashing
+- Protected routes
+- Cookie-based protection where applicable
+
+### Authorization
+
+- Role-based access control
+- Protected administrative routes
+- Permission-aware API handlers
+- User-level resource ownership checks
+
+### API Protection
+
+- Rate limiting
+- Input validation
+- Input sanitization
+- CORS configuration
+- Secure authentication middleware
+
+### Administration
+
+- User moderation workflows
+- Account warnings
+- Temporary suspensions
+- Administrative audit logging
+
+For detailed security considerations:
+
+**[Security Best Practices](./docs/SECURITY_BEST_PRACTICES.md)**
+
+---
+
+## Testing
+
+PASO uses automated testing to validate backend behavior and frontend builds.
+
+### Backend Tests
+
+```bash
+cd backend
+npm test
+```
+
+### Frontend Build
+
+```bash
+cd frontend
+npm run build
+```
+
+### CI Validation
+
+GitHub Actions maintains separate workflows for the frontend and backend:
+
+```text
+.github/
+└── workflows/
+    ├── frontend-ci.yml
+    └── backend-ci.yml
+```
+
+The backend workflow validates the server test suite.
+
+The frontend workflow validates the production Vite build.
+
+See **[Testing](./docs/TESTING.md)** for the complete testing strategy.
+
+---
+
+## Performance & Scalability
+
+PASO is designed around several principles that allow the communication layer to scale beyond a single application instance.
+
+### Realtime Scaling
+
+Socket.IO instances communicate through Redis Pub/Sub, allowing events to propagate between server instances.
+
+### Data Layer
+
+MongoDB provides persistent storage for users, conversations, messages, reports, and other application data.
+
+### Caching & Ephemeral State
+
+Redis can be used for high-frequency state such as:
+
+- Presence
+- Session-related data
+- Realtime coordination
+- Pub/Sub events
+- Frequently accessed transient data
+
+### Media
+
+Cloudinary handles external media storage and delivery rather than placing large assets directly on application servers.
+
+### ML Isolation
+
+The ML inference layer runs separately from the primary Node.js API, keeping Python-based inference workloads isolated from the core application process.
+
+For detailed performance considerations:
+
+**[Performance Guide](./docs/PERFORMANCE.md)**
+
+---
+
+## Engineering Highlights
+
+PASO focuses on several problems that commonly appear in production realtime systems:
+
+### Distributed Realtime State
+
+A single Socket.IO server is simple. Multiple instances require synchronization.
+
+PASO uses Redis Pub/Sub to allow realtime events to propagate across instances.
+
+### AI + Application Integration
+
+AI features are treated as application services rather than isolated demonstrations.
+
+The platform connects:
+
+```text
+User Message
+     │
+     ├──► Realtime Delivery
+     │
+     ├──► Toxicity Analysis
+     │
+     ├──► Spam Detection
+     │
+     ├──► Intent Detection
+     │
+     └──► AI-Assisted Response
+```
+
+### Separation of Responsibilities
+
+The project separates:
+
+- Frontend presentation
+- REST API
+- Realtime communication
+- Business services
+- ML inference
+- Persistence
+- External integrations
+
+This makes individual components easier to test, replace, and scale independently.
 
 ---
 
 ## GitHub Copilot-Assisted Development
 
-This project was accelerated using GitHub Copilot for:
+GitHub Copilot was used as a development accelerator throughout the project.
 
-- **Architecture Planning**: Copilot assisted in Socket.IO scaling decisions
-- **Boilerplate Generation**: 40%+ faster controller/model creation
-- **Testing**: Automated test case generation with Jest
-- **Debugging**: Real-time inline suggestions
-- **Documentation**: Copilot improved technical clarity
+It assisted with:
 
-Read the complete [Copilot Integration Story](./docs/COPILOT_STORY.md) for real engineering workflows and impact metrics.
+- Initial architecture exploration
+- Controller and model boilerplate
+- Test generation
+- Debugging
+- Refactoring
+- Documentation
+- Repetitive implementation work
 
----
+The engineering decisions, integration design, validation, and final implementation remain part of the project development process.
 
-## Performance & Scalability Highlights
+For the detailed development story:
 
-### Throughput Metrics
-- **Message Latency**: <50ms end-to-end (p95)
-- **Typing Indicators**: <20ms delivery
-- **Presence Updates**: <100ms broadcast
-- **ML Moderation**: <50ms decision time
-
-### Scalability
-- **Concurrent Users**: 100,000+ (with Redis)
-- **Message Throughput**: 50,000 msg/sec
-- **Connection Reuse**: Socket.IO connection pooling
-- **Database**: MongoDB sharding for horizontal scaling
-
-### Caching Strategy
-- Redis cache for presence, recent messages, user sessions
-- Cloudinary CDN for media delivery (global edge)
-- Browser caching for static assets (Vite)
-
-For detailed performance tuning, see [PERFORMANCE.md](./docs/PERFORMANCE.md)
+**[Copilot Integration Story](./docs/COPILOT_STORY.md)**
 
 ---
 
-## Security & Compliance
+## Roadmap
 
-### Security Features
- JWT authentication with refresh token rotation  
- Rate limiting (100 req/min per user)  
- Input validation & sanitization  
- CORS protection  
- CSRF tokens on state-changing operations  
- SQL injection prevention (Mongoose)  
- XSS protection (React built-in)  
- Password hashing (bcryptjs)  
+Planned improvements include:
 
-### Compliance
- GDPR-ready user data export  
- Right to be forgotten (account deletion)  
- Audit logs for admin actions  
- Data encryption at rest & in transit  
+- End-to-end message encryption
+- Ephemeral message controls
+- Advanced message search and filtering
+- Voice message recording
+- Improved media handling
+- Location sharing
+- Cloud backup and restore
+- Expanded moderation models
+- Native mobile clients
+- More advanced realtime observability
 
-See [SECURITY_BEST_PRACTICES.md](./docs/SECURITY_BEST_PRACTICES.md) for hardening guide.
-
----
-
-## Testing Strategy
-
-### Test Coverage
-- **Backend Unit Tests**: Controllers, middleware, utilities
-- **Integration Tests**: API endpoints, database, Socket.IO
-- **Socket.IO Tests**: Real-time events, multi-node scaling
-- **E2E Tests**: User flows (signup, messaging, calling)
-
-### Running Tests
-```bash
-cd backend
-npm test                    # Run all tests
-npm run lint               # Check code style
-npm run test -- --coverage # Coverage report
-```
-
-Load testing: `npm run load-test` (see [TESTING.md](./docs/TESTING.md))
+See **[ROADMAP.md](./docs/ROADMAP.md)** for the detailed roadmap.
 
 ---
 
 ## Contributing
 
-We welcome contributions! The project is designed for collaborative development.
-
-### Quick Contribution Steps
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** changes: `git commit -m 'Add amazing feature'`
-4. **Push** to branch: `git push origin feature/amazing-feature`
-5. **Open** a Pull Request
+Contributions, issues, and technical discussions are welcome.
 
 ### Development Workflow
-- See [DEV_WORKFLOW.md](./docs/DEV_WORKFLOW.md) for branch strategy
-- See [CONTRIBUTOR_ONBOARDING.md](./docs/CONTRIBUTOR_ONBOARDING.md) for detailed guide
-- Check [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for community standards
+
+```bash
+# Fork the repository
+
+git clone https://github.com/CodePlaygroundHub/paso-chat-app.git
+
+cd paso-chat-app
+
+# Create a feature branch
+git checkout -b feature/your-feature
+
+# Make your changes
+
+# Run tests
+npm test
+
+# Commit
+git commit -m "Add your feature"
+
+# Push
+git push origin feature/your-feature
+```
+
+Then open a Pull Request.
+
+Before contributing, read:
+
+- [Contributor Onboarding](./docs/CONTRIBUTOR_ONBOARDING.md)
+- [Development Workflow](./docs/DEV_WORKFLOW.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ---
 
-## License & Attribution
+## Project Status
 
-**MIT License** — Free to use for commercial and personal projects  
-See [LICENSE](./LICENSE) for details
+PASO is an actively developed full-stack project demonstrating:
 
-### Project Inspiration
-- WhatsApp (messaging UX)
-- Slack (real-time collaboration)
-- Discord (voice/video)
-- Telegram (security, encryption)
+- Realtime communication
+- Distributed Socket.IO architecture
+- Redis Pub/Sub
+- AI-assisted communication
+- ML-powered moderation
+- Voice/video calling
+- Secure authentication
+- RBAC
+- Administrative tooling
+- Media handling
+- Automated testing
+- CI/CD
 
----
-
-## Support & Community
-
-- **Documentation**: Read the [docs](./docs) folder
-- **Issues**: Report bugs on [GitHub Issues](https://github.com/CodePlaygroundHub/paso-chat-app/issues)
-- **Discussions**: Join conversations in [GitHub Discussions](https://github.com/CodePlaygroundHub/paso-chat-app/discussions)
-- **Live Demo**: Try it at [chat-app-sooty-mu.vercel.app](https://chat-app-sooty-mu.vercel.app)
-
----
-
-## Future Vision
-
-PASO is actively maintained with exciting features on the roadmap:
-
-- **E2E Encryption**: End-to-end message encryption (Signal protocol)
-- **Ephemeral Messages**: Auto-delete after timeout
-- **Advanced Search**: Full-text search with filters
-- **Message Reactions**: Rich emoji reactions (already partial support)
-- **Voice Messages**: Async voice note recording & playback
-- **Location Sharing**: Real-time location with privacy controls
-- **Backup/Restore**: Cloud backup with recovery options
-- **Native Mobile Apps**: React Native for iOS/Android
-
-See [ROADMAP.md](./docs/ROADMAP.md) for the complete vision and timeline.
+The project is primarily intended as a **technical demonstration and portfolio project**, while maintaining an architecture that reflects patterns used in production realtime applications.
 
 ---
 
-## Contributors
+## License
 
-PASO is built by an amazing community of contributors. Every issue, pull request, bug fix, and feature helps make the project better.
+PASO is released under the **MIT License**.
 
-<a href="https://github.com/CodePlaygroundHub/paso-chat-app/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=CodePlaygroundHub/paso-chat-app" />
-</a>
-
-Want to see your avatar here? Check out the Contributing Guide and open your first PR!
+See [`LICENSE`](./LICENSE) for the complete license text.
 
 ---
+
+## Acknowledgements
+
+PASO draws inspiration from the user experience and technical patterns found across modern communication platforms, including:
+
+- WhatsApp — messaging experience
+- Slack — collaborative communication
+- Discord — realtime communities and calling
+- Telegram — communication and security concepts
+
+Third-party services used by PASO include Groq, ZegoCloud, Cloudinary, Brevo, MongoDB, Redis, and other open-source technologies.
+
+---
+
+## ⭐ Support the Project
+
+If PASO was useful or interesting to you, consider giving the repository a ⭐.
+
+Issues, ideas, and pull requests are always welcome.
 
 ## ⭐ Star History
 
-If PASO helps you, consider giving it a ⭐ on GitHub!
-
----
+<p align="center">
+  <a href="https://github.com/CodePlaygroundHub/paso-chat-app/stargazers">
+    <img
+      src="https://api.star-history.com/svg?repos=CodePlaygroundHub/paso-chat-app&type=Date"
+      alt="PASO Star History"
+      width="820"
+    />
+  </a>
+</p>
 
 <p align="center">
-  <strong>Built with ❤️ by the CodePlaygroundHub community</strong>
+  <sub>
+    Built with React, Node.js, Socket.IO, Redis, MongoDB, Python, and AI.
+  </sub>
 </p>
