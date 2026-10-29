@@ -29,6 +29,7 @@ app.use(
       "https://chat-app-sooty-mu.vercel.app",
       "http://localhost:5173",
       "http://localhost:5174",
+      "https://pasochat.vercel.app",
     ],
     credentials: true,
   })
