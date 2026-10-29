@@ -23,19 +23,20 @@ const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 app.set("trust proxy", 1);
 
-app.use(
-  cors({
-    origin: [
-      "https://chat-app-sooty-mu.vercel.app",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://pasochat.vercel.app",
-    ],
-    credentials: true,
-  })
-);
+const allowedOrigins = [
+  "https://chat-app-sooty-mu.vercel.app",
+  "https://pasochat.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
 
-// app.options("*", cors());
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
