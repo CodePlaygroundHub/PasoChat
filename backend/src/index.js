@@ -20,7 +20,7 @@ import pollRoutes from "./routes/poll.routes.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
+const __dirname = path.resolve(); // It gets the absolute path of the current working directory
 app.set("trust proxy", 1);
 
 const allowedOrigins = [
