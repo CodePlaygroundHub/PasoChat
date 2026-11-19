@@ -223,8 +223,8 @@ const MessageInput = () => {
 
   return (
     <div
-      className={`relative border-t border-base-200/80 dark:border-base-800 px-4 py-3 w-full shrink-0 bg-base-100/80 backdrop-blur-md ${
-        dragActive ? "bg-primary/10 border-primary" : ""
+      className={`relative w-full shrink-0 border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#100F0F] px-3 sm:px-5 py-3 transition-colors ${
+        dragActive ? "bg-zinc-50 dark:bg-zinc-900/50" : ""
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -232,48 +232,53 @@ const MessageInput = () => {
     >
       {/* Drop Zone Overlay */}
       {dragActive && (
-        <div className="absolute inset-0 flex items-center justify-center bg-base-100/90 backdrop-blur-md z-40 rounded-2xl border-2 border-dashed border-primary m-2">
-          <p className="text-sm font-bold text-primary animate-pulse">
-            Drop file here to upload
+        <div className="pointer-events-none absolute inset-2 z-40 flex items-center justify-center rounded-lg border border-dashed border-zinc-400 dark:border-zinc-600 bg-white/95 dark:bg-[#141313]/95 backdrop-blur-xs">
+          <p className="text-xs font-medium text-zinc-700 dark:text-zinc-200">
+            Drop file here to attach
           </p>
         </div>
       )}
 
       {/* Replying Banner */}
       {replyingTo && (
-        <div className="mb-2 flex items-center justify-between rounded-xl bg-base-200/70 border border-base-300/40 px-3.5 py-2 text-xs">
-          <div className="truncate flex items-center gap-1.5">
-            <span className="text-primary font-bold">Replying to:</span>
-            <span className="text-base-content/70 truncate">{replyingTo.text || "Media attachment"}</span>
+        <div className="mb-2 flex items-center justify-between gap-2 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/50 px-3 py-2 text-xs">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="shrink-0 font-medium text-zinc-700 dark:text-zinc-300">
+              Replying to:
+            </span>
+            <span className="truncate text-zinc-500 dark:text-zinc-400">
+              {replyingTo.text || "Media attachment"}
+            </span>
           </div>
           <button
-            onClick={clearReplyingTo}
-            className="w-5 h-5 rounded-full flex items-center justify-center text-base-content/50 hover:bg-base-300 hover:text-base-content transition-colors"
             type="button"
+            onClick={clearReplyingTo}
+            aria-label="Cancel reply"
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
-            <X size={13} />
+            <X className="h-3 w-3 stroke-[1.75]" />
           </button>
         </div>
       )}
 
       {/* Media & Attachment Previews */}
       {(imagePreview || fileData || audioData) && (
-        <div className="mb-2.5 flex flex-wrap gap-2 animate-in fade-in slide-in-from-bottom-2">
+        <div className="mb-2.5 flex flex-wrap gap-2">
           {imagePreview && (
             <Preview onRemove={() => setImagePreview(null)}>
               <img
                 src={imagePreview}
                 alt="Preview"
-                className="h-16 w-16 rounded-xl object-cover border border-base-300 shadow-sm"
+                className="h-14 w-14 rounded-lg border border-zinc-200 dark:border-zinc-800 object-cover"
               />
             </Preview>
           )}
 
           {fileData && (
             <Preview onRemove={() => setFileData(null)}>
-              <div className="flex items-center gap-2 text-xs bg-base-200 border border-base-300 px-3 py-2 rounded-xl shadow-sm">
-                <Paperclip size={14} className="text-primary" />
-                <span className="truncate max-w-[150px] font-medium text-base-content/80">
+              <div className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-3 py-2 text-xs text-zinc-700 dark:text-zinc-300">
+                <Paperclip className="h-3.5 w-3.5 shrink-0 text-zinc-400 stroke-[1.75]" />
+                <span className="max-w-[160px] truncate font-medium">
                   {fileData.name}
                 </span>
               </div>
@@ -282,9 +287,9 @@ const MessageInput = () => {
 
           {audioData && (
             <Preview onRemove={() => setAudioData(null)}>
-              <div className="flex items-center gap-2 text-xs bg-primary/10 text-primary border border-primary/20 px-3 py-2 rounded-xl">
-                <Mic size={14} />
-                <span className="font-semibold">Voice memo attached</span>
+              <div className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 px-3 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                <Mic className="h-3.5 w-3.5 shrink-0 text-zinc-500 stroke-[1.75]" />
+                <span>Voice memo attached</span>
               </div>
             </Preview>
           )}
@@ -293,20 +298,21 @@ const MessageInput = () => {
 
       {/* Smart Replies */}
       {smartReplies?.length > 0 && !isAI && (
-        <div className="mb-3 relative overflow-hidden rounded-2xl p-3 bg-base-200/50 border border-base-300/40">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-base-content/50 uppercase tracking-wider">
-              Suggested Replies
+        <div className="mb-2.5 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/80 dark:bg-zinc-900/40 px-3 py-2">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+              Suggested replies
             </span>
             <button
               type="button"
               onClick={() => useChatStore.setState({ smartReplies: [] })}
-              className="text-base-content/40 hover:text-error transition-colors"
+              aria-label="Dismiss suggested replies"
+              className="flex h-5 w-5 items-center justify-center rounded text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
             >
-              <X size={12} />
+              <X className="h-3 w-3 stroke-[1.75]" />
             </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {smartReplies.map((reply, index) => (
               <button
                 key={index}
@@ -315,7 +321,7 @@ const MessageInput = () => {
                   setText(reply);
                   useChatStore.setState({ smartReplies: [] });
                 }}
-                className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 transition-all duration-200 active:scale-95"
+                className="rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 hover:text-zinc-950 dark:hover:text-zinc-100 transition-colors cursor-pointer"
               >
                 {reply}
               </button>
@@ -324,22 +330,21 @@ const MessageInput = () => {
         </div>
       )}
 
-      {/* Main Bar */}
+      {/* Main Composer Bar */}
       <form onSubmit={handleSend} className="flex items-center gap-2">
-        {/* Unified Input Bar */}
-        <div className="flex-1 flex items-center bg-base-200/60 dark:bg-base-800/50 border border-base-300/50 dark:border-white/5 rounded-2xl px-2.5 py-1 focus-within:border-primary/50 focus-within:bg-base-100 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+        <div className="flex flex-1 items-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/70 dark:bg-zinc-900/50 px-2 py-1 focus-within:border-zinc-400 dark:focus-within:border-zinc-600 focus-within:bg-white dark:focus-within:bg-zinc-900 transition-colors">
           <input
             type="text"
             value={text}
             onChange={(e) => handleTyping(e.target.value)}
             onBlur={stopTyping}
-            placeholder={isAI ? "Ask AI assistant…" : "Type a message…"}
+            placeholder={isAI ? "Ask AI assistant..." : "Type a message..."}
             disabled={recording}
-            className="flex-1 bg-transparent px-2.5 py-2 text-sm text-base-content placeholder:text-base-content/40 outline-none disabled:opacity-50"
+            className="h-8 flex-1 bg-transparent px-2 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 outline-none disabled:opacity-50"
           />
 
           {!isAI && (
-            <div className="flex items-center gap-0.5 text-base-content/50">
+            <div className="flex items-center gap-0.5 text-zinc-500 dark:text-zinc-400">
               <input
                 ref={imageRef}
                 type="file"
@@ -354,7 +359,7 @@ const MessageInput = () => {
                 onChange={handleFileChange}
               />
 
-              {/* Emoji Picker Button */}
+              {/* Emoji Picker */}
               <div className="relative" ref={emojiRef}>
                 <button
                   type="button"
@@ -362,13 +367,18 @@ const MessageInput = () => {
                     setShowGifPicker(false);
                     setShowEmojiPicker((prev) => !prev);
                   }}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+                  aria-label="Insert emoji"
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer ${
+                    showEmojiPicker
+                      ? "bg-zinc-200/70 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                      : "hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  }`}
                 >
-                  <Smile size={18} />
+                  <Smile className="h-4 w-4 stroke-[1.75]" />
                 </button>
 
                 {showEmojiPicker && (
-                  <div className="fixed sm:absolute bottom-16 sm:bottom-12 right-4 sm:right-0 z-50 shadow-2xl rounded-2xl overflow-hidden border border-base-300">
+                  <div className="fixed bottom-16 right-4 z-50 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#141313] shadow-lg sm:absolute sm:bottom-11 sm:right-0">
                     <EmojiPicker
                       onEmojiClick={handleEmojiClick}
                       width={320}
@@ -378,16 +388,17 @@ const MessageInput = () => {
                 )}
               </div>
 
-              {/* Image Button */}
+              {/* Image Upload */}
               <button
                 type="button"
-                onClick={() => imageRef.current.click()}
-                className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+                onClick={() => imageRef.current?.click()}
+                aria-label="Attach image"
+                className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
               >
-                <Image size={18} />
+                <Image className="h-4 w-4 stroke-[1.75]" />
               </button>
 
-              {/* GIF Picker Button */}
+              {/* GIF Picker */}
               <div className="relative" ref={gifRef}>
                 <button
                   type="button"
@@ -395,13 +406,18 @@ const MessageInput = () => {
                     setShowEmojiPicker(false);
                     setShowGifPicker((prev) => !prev);
                   }}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+                  aria-label="Insert GIF"
+                  className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer ${
+                    showGifPicker
+                      ? "bg-zinc-200/70 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                      : "hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  }`}
                 >
-                  <Clapperboard size={18} />
+                  <Clapperboard className="h-4 w-4 stroke-[1.75]" />
                 </button>
 
                 {showGifPicker && (
-                  <div className="fixed sm:absolute bottom-16 sm:bottom-12 right-4 sm:right-0 z-50 shadow-2xl rounded-2xl overflow-hidden border border-base-300">
+                  <div className="fixed bottom-16 right-4 z-50 overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#141313] shadow-lg sm:absolute sm:bottom-11 sm:right-0">
                     <GifPicker
                       onSelect={handleGifSelect}
                       onClose={() => setShowGifPicker(false)}
@@ -410,42 +426,50 @@ const MessageInput = () => {
                 )}
               </div>
 
-              {/* Attachment Button */}
+              {/* File Attachment */}
               <button
                 type="button"
-                onClick={() => fileRef.current.click()}
-                className="w-8 h-8 rounded-xl flex items-center justify-center hover:text-primary hover:bg-primary/10 transition-colors"
+                onClick={() => fileRef.current?.click()}
+                aria-label="Attach file"
+                className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
               >
-                <Paperclip size={18} />
+                <Paperclip className="h-4 w-4 stroke-[1.75]" />
               </button>
 
-              {/* Poll Button (Group chats only) */}
+              {/* Poll Creator (Group chats only) */}
               {selectedChatType === "group" && (
                 <button
                   type="button"
                   onClick={() => setShowPollModal(true)}
-                  className="w-8 h-8 rounded-xl flex items-center justify-center text-primary/80 hover:text-primary hover:bg-primary/10 transition-colors"
-                  title="Create Poll"
+                  aria-label="Create poll"
+                  title="Create poll"
+                  className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
                 >
-                  <BarChart2 size={18} />
+                  <BarChart2 className="h-4 w-4 stroke-[1.75]" />
                 </button>
               )}
             </div>
           )}
         </div>
 
-        {/* Audio Recording / Mic Button */}
+        {/* Voice Recording Button */}
         {!isAI && (
           <button
             type="button"
             onClick={recording ? stopRecording : startRecording}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
+            aria-label={recording ? "Stop recording" : "Record voice message"}
+            title={recording ? "Stop recording" : "Record voice message"}
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors cursor-pointer ${
               recording
-                ? "bg-error text-white shadow-lg shadow-error/30 animate-pulse"
-                : "bg-base-200/70 hover:bg-base-300/80 text-base-content/70"
+                ? "border-red-600/30 bg-red-600 text-white hover:bg-red-700"
+                : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-950 dark:hover:text-zinc-100"
             }`}
           >
-            {recording ? <StopCircle size={20} /> : <Mic size={20} />}
+            {recording ? (
+              <StopCircle className="h-4 w-4 stroke-[1.75]" />
+            ) : (
+              <Mic className="h-4 w-4 stroke-[1.75]" />
+            )}
           </button>
         )}
 
@@ -453,13 +477,10 @@ const MessageInput = () => {
         <button
           type="submit"
           disabled={!hasContent}
-          className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-200 ${
-            hasContent
-              ? "bg-primary text-primary-content shadow-lg shadow-primary/30 hover:scale-105 active:scale-95"
-              : "bg-base-200/50 text-base-content/30 cursor-not-allowed"
-          }`}
+          aria-label="Send message"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
         >
-          <Send size={18} className={hasContent ? "translate-x-0.5" : ""} />
+          <Send className="h-4 w-4 stroke-[1.75]" />
         </button>
       </form>
 
@@ -477,11 +498,12 @@ const Preview = ({ children, onRemove }) => (
   <div className="relative inline-flex items-center">
     {children}
     <button
-      onClick={onRemove}
       type="button"
-      className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-base-300 flex items-center justify-center border border-base-100 shadow-sm hover:bg-error hover:text-white transition-colors"
+      onClick={onRemove}
+      aria-label="Remove attachment"
+      className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
     >
-      <X size={11} />
+      <X className="h-2.5 w-2.5 stroke-[2]" />
     </button>
   </div>
 );
