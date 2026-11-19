@@ -131,7 +131,7 @@ const ChatContainer = () => {
 
   if (isMessagesLoading) {
     return (
-      <div className="flex flex-1 flex-col h-full min-h-0 w-full">
+      <div className="flex flex-1 flex-col h-full min-h-0 w-full bg-white dark:bg-[#100F0F]">
         <ChatHeader />
         <MessageSkeleton />
         <MessageInput />
@@ -140,7 +140,7 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex flex-1 flex-col h-full min-h-0 w-full bg-transparent overflow-hidden">
+    <div className="flex flex-1 flex-col h-full min-h-0 w-full bg-white dark:bg-[#100F0F] overflow-hidden">
       <div className="shrink-0 z-20">
         <ChatHeader />
       </div>
@@ -158,16 +158,13 @@ const ChatContainer = () => {
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
-              backgroundAttachment: "fixed", // Keeps image still while scrolling
+              backgroundAttachment: "fixed",
             }}
-          >
-            {/* DARK OVERLAY FOR READABILITY */}
-            {/* <div className="absolute inset-0 bg-black/40 pointer-events-none" /> */}
-          </div>
+          />
         )}
 
-        <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-2 py-2 sm:px-4 sm:py-3">
-          <div className="space-y-2 sm:space-y-4">
+        <div className="relative z-10 h-full overflow-y-auto overscroll-contain px-3 py-3 sm:px-5 sm:py-4">
+          <div className="space-y-2.5 sm:space-y-3.5">
             {timelineItems.map((item, idx) => {
               const isLast = idx === timelineItems.length - 1;
 
@@ -178,14 +175,13 @@ const ChatContainer = () => {
                     ref={(el) => {
                       if (isLast) bottomRef.current = el;
                     }}
-                    className="flex justify-start px-2 sm:px-4"
+                    className="flex justify-start px-1 sm:px-2"
                   >
                     <PollBubble poll={item.data} />
                   </div>
                 );
               }
 
-              // Regular message
               const message = item.data;
               const isMe =
                 typeof message.senderId === "string"
@@ -218,28 +214,34 @@ const ChatContainer = () => {
               );
             })}
 
-            {/* AI THINKING */}
+            {/* AI Thinking Indicator */}
             <AnimatePresence>
               {isAILoading && (
                 <motion.div
-                  initial={{ opacity: 0, y: 6 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  className="chat chat-start mb-2 sm:mb-4"
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex items-center gap-2.5 pt-1"
                 >
-                  <div className="chat-image avatar">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full ring-1 ring-primary animate-pulse">
-                      <img src="/ai-avatar.png" alt="AI" />
-                    </div>
-                  </div>
+                  <img
+                    src="/ai-avatar.png"
+                    alt="AI"
+                    className="h-7 w-7 rounded-full object-cover border border-zinc-200 dark:border-zinc-800 shrink-0"
+                  />
 
-                  <div className="chat-bubble bg-base-200 text-primary flex items-center gap-1 py-2 px-3 sm:py-3 sm:px-4 rounded-2xl rounded-tl-none border border-primary/10">
-                    {[0, 0.2, 0.4].map((delay, i) => (
+                  <div className="inline-flex h-8 items-center gap-1 rounded-lg border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/70 px-3">
+                    {[0, 0.18, 0.36].map((delay, i) => (
                       <motion.span
                         key={i}
-                        animate={{ scale: [1, 1.5, 1] }}
-                        transition={{ repeat: Infinity, duration: 1, delay }}
-                        className="w-1.5 h-1.5 bg-primary rounded-full"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 1.1,
+                          delay,
+                          ease: "easeInOut",
+                        }}
+                        className="h-1.5 w-1.5 rounded-full bg-zinc-500 dark:bg-zinc-400"
                       />
                     ))}
                   </div>
@@ -249,6 +251,7 @@ const ChatContainer = () => {
           </div>
         </div>
       </div>
+
       <div className="shrink-0 z-20">
         <MessageInput />
       </div>
