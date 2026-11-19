@@ -79,8 +79,8 @@ const ChatHeader = () => {
     typingText = !isGroup
       ? "typing..."
       : typingUserIds.length === 1
-      ? "Someone is typing..."
-      : `${typingUserIds.length} people typing...`;
+        ? "Someone is typing..."
+        : `${typingUserIds.length} people typing...`;
   }
 
   const handleClearChat = () => {
@@ -122,20 +122,20 @@ const ChatHeader = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-base-content/5 bg-base-100/80 backdrop-blur-xl transition-all select-none">
-      <div className="relative px-3 sm:px-5 py-2.5 sm:py-3 h-[60px] sm:h-[68px] flex items-center">
-        {/* Full-width Seamless Overlay Search Bar */}
+    <header className="sticky top-0 z-40 w-full select-none border-b border-zinc-200/80 bg-white/90 backdrop-blur-md dark:border-zinc-800/80 dark:bg-[#100F0F]/90">
+      <div className="relative flex h-16 items-center px-3 sm:px-5">
+        {/* Seamless Overlay Search Bar */}
         <AnimatePresence>
           {showSearch && (
             <motion.div
-              initial={{ opacity: 0, x: 15 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 15 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute inset-0 z-30 flex items-center gap-2 bg-base-100 px-3 sm:px-5"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.14 }}
+              className="absolute inset-0 z-30 flex items-center gap-2 bg-white px-3 sm:px-5 dark:bg-[#100F0F]"
             >
-              <div className="relative flex-1 flex items-center">
-                <Search className="absolute left-3.5 h-4 w-4 text-base-content/40 pointer-events-none" />
+              <div className="relative flex flex-1 items-center">
+                <Search className="pointer-events-none absolute left-3 h-4 w-4 stroke-[1.75] text-zinc-400 dark:text-zinc-500" />
                 <input
                   ref={searchInputRef}
                   value={searchQuery}
@@ -145,53 +145,53 @@ const ChatHeader = () => {
                     if (e.key === "Escape") handleCloseSearch();
                   }}
                   placeholder="Search messages (press Enter)..."
-                  className="w-full bg-base-200/70 border border-base-content/10 focus:border-primary focus:bg-base-100 rounded-full pl-10 pr-9 py-2 text-xs sm:text-sm text-base-content placeholder:text-base-content/40 outline-none transition-all"
+                  className="h-9 w-full rounded-md border border-zinc-200 bg-zinc-50 pl-9 pr-8 text-xs text-zinc-900 placeholder:text-zinc-400 transition-colors focus:border-zinc-400 focus:bg-white focus:outline-none dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-zinc-600 dark:focus:bg-zinc-900"
                 />
                 {searchQuery && (
                   <button
+                    type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 p-0.5 rounded-full hover:bg-base-content/10 text-base-content/40 hover:text-base-content transition-colors"
+                    aria-label="Clear search query"
+                    className="absolute right-2 flex h-6 w-6 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/60 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
                   >
-                    <X size={14} />
+                    <X className="h-3.5 w-3.5 stroke-[1.75]" />
                   </button>
                 )}
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.95 }}
+              <button
+                type="button"
                 onClick={runSearch}
-                className="btn btn-primary btn-sm rounded-full px-4 text-xs font-semibold shadow-sm"
+                className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md bg-zinc-900 px-3.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
               >
                 Search
-              </motion.button>
+              </button>
 
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
+              <button
+                type="button"
                 onClick={handleCloseSearch}
-                className="p-2 rounded-full text-base-content/60 hover:text-base-content hover:bg-base-200 transition-colors"
+                aria-label="Close search"
                 title="Close search (Esc)"
+                className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
               >
-                <X size={18} />
-              </motion.button>
+                <X className="h-4 w-4 stroke-[1.75]" />
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Header Content */}
-        <div className="flex items-center justify-between gap-3 w-full min-w-0">
+        {/* Main Header Row */}
+        <div className="flex w-full min-w-0 items-center justify-between gap-3">
           {/* User / Group Info */}
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <button
+              type="button"
               onClick={clearSelectedChat}
-              className="p-1.5 rounded-full lg:hidden text-base-content/70 hover:text-base-content hover:bg-base-200/80 transition-colors -ml-1"
+              className="-ml-1 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-950 lg:hidden dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
               aria-label="Back"
             >
-              <ArrowLeft className="h-5 w-5" />
-            </motion.button>
+              <ArrowLeft className="h-4 w-4 stroke-[1.75]" />
+            </button>
 
             {/* Avatar */}
             <div className="relative shrink-0 select-none">
@@ -200,88 +200,74 @@ const ChatHeader = () => {
                   <img
                     src={selectedGroup.avatar}
                     alt={selectedGroup.name}
-                    className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl object-cover ring-1 ring-base-content/10 shadow-sm"
+                    className="h-9 w-9 rounded-lg border border-zinc-200 object-cover dark:border-zinc-800"
                   />
                 ) : (
-                  <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-tr from-primary/20 via-primary/10 to-base-200 flex items-center justify-center border border-primary/20 shadow-sm">
-                    <span className="font-semibold text-primary text-base sm:text-lg">
-                      {selectedGroup?.name?.[0]?.toUpperCase() || "G"}
-                    </span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-100 text-xs font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                    {selectedGroup?.name?.[0]?.toUpperCase() || "G"}
                   </div>
                 )
               ) : (
                 <div className="relative">
-                  <img
-                    src={
-                      isAI
-                        ? "/ai-avatar.png"
-                        : selectedUser?.profilePic || "/avatar.png"
-                    }
-                    alt={isAI ? "AI Avatar" : selectedUser?.fullName || "User"}
-                    className={`h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover shadow-sm ${
-                      isAI
-                        ? "ring-2 ring-primary/40 p-0.5 bg-gradient-to-tr from-primary/30 to-secondary/30"
-                        : "ring-1 ring-base-content/10"
-                    }`}
-                  />
-
-                  {/* Online Status Indicator */}
-                  {isOnline && (
-                    <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-base-100 shadow-sm" />
+                  {isAI ? (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                      <Sparkles className="h-4 w-4 stroke-[1.75]" />
+                    </div>
+                  ) : (
+                    <img
+                      src={selectedUser?.profilePic || "/avatar.png"}
+                      alt={selectedUser?.fullName || "User"}
+                      className="h-9 w-9 rounded-full border border-zinc-200 object-cover dark:border-zinc-800"
+                    />
                   )}
 
-                  {/* AI Pulsing Ring */}
-                  {isAI && isAILoading && (
-                    <span className="absolute inset-0 rounded-full ring-2 ring-primary animate-ping opacity-30" />
+                  {isOnline && (
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#100F0F]" />
                   )}
                 </div>
               )}
             </div>
 
             {/* Title & Status */}
-            <div className="min-w-0 flex flex-col justify-center">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <h3 className="font-semibold text-sm sm:text-base tracking-tight truncate text-base-content">
+            <div className="flex min-w-0 flex-col justify-center">
+              <div className="flex min-w-0 items-center gap-2">
+                <h3 className="truncate text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
                   {isGroup
                     ? selectedGroup?.name
                     : isAI
-                    ? "Meta AI"
-                    : selectedUser?.fullName}
+                      ? "Meta AI"
+                      : selectedUser?.fullName}
                 </h3>
                 {isAI && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20 shrink-0">
-                    <Sparkles size={11} className={isAILoading ? "animate-spin" : ""} />
-                    AI
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+                    <Sparkles className="h-2.5 w-2.5 stroke-[1.75]" />
+                    Assistant
                   </span>
                 )}
               </div>
 
-              <div className="h-4 flex items-center overflow-hidden">
+              <div className="flex h-4 items-center overflow-hidden">
                 <AnimatePresence mode="wait">
                   {isAI && isAILoading ? (
                     <motion.span
                       key="ai"
-                      initial={{ opacity: 0, y: 3 }}
+                      initial={{ opacity: 0, y: 2 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -3 }}
-                      className="text-[11px] font-medium text-primary flex items-center gap-1.5"
+                      exit={{ opacity: 0, y: -2 }}
+                      transition={{ duration: 0.12 }}
+                      className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
                     >
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                       Thinking...
                     </motion.span>
                   ) : typingText ? (
                     <motion.span
                       key="typing"
-                      initial={{ opacity: 0, y: 3 }}
+                      initial={{ opacity: 0, y: 2 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -3 }}
-                      className="text-[11px] font-medium text-primary flex items-center gap-1.5 italic"
+                      exit={{ opacity: 0, y: -2 }}
+                      transition={{ duration: 0.12 }}
+                      className="text-[11px] font-medium text-zinc-600 dark:text-zinc-300"
                     >
-                      <span className="flex gap-0.5">
-                        <span className="h-1 w-1 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-                        <span className="h-1 w-1 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-                        <span className="h-1 w-1 rounded-full bg-primary animate-bounce" />
-                      </span>
                       {typingText}
                     </motion.span>
                   ) : (
@@ -289,20 +275,23 @@ const ChatHeader = () => {
                       key="status"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-[11px] text-base-content/60 truncate tracking-wide"
+                      transition={{ duration: 0.12 }}
+                      className="truncate text-[11px] text-zinc-500 dark:text-zinc-400"
                     >
                       {isGroup
                         ? `${selectedGroup?.members?.length || 0} members`
                         : isAI
-                        ? "Always ready to help"
-                        : isOnline
-                        ? "Active now"
-                        : selectedUser?.lastSeen
-                        ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}`
-                        : "Offline"}
+                          ? "Always available"
+                          : isOnline
+                            ? "Online"
+                            : selectedUser?.lastSeen
+                              ? `Last seen ${new Date(
+                                selectedUser.lastSeen,
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}`
+                              : "Offline"}
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -311,123 +300,125 @@ const ChatHeader = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-            <div className="flex items-center bg-base-200/50 backdrop-blur-md rounded-2xl p-1 border border-base-content/5 shadow-inner">
-              {isGroup ? (
+          <div className="flex shrink-0 items-center gap-1">
+            {isGroup ? (
+              <>
+                <HeaderButton
+                  onClick={() => setShowMembers(true)}
+                  title="Group info"
+                >
+                  <Info className="h-4 w-4 stroke-[1.75]" />
+                </HeaderButton>
+                <HeaderButton
+                  onClick={() =>
+                    startGroupCall({
+                      groupId: selectedGroup._id,
+                      callType: "voice",
+                    })
+                  }
+                  title="Audio call"
+                >
+                  <Phone className="h-4 w-4 stroke-[1.75]" />
+                </HeaderButton>
+                <HeaderButton
+                  onClick={() =>
+                    startGroupCall({
+                      groupId: selectedGroup._id,
+                      callType: "video",
+                    })
+                  }
+                  title="Video call"
+                >
+                  <Video className="h-4 w-4 stroke-[1.75]" />
+                </HeaderButton>
+              </>
+            ) : (
+              !isAI && (
                 <>
                   <HeaderButton
-                    onClick={() => setShowMembers(true)}
-                    title="Group info"
-                  >
-                    <Info size={17} />
-                  </HeaderButton>
-                  <HeaderButton
                     onClick={() =>
-                      startGroupCall({
-                        groupId: selectedGroup._id,
+                      startCall({
+                        receiver: selectedUser,
                         callType: "voice",
                       })
                     }
                     title="Audio call"
                   >
-                    <Phone size={17} />
+                    <Phone className="h-4 w-4 stroke-[1.75]" />
                   </HeaderButton>
                   <HeaderButton
                     onClick={() =>
-                      startGroupCall({
-                        groupId: selectedGroup._id,
+                      startCall({
+                        receiver: selectedUser,
                         callType: "video",
                       })
                     }
                     title="Video call"
                   >
-                    <Video size={17} />
+                    <Video className="h-4 w-4 stroke-[1.75]" />
                   </HeaderButton>
                 </>
-              ) : (
-                !isAI && (
-                  <>
-                    <HeaderButton
-                      onClick={() =>
-                        startCall({
-                          receiver: selectedUser,
-                          callType: "voice",
-                        })
-                      }
-                      title="Audio call"
-                    >
-                      <Phone size={17} />
-                    </HeaderButton>
-                    <HeaderButton
-                      onClick={() =>
-                        startCall({
-                          receiver: selectedUser,
-                          callType: "video",
-                        })
-                      }
-                      title="Video call"
-                    >
-                      <Video size={17} />
-                    </HeaderButton>
-                  </>
-                )
-              )}
+              )
+            )}
 
-              <HeaderButton
-                onClick={() => setShowSearch(true)}
-                title="Search conversation"
-              >
-                <Search size={17} />
-              </HeaderButton>
-            </div>
+            <HeaderButton
+              onClick={() => setShowSearch(true)}
+              title="Search conversation"
+            >
+              <Search className="h-4 w-4 stroke-[1.75]" />
+            </HeaderButton>
+
+            <div className="mx-1 h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
 
             {/* 3-Dot Dropdown Menu */}
             <div ref={menuRef} className="relative">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
+              <button
+                type="button"
                 onClick={() => setOpenMenu((prev) => !prev)}
-                className={`p-2 rounded-full transition-colors ${
-                  openMenu
-                    ? "bg-base-200 text-base-content"
-                    : "text-base-content/70 hover:text-base-content hover:bg-base-200/70"
-                }`}
+                className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors ${openMenu
+                    ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
+                  }`}
                 aria-label="More options"
               >
-                <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
-              </motion.button>
+                <MoreVertical className="h-4 w-4 stroke-[1.75]" />
+              </button>
 
               <AnimatePresence>
                 {openMenu && (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 8 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="absolute right-0 top-full mt-2 w-52 bg-base-100 border border-base-content/10 rounded-2xl shadow-2xl z-[100] p-1.5"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute right-0 top-full z-[100] mt-1.5 w-48 rounded-lg border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-800 dark:bg-[#141313]"
                   >
                     <button
+                      type="button"
                       onClick={handleWallpaperChange}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl hover:bg-base-200/70 text-base-content/80 hover:text-base-content transition-colors"
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:hover:text-white"
                     >
-                      <Image size={16} className="text-base-content/60" />
+                      <Image className="h-3.5 w-3.5 stroke-[1.75] text-zinc-500" />
                       Change Wallpaper
                     </button>
 
                     <button
+                      type="button"
                       onClick={handleRemoveWallpaper}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl hover:bg-base-200/70 text-base-content/80 hover:text-base-content transition-colors"
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:hover:text-white"
                     >
-                      <Trash size={16} className="text-base-content/60" />
+                      <Trash className="h-3.5 w-3.5 stroke-[1.75] text-zinc-500" />
                       Remove Wallpaper
                     </button>
 
-                    <div className="my-1 border-t border-base-content/5" />
+                    <div className="my-1 border-t border-zinc-100 dark:border-zinc-800/80" />
 
                     <button
+                      type="button"
                       onClick={handleClearChat}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-xs sm:text-sm font-medium rounded-xl text-error hover:bg-error/10 transition-colors"
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-red-600 transition-colors hover:bg-red-50/70 dark:text-red-400 dark:hover:bg-red-950/30"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 className="h-3.5 w-3.5 stroke-[1.75]" />
                       Clear Conversation
                     </button>
                   </motion.div>
@@ -436,14 +427,14 @@ const ChatHeader = () => {
             </div>
 
             {/* Desktop Close View */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
+            <button
+              type="button"
               onClick={clearSelectedChat}
-              className="p-2 rounded-full hidden lg:flex text-base-content/60 hover:text-base-content hover:bg-base-200/70 transition-colors"
+              className="hidden h-8 w-8 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 lg:flex dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
               title="Close chat"
             >
-              <X className="h-4 w-4" />
-            </motion.button>
+              <X className="h-4 w-4 stroke-[1.75]" />
+            </button>
           </div>
         </div>
       </div>
