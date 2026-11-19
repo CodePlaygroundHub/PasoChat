@@ -6,7 +6,7 @@ export let subClient = null;
 const isTest = process.env.NODE_ENV === "test";
 
 if (!isTest && process.env.REDIS_URL) {
-  pubClient = createClient({
+    pubClient = createClient({
     url: process.env.REDIS_URL,
   });
 
