@@ -21,6 +21,7 @@ const Sidebar = ({ setActiveTab }) => {
     getGroups,
     users,
     groups,
+    messages,
     selectedUser,
     selectedGroup,
     unreadCounts,
@@ -36,17 +37,55 @@ const Sidebar = ({ setActiveTab }) => {
 
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [sentCounts, setSentCounts] = useState({});
 
   useEffect(() => {
     getUsers();
     getGroups();
-  }, []);
+  }, [getUsers, getGroups]);
+
+  // Track outgoing messages sent by the current user to each recipient
+  useEffect(() => {
+    if (!authUser?._id || !Array.isArray(messages) || messages.length === 0) {
+      return;
+    }
+
+    const latestMessage = messages[messages.length - 1];
+    if (!latestMessage?._id) return;
+
+    const senderId = String(
+      latestMessage.senderId?._id || latestMessage.senderId || "",
+    );
+    if (senderId !== String(authUser._id)) return;
+
+    const targetId = String(
+      latestMessage.receiverId?._id ||
+        latestMessage.receiverId ||
+        selectedUser?._id ||
+        "",
+    );
+    if (!targetId) return;
+
+    setSentCounts((prev) => {
+      const current = prev[targetId] || { count: 0, lastMessageId: null };
+      if (current.lastMessageId === latestMessage._id) return prev;
+
+      return {
+        ...prev,
+        [targetId]: {
+          count: current.count + 1,
+          lastMessageId: latestMessage._id,
+        },
+      };
+    });
+  }, [messages, authUser?._id, selectedUser?._id]);
 
   const onlineSet = useMemo(() => {
     return new Set((onlineUsers || []).map((id) => String(id)));
   }, [onlineUsers]);
 
   const handleDeleteGroup = (e, groupId) => {
+    e.preventDefault();
     e.stopPropagation();
     if (!window.confirm("Delete this group?")) return;
     deleteGroup(groupId);
@@ -55,7 +94,7 @@ const Sidebar = ({ setActiveTab }) => {
   const isPinned = (chatId, chatType) => {
     return authUser?.pinnedChats?.some(
       (chat) =>
-        String(chat.chatId) === String(chatId) && chat.chatType === chatType
+        String(chat.chatId) === String(chatId) && chat.chatType === chatType,
     );
   };
 
@@ -70,15 +109,22 @@ const Sidebar = ({ setActiveTab }) => {
     }
   };
 
+  // Order: 1. Pinned users, 2. Online users, 3. Everyone else
   const filteredUsers = useMemo(() => {
     const filtered = !showOnlineOnly
       ? users
       : users.filter((u) => onlineSet.has(String(u._id)));
 
     return [...filtered].sort((a, b) => {
-      return (
-        Number(isPinned(b._id, "user")) - Number(isPinned(a._id, "user"))
-      );
+      const aPinned = Number(isPinned(a._id, "user"));
+      const bPinned = Number(isPinned(b._id, "user"));
+      if (aPinned !== bPinned) return bPinned - aPinned;
+
+      const aOnline = Number(onlineSet.has(String(a._id)));
+      const bOnline = Number(onlineSet.has(String(b._id)));
+      if (aOnline !== bOnline) return bOnline - aOnline;
+
+      return 0;
     });
   }, [users, showOnlineOnly, onlineSet, authUser]);
 
@@ -96,63 +142,67 @@ const Sidebar = ({ setActiveTab }) => {
 
   return (
     <>
-      <aside className="flex h-full flex-col border-r border-base-300 bg-base-100 w-full md:w-20 lg:w-72 transition-all duration-300 select-none">
-        {/* Header Section */}
-        <div className="border-b border-base-300 px-4 py-3.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-semibold">
-                <Users className="h-5 w-5" />
-              </div>
-              <div className="hidden lg:block leading-tight">
-                <h2 className="font-bold text-base text-base-content">Chats</h2>
-              </div>
+      <aside className="flex h-full w-full shrink-0 flex-col border-r border-zinc-200/80 bg-white transition-[width] duration-200 select-none md:w-64 lg:w-72 dark:border-zinc-800/80 dark:bg-[#100F0F]">
+        {/* Header */}
+        <div className="border-b border-zinc-200/80 px-3.5 py-3 lg:px-4 dark:border-zinc-800/80">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                <Users className="h-3.5 w-3.5 stroke-[1.75]" />
+              </span>
+              <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                Chats
+              </h2>
             </div>
 
             <div className="flex items-center gap-1">
               <button
+                type="button"
                 onClick={() => setActiveTab("status")}
-                className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-base-content/70 hover:text-primary transition-colors"
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
                 title="Status"
+                aria-label="Status"
               >
-                <CircleDot className="h-4 w-4 sm:h-5 sm:w-5" />
+                <CircleDot className="h-4 w-4 stroke-[1.75]" />
               </button>
 
               <button
+                type="button"
                 onClick={() => setShowCreateGroup(true)}
-                className="btn btn-ghost btn-xs sm:btn-sm btn-circle text-base-content/70 hover:text-primary transition-colors"
+                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100"
                 title="Create Group"
+                aria-label="Create Group"
               >
-                <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
+                <Plus className="h-4 w-4 stroke-[1.75]" />
               </button>
             </div>
           </div>
 
-          {/* Online Filter Toggle */}
-          <div className="mt-3 hidden lg:flex items-center justify-between px-0.5">
-            <label className="cursor-pointer flex items-center gap-2 text-xs font-medium text-base-content/70 hover:text-base-content transition-colors">
+          {/* Online Filter Row */}
+          <div className="mt-2.5 flex items-center justify-between border-t border-zinc-100 pt-2 dark:border-zinc-800/70">
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">
               <input
                 type="checkbox"
-                className="checkbox checkbox-xs checkbox-primary rounded"
                 checked={showOnlineOnly}
                 onChange={(e) => setShowOnlineOnly(e.target.checked)}
+                className="h-3.5 w-3.5 cursor-pointer rounded border-zinc-300 bg-transparent text-zinc-900 focus:ring-0 focus:ring-offset-0 dark:border-zinc-700 dark:text-zinc-100"
               />
               <span>Online only</span>
             </label>
-            <span className="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+
+            <span className="text-[11px] font-medium tabular-nums text-zinc-500 dark:text-zinc-400">
               {onlineSet.size} online
             </span>
           </div>
         </div>
 
-        {/* Chat List Container */}
-        <div className="flex-1 overflow-y-auto px-2 py-2.5 space-y-4 custom-scrollbar">
-          {/* GROUPS SECTION */}
+        {/* Scrollable Chat List */}
+        <div className="flex-1 space-y-4 overflow-y-auto px-2 py-2.5">
+          {/* GROUPS */}
           {groups.length > 0 && (
-            <div className="space-y-1">
-              <div className="px-2.5 py-1 flex items-center justify-between text-[11px] font-bold tracking-wider text-base-content/45 uppercase">
-                <span className="block md:hidden lg:block">Groups</span>
-                <span className="hidden md:block lg:hidden text-center w-full">GRP</span>
+            <div className="space-y-0.5">
+              <div className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                Groups
               </div>
 
               {sortedGroups.map((group) => {
@@ -162,89 +212,104 @@ const Sidebar = ({ setActiveTab }) => {
                 const unread = unreadCounts[group._id] || 0;
 
                 return (
-                  <button
+                  <div
                     key={group._id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setSelectedGroup(group)}
-                    className={`group relative flex w-full items-center justify-between p-2 rounded-xl transition-all duration-150 ${
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedGroup(group);
+                      }
+                    }}
+                    className={`group relative flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2 text-left transition-colors ${
                       isActive
-                        ? "bg-primary/15 text-primary font-medium"
-                        : "hover:bg-base-200/70 text-base-content/80 hover:text-base-content"
+                        ? "bg-zinc-100 text-zinc-950 dark:bg-zinc-800/80 dark:text-zinc-50"
+                        : "text-zinc-700 hover:bg-zinc-100/70 dark:text-zinc-300 dark:hover:bg-zinc-800/40"
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* Avatar with Floating Pin Badge */}
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
                       <div className="relative shrink-0">
                         {group.avatar ? (
                           <img
                             src={group.avatar}
                             alt={group.name}
-                            className="h-10 w-10 rounded-full object-cover ring-1 ring-base-300"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                            className="h-9 w-9 rounded-full border border-zinc-200 object-cover dark:border-zinc-800"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm border border-primary/20">
-                            <UsersRound className="h-5 w-5" />
+                          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+                            <UsersRound className="h-4 w-4 stroke-[1.75]" />
                           </div>
-                        )}
-
-                        {pinned && (
-                          <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-md ring-2 ring-base-100 z-10">
-                            <Pin size={11} className="fill-black" />
-                          </span>
                         )}
                       </div>
 
-                      <div className="hidden md:hidden lg:block text-left truncate">
-                        <p className="text-sm font-semibold truncate leading-snug">
-                          {group.name}
-                        </p>
-                        <p className="text-xs text-base-content/50 truncate">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-[13px] font-medium leading-tight">
+                            {group.name}
+                          </p>
+                          {pinned && (
+                            <Pin className="h-3 w-3 shrink-0 fill-current text-zinc-400 dark:text-zinc-500" />
+                          )}
+                        </div>
+                        <p className="mt-0.5 truncate text-[11px] tabular-nums text-zinc-500 dark:text-zinc-400">
                           {group.members?.length || 0} members
                         </p>
                       </div>
                     </div>
 
-                    {/* Actions & Badges */}
-                    <div className="hidden md:hidden lg:flex items-center gap-1 shrink-0">
-                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span
+                    {/* Right Controls & Unread */}
+                    <div className="ml-1.5 flex shrink-0 items-center gap-1">
+                      <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                        <button
+                          type="button"
                           onClick={(e) => handlePin(e, group._id, "group")}
-                          className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-warning"
-                          title={pinned ? "Unpin Chat" : "Pin Chat"}
+                          className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/70 hover:text-zinc-800 dark:hover:bg-zinc-700/60 dark:hover:text-zinc-200"
+                          title={pinned ? "Unpin chat" : "Pin chat"}
+                          aria-label={pinned ? "Unpin chat" : "Pin chat"}
                         >
                           <Pin
-                            size={14}
-                            className={pinned ? "fill-warning text-warning" : ""}
+                            className={`h-3.5 w-3.5 ${
+                              pinned
+                                ? "fill-current text-zinc-700 dark:text-zinc-200"
+                                : ""
+                            }`}
                           />
-                        </span>
+                        </button>
 
                         {isCreator && (
-                          <span
+                          <button
+                            type="button"
                             onClick={(e) => handleDeleteGroup(e, group._id)}
-                            className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-error"
-                            title="Delete Group"
+                            className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                            title="Delete group"
+                            aria-label="Delete group"
                           >
-                            <Trash2 size={14} />
-                          </span>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
                         )}
                       </div>
 
                       {unread > 0 && (
-                        <span className="badge badge-error badge-sm text-[10px] font-bold h-5 min-w-[20px] px-1">
-                          {unread > 9 ? "9+" : unread}
+                        <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-semibold tabular-nums text-white dark:bg-zinc-100 dark:text-zinc-950">
+                          {unread > 99 ? "99+" : unread}
                         </span>
                       )}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           )}
 
-          {/* DIRECT MESSAGES SECTION */}
-          <div className="space-y-1">
-            <div className="px-2.5 py-1 flex items-center justify-between text-[11px] font-bold tracking-wider text-base-content/45 uppercase">
-              <span className="block md:hidden lg:block">Direct Messages</span>
-              <span className="hidden md:block lg:hidden text-center w-full">DM</span>
+          {/* DIRECT MESSAGES */}
+          <div className="space-y-0.5">
+            <div className="px-2 py-1 text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              Direct Messages
             </div>
 
             {filteredUsers.map((user) => {
@@ -252,92 +317,120 @@ const Sidebar = ({ setActiveTab }) => {
               const isOnline = onlineSet.has(String(user._id));
               const pinned = isPinned(user._id, "user");
               const unread = unreadCounts[user._id] || 0;
+              const sentCount = sentCounts[String(user._id)]?.count || 0;
               const isAI = user.isAI;
 
               return (
-                <button
+                <div
                   key={user._id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setSelectedUser(user)}
-                  className={`group relative flex w-full items-center justify-between p-2 rounded-xl transition-all duration-150 ${
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedUser(user);
+                    }
+                  }}
+                  className={`group relative flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2 text-left transition-colors ${
                     isSelected
-                      ? "bg-primary/15 text-primary font-medium"
-                      : "hover:bg-base-200/70 text-base-content/80 hover:text-base-content"
+                      ? "bg-zinc-100 text-zinc-950 dark:bg-zinc-800/80 dark:text-zinc-50"
+                      : "text-zinc-700 hover:bg-zinc-100/70 dark:text-zinc-300 dark:hover:bg-zinc-800/40"
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Avatar with Floating Pin Badge */}
+                  <div className="flex min-w-0 flex-1 items-center gap-2.5">
                     <div className="relative shrink-0">
                       {isAI ? (
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-primary/20 via-primary/10 to-base-200 flex items-center justify-center border border-primary/25 text-primary shadow-sm">
-                          <Sparkles className="h-5 w-5 animate-pulse" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                          <Sparkles className="h-4 w-4 stroke-[1.75]" />
                         </div>
                       ) : (
                         <img
                           src={user.profilePic || "/avatar.png"}
                           alt={user.fullName}
-                          className="h-10 w-10 rounded-full object-cover ring-1 ring-base-300"
+                          onError={(e) => {
+                            e.currentTarget.src = "/avatar.png";
+                          }}
+                          className="h-9 w-9 rounded-full border border-zinc-200 object-cover dark:border-zinc-800"
                         />
                       )}
 
-                      {/* Top-Right Yellow Pin Badge */}
-                      {pinned && (
-                        <span className="absolute -top-1 -right-1 h-5 w-5 bg-amber-400 text-black rounded-full flex items-center justify-center shadow-md ring-2 ring-base-100 z-10">
-                          <Pin size={11} className="fill-black" />
-                        </span>
-                      )}
-
-                      {/* Bottom-Right Online Green Dot */}
                       {isOnline && !isAI && (
-                        <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-success ring-2 ring-base-100" />
+                        <span
+                          title="Online"
+                          className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#100F0F]"
+                        />
                       )}
                     </div>
 
-                    <div className="hidden md:hidden lg:block text-left truncate">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <p className="text-sm font-semibold truncate leading-snug">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="truncate text-[13px] font-medium leading-tight">
                           {isAI ? "Meta AI" : user.fullName}
                         </p>
-                        {isAI && (
-                          <Sparkles size={13} className="text-primary shrink-0" />
+                        {pinned && (
+                          <Pin className="h-3 w-3 shrink-0 fill-current text-zinc-400 dark:text-zinc-500" />
                         )}
                       </div>
-                      <p className="text-xs text-base-content/50 truncate">
+                      <p className="mt-0.5 truncate text-[11px] text-zinc-500 dark:text-zinc-400">
                         {isAI
-                          ? "Always Active"
+                          ? "Assistant"
                           : isOnline
-                          ? "Online"
-                          : user.lastSeen
-                          ? `Last seen ${new Date(user.lastSeen).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}`
-                          : "Offline"}
+                            ? "Online"
+                            : user.lastSeen
+                              ? `Last seen ${new Date(
+                                  user.lastSeen,
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}`
+                              : "Offline"}
                       </p>
                     </div>
                   </div>
 
-                  {/* Actions & Badges */}
-                  <div className="hidden md:hidden lg:flex items-center gap-1 shrink-0">
-                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span
+                  {/* Right Controls, Outgoing Counter Pop-up & Unread */}
+                  <div className="ml-1.5 flex shrink-0 items-center gap-1">
+                    <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                      <button
+                        type="button"
                         onClick={(e) => handlePin(e, user._id, "user")}
-                        className="btn btn-ghost btn-xs btn-circle text-base-content/60 hover:text-warning"
-                        title={pinned ? "Unpin Chat" : "Pin Chat"}
+                        className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-200/70 hover:text-zinc-800 dark:hover:bg-zinc-700/60 dark:hover:text-zinc-200"
+                        title={pinned ? "Unpin chat" : "Pin chat"}
+                        aria-label={pinned ? "Unpin chat" : "Pin chat"}
                       >
                         <Pin
-                          size={14}
-                          className={pinned ? "fill-warning text-warning" : ""}
+                          className={`h-3.5 w-3.5 ${
+                            pinned
+                              ? "fill-current text-zinc-700 dark:text-zinc-200"
+                              : ""
+                          }`}
                         />
-                      </span>
+                      </button>
                     </div>
 
+                    {sentCount > 0 && (
+                      <motion.span
+                        key={sentCount}
+                        initial={{ scale: 0.78, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.14, ease: "easeOut" }}
+                        title={`${sentCount} ${
+                          sentCount === 1 ? "message" : "messages"
+                        } sent`}
+                        className="inline-flex h-4 min-w-[18px] items-center justify-center rounded-md border border-zinc-200 bg-zinc-100 px-1 text-[10px] font-semibold tabular-nums text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                      >
+                        {sentCount}
+                      </motion.span>
+                    )}
+
                     {unread > 0 && (
-                      <span className="badge badge-error badge-sm text-[10px] font-bold h-5 min-w-[20px] px-1">
-                        {unread > 9 ? "9+" : unread}
+                      <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-zinc-900 px-1 text-[10px] font-semibold tabular-nums text-white dark:bg-zinc-100 dark:text-zinc-950">
+                        {unread > 99 ? "99+" : unread}
                       </span>
                     )}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
