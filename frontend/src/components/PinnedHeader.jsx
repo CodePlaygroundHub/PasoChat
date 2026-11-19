@@ -12,7 +12,7 @@ const PinnedHeader = ({ chatId }) => {
 
   if (pinnedIds.length === 0) return null;
 
-  const pinnedId = pinnedIds[pinnedIds.length - 1];    
+  const pinnedId = pinnedIds[pinnedIds.length - 1];
   const pinnedMsg = messages?.find((m) => m._id === pinnedId);
 
   const scrollToMessage = () => {
@@ -34,39 +34,43 @@ const PinnedHeader = ({ chatId }) => {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: -20, opacity: 0 }}
+        initial={{ y: -12, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -20, opacity: 0 }}
-        className="sticky top-0 z-[45] w-full"
+        exit={{ y: -12, opacity: 0 }}
+        transition={{ duration: 0.15 }}
+        className="w-full border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/90 dark:bg-[#141313]/90 backdrop-blur-sm"
       >
-        <div className="flex items-center justify-between gap-3 px-4 py-2 bg-base-100/80 backdrop-blur-md border-b border-base-content/5 shadow-sm">
-          <div className="flex items-center gap-3 overflow-hidden flex-1">
-            <div className="w-1 h-8 bg-primary rounded-full" />
+        <div className="flex items-center justify-between gap-3 px-4 py-2">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="h-7 w-0.5 shrink-0 rounded-full bg-zinc-400 dark:bg-zinc-600" />
 
             <button
+              type="button"
               onClick={scrollToMessage}
-              className="flex flex-col items-start overflow-hidden text-left transition-opacity hover:opacity-80"
+              className="flex flex-col items-start min-w-0 flex-1 text-left group cursor-pointer"
             >
               <div className="flex items-center gap-1.5">
-                <Pin size={12} className="text-primary fill-primary" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                  Pinned Message
+                <Pin className="h-3 w-3 shrink-0 text-zinc-500 dark:text-zinc-400 fill-current" />
+                <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                  Pinned message
                 </span>
               </div>
 
-              <p className="text-sm text-base-content/70 truncate w-full max-w-md italic">
+              <p className="mt-0.5 w-full truncate text-xs text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-zinc-100 transition-colors">
                 {pinnedMsg?.text ||
-                  (pinnedMsg?.image ? "📷 Image" : "Attachment")}
+                  (pinnedMsg?.image ? "Image attachment" : "Attachment")}
               </p>
             </button>
           </div>
 
           <button
+            type="button"
             onClick={() => togglePin(chatId, pinnedId)}
-            className="flex-shrink-0 p-2 rounded-full hover:bg-base-content/10 text-base-content/40 hover:text-base-content transition-colors"
+            aria-label="Unpin message"
             title="Unpin"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-200/70 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
-            <X size={16} />
+            <X className="h-3.5 w-3.5 stroke-[1.75]" />
           </button>
         </div>
       </motion.div>
