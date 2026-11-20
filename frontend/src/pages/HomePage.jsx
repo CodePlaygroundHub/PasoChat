@@ -7,7 +7,7 @@ import ChatContainer from "../components/ChatContainer";
 
 import StatusSidebar from "../components/StatusSidebar";
 import StatusViewer from "../components/StatusViewer";
-import Navbar from "../components/Navbar"; // 1. Import Navbar here
+import Navbar from "../components/Navbar";
 
 const HomePage = () => {
   const { selectedUser, selectedGroup } = useChatStore();
@@ -16,15 +16,14 @@ const HomePage = () => {
   const [activeTab, setActiveTab] = useState("chats"); // chats | status
 
   return (
-    <div className="flex h-full w-full bg-base-200 overflow-hidden items-center justify-center p-0 md:p-3 lg:p-4">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-zinc-50 dark:bg-[#100F0F]">
       <StatusViewer />
 
       {/* MOBILE LAYOUT (< md) */}
-      <div className="flex flex-col h-full w-full md:hidden">
-        {/* On mobile, Navbar sits on top when no chat is open */}
+      <div className="flex h-full w-full flex-col md:hidden">
         {!isChatOpen && <Navbar />}
 
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-hidden">
           {!isChatOpen ? (
             activeTab === "status" ? (
               <StatusSidebar setActiveTab={setActiveTab} />
@@ -37,17 +36,14 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* DESKTOP LAYOUT (>= md) */}
-      <div className="hidden md:flex h-full w-full max-w-6xl">
-        <div className="flex flex-col h-full w-full bg-base-100 rounded-2xl shadow-xl overflow-hidden border border-base-300">
-          
-          {/* 2. Embedded Header inside the application container card */}
+      {/* DESKTOP LAYOUT (>= md) — Clean framed workspace */}
+      <div className="hidden md:flex h-full w-full flex-col overflow-hidden p-2 lg:p-3">
+        <div className="mx-auto flex h-full w-full max-w-7xl flex-col overflow-hidden rounded-lg border border-zinc-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#100F0F]">
           <Navbar />
 
-          {/* Main Content Area */}
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* Sidebar Column */}
-            <div className="w-[288px] border-r border-base-300 flex-shrink-0">
+            <div className="w-72 shrink-0 border-r border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden">
               {activeTab === "status" ? (
                 <StatusSidebar setActiveTab={setActiveTab} />
               ) : (
@@ -56,11 +52,10 @@ const HomePage = () => {
             </div>
 
             {/* Chat View Area */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 min-w-0 overflow-hidden">
               {!isChatOpen ? <NoChatSelected /> : <ChatContainer />}
             </div>
           </div>
-
         </div>
       </div>
     </div>
