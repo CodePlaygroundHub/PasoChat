@@ -42,159 +42,157 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-base-200 px-4 py-8 relative overflow-hidden">
-      {/* Background Decorative Glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full animate-pulse pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-secondary/10 blur-[120px] rounded-full animate-pulse pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 dark:bg-[#100F0F] px-4 py-10">
+      <div className="w-full max-w-[380px]">
+        {/* Brand & Header */}
+        <div className="mb-7">
+          <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+            <MessageSquare className="h-4 w-4 stroke-[1.75]" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Sign in to PASO
+          </h1>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Enter your credentials to access your conversations.
+          </p>
+        </div>
 
-      {/* Main Container */}
-      <div className="w-full max-w-md relative z-10 my-auto">
-        <div className="w-full rounded-3xl bg-base-100/80 backdrop-blur-2xl shadow-2xl border border-base-content/10 overflow-hidden">
-          <div className="p-6 sm:p-8 md:p-10 flex flex-col justify-center">
-
-            {/* Header */}
-            <div className="text-center mb-8 sm:mb-10">
-              <div className="flex flex-col items-center gap-3">
-                <div className="size-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                  <MessageSquare className="size-7 text-primary-content" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-base-content">
-                    Welcome Back
-                  </h1>
-                  <p className="text-base-content/60 font-medium text-xs sm:text-sm mt-1">
-                    Sign in to continue your conversations
-                  </p>
-                </div>
+        {/* Auth Card */}
+        <div className="rounded-xl border border-zinc-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#141313] p-6 shadow-xs">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
+              >
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 stroke-[1.75]" />
+                <input
+                  id="email"
+                  type="email"
+                  className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/70 pl-9 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none transition-colors"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  autoComplete="email"
+                />
               </div>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-              <div className="form-control">
-                <label className="label py-1">
-                  <span className="label-text font-bold text-xs uppercase opacity-70">
-                    Email Address
-                  </span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-40" />
-                  <input
-                    type="email"
-                    className="input input-bordered w-full pl-12 bg-base-200/50 border-none focus:ring-2 ring-primary/20 transition-all h-12 text-sm"
-                    placeholder="name@email.com"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    autoComplete="email"
-                  />
-                </div>
-              </div>
-
-              <div className="form-control">
-                <div className="flex justify-between items-center mb-1 px-1">
-                  <label className="label p-0">
-                    <span className="label-text font-bold text-xs uppercase opacity-70">
-                      Password
-                    </span>
-                  </label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs font-bold text-primary hover:underline transition-all"
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-40" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className="input input-bordered w-full pl-12 pr-12 bg-base-200/50 border-none focus:ring-2 ring-primary/20 transition-all h-12 text-sm"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    autoComplete="current-password"
-                  />
-
-                  <button
-                    type="button"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="size-5" />
-                    ) : (
-                      <Eye className="size-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="btn btn-primary w-full h-12 shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all font-semibold text-base"
-                  disabled={isLoggingIn}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label
+                  htmlFor="password"
+                  className="block text-xs font-medium text-zinc-700 dark:text-zinc-300"
                 >
-                  {isLoggingIn ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="size-5 animate-spin" />
-                      <span>Signing in...</span>
-                    </div>
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 stroke-[1.75]" />
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/70 pl-9 pr-9 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none transition-colors"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  autoComplete="current-password"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-3.5 w-3.5 stroke-[1.75]" />
                   ) : (
-                    "Sign In"
+                    <Eye className="h-3.5 w-3.5 stroke-[1.75]" />
                   )}
                 </button>
               </div>
-            </form>
+            </div>
 
-            {/* Google OAuth Section */}
-            <div className="my-6">
-              <div className="divider text-xs uppercase opacity-60">OR</div>
-
-              <div className="flex justify-center mt-4">
-                <GoogleLogin
-                  onSuccess={async (credentialResponse) => {
-                    if (!credentialResponse.credential) {
-                      toast.error("Google authentication failed.");
-                      return;
-                    }
-
-                    await googleLogin(credentialResponse.credential);
-                  }}
-                  onError={() => {
-                    toast.error("Google login failed.");
-                  }}
-                  useOneTap={false}
-                />
-              </div>
-
-              {isGoogleLoggingIn && (
-                <div className="flex justify-center mt-3">
-                  <Loader2 className="size-5 animate-spin text-primary" />
-                </div>
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className="mt-2 flex h-9 w-full items-center justify-center rounded-md bg-zinc-900 dark:bg-zinc-100 px-4 text-xs font-medium text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
+            >
+              {isLoggingIn ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Signing in...</span>
+                </span>
+              ) : (
+                "Sign in"
               )}
-            </div>
+            </button>
+          </form>
 
-            {/* Footer */}
-            <div className="mt-4 text-center">
-              <p className="text-xs sm:text-sm text-base-content/60 font-medium">
-                Don&apos;t have an account?
-                <Link
-                  to="/signup"
-                  className="text-primary font-bold ml-1.5 hover:underline transition-all"
-                >
-                  Create account
-                </Link>
-              </p>
+          {/* Divider */}
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-200/80 dark:border-zinc-800/80" />
             </div>
-
+            <div className="relative flex justify-center text-[11px]">
+              <span className="bg-white dark:bg-[#141313] px-2 text-zinc-400 dark:text-zinc-500">
+                or continue with
+              </span>
+            </div>
           </div>
+
+          {/* Google OAuth */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                if (!credentialResponse.credential) {
+                  toast.error("Google authentication failed.");
+                  return;
+                }
+                await googleLogin(credentialResponse.credential);
+              }}
+              onError={() => {
+                toast.error("Google login failed.");
+              }}
+              useOneTap={false}
+              theme="outline"
+              size="medium"
+              width="330"
+            />
+          </div>
+
+          {isGoogleLoggingIn && (
+            <div className="mt-3 flex justify-center">
+              <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
+            </div>
+          )}
         </div>
+
+        {/* Footer Link */}
+        <p className="mt-5 text-center text-xs text-zinc-500 dark:text-zinc-400">
+          New to PASO?{" "}
+          <Link
+            to="/signup"
+            className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline underline-offset-4"
+          >
+            Create an account
+          </Link>
+        </p>
       </div>
     </div>
   );
