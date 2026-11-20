@@ -7,7 +7,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { useAuthStore } from "../store/useAuthStore";
@@ -16,6 +16,7 @@ import { useChatStore } from "../store/useChatStore";
 const GITHUB_URL = "https://github.com/Akash504-ai/Chat-app.git";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { logout, authUser } = useAuthStore();
   const { selectedUser, selectedGroup } = useChatStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,6 +32,16 @@ const Navbar = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleSignOut = async () => {
+    setProfileMenuOpen(false);
+    setMobileMenuOpen(false);
+    try {
+      await logout();
+    } finally {
+      navigate("/", { replace: true });
+    }
+  };
 
   return (
     <header
@@ -65,23 +76,6 @@ const Navbar = () => {
             <FaGithub className="h-4 w-4" />
           </a>
 
-          {/* <Link
-            to="/contribute"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 px-2.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:text-zinc-950 dark:hover:text-white transition-colors"
-          >
-            <GitPullRequest className="h-3.5 w-3.5 stroke-[1.75]" />
-            <span>Contribute</span>
-          </Link> */}
-
-          {/* <Link
-            to="/settings"
-            aria-label="Settings"
-            title="Settings"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-          >
-            <Settings className="h-4 w-4 stroke-[1.75]" />
-          </Link> */}
-
           {authUser && (
             <>
               <div className="mx-1.5 h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
@@ -90,7 +84,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
+                  className="flex cursor-pointer items-center gap-2 rounded-md py-1 pl-1 pr-2 text-left hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
                 >
                   <img
                     src={authUser.profilePic || "/avatar.png"}
@@ -122,14 +116,6 @@ const Navbar = () => {
                         <User className="h-3.5 w-3.5 text-zinc-500" />
                         <span>My Profile</span>
                       </Link>
-                      {/* <Link
-                        to="/settings"
-                        onClick={() => setProfileMenuOpen(false)}
-                        className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
-                      >
-                        <Settings className="h-3.5 w-3.5 text-zinc-500" />
-                        <span>Settings</span>
-                      </Link> */}
                     </div>
 
                     <div className="my-1 border-t border-zinc-100 dark:border-zinc-800/80" />
@@ -137,11 +123,8 @@ const Navbar = () => {
                     <div className="px-1.5">
                       <button
                         type="button"
-                        onClick={() => {
-                          setProfileMenuOpen(false);
-                          logout();
-                        }}
-                        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/70 dark:hover:bg-red-950/30 transition-colors"
+                        onClick={handleSignOut}
+                        className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/70 dark:hover:bg-red-950/30 transition-colors"
                       >
                         <LogOut className="h-3.5 w-3.5" />
                         <span>Sign out</span>
@@ -159,7 +142,7 @@ const Navbar = () => {
           type="button"
           onClick={() => setMobileMenuOpen((prev) => !prev)}
           aria-label="Toggle navigation menu"
-          className="md:hidden flex h-8 w-8 items-center justify-center rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
+          className="md:hidden flex cursor-pointer h-8 w-8 items-center justify-center rounded-md text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
         >
           {mobileMenuOpen ? (
             <X className="h-4 w-4" />
@@ -190,15 +173,6 @@ const Navbar = () => {
             </div>
           )}
 
-          <Link
-            to="/contribute"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
-          >
-            <GitPullRequest className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Contribute to PASO</span>
-          </Link>
-
           <a
             href={GITHUB_URL}
             target="_blank"
@@ -208,15 +182,6 @@ const Navbar = () => {
             <FaGithub className="h-3.5 w-3.5 text-zinc-500" />
             <span>GitHub Repository</span>
           </a>
-
-          <Link
-            to="/settings"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800/70 transition-colors"
-          >
-            <Settings className="h-3.5 w-3.5 text-zinc-500" />
-            <span>Settings</span>
-          </Link>
 
           {authUser && (
             <>
@@ -232,11 +197,8 @@ const Navbar = () => {
               <div className="pt-1 mt-1 border-t border-zinc-100 dark:border-zinc-800/80">
                 <button
                   type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    logout();
-                  }}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/70 dark:hover:bg-red-950/30 transition-colors"
+                  onClick={handleSignOut}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50/70 dark:hover:bg-red-950/30 transition-colors"
                 >
                   <LogOut className="h-3.5 w-3.5" />
                   <span>Sign out</span>
