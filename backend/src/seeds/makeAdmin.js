@@ -1,51 +1,57 @@
-/**
- * makeAdmin.js — Promote a user to admin role
- *
- * Usage:
- *   node src/seeds/makeAdmin.js <email>
- *
- * Example:
- *   node src/seeds/makeAdmin.js you@example.com
- */
-
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 
 dotenv.config();
 
-const email = process.argv[2];
-
-if (!email) {
-  console.error("❌  Please provide an email address.");
-  console.error("    Usage: node src/seeds/makeAdmin.js <email>");
-  process.exit(1);
-}
-
-async function makeAdmin() {
+const createAdmin = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("✅  Connected to MongoDB");
+    const email = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+    const password = process.env.ADMIN_PASSWORD;
+    const fullName = process.env.ADMIN_NAME?.trim() || "PasoChat Admin";
 
-    const user = await User.findOneAndUpdate(
-      { email: email.toLowerCase().trim() },
-      { $set: { role: "admin" } },
-      { new: true }
-    );
-
-    if (!user) {
-      console.error(`❌  No user found with email: ${email}`);
-      process.exit(1);
+    if (!email || !password) {
+      throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set in .env");
     }
 
-    console.log(`✅  Success! "${user.fullName}" (${user.email}) is now an admin.`);
-  } catch (err) {
-    console.error("❌  Error:", err.message);
-    process.exit(1);
+    if (password.length < 6) {
+      throw new Error("ADMIN_PASSWORD must be at least 6 characters long");
+    }
+
+    await mongoose.connect(process.env.MONGODB_URI);
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    let admin = await User.findOne({ email });
+
+    if (admin) {
+      admin.password = hashedPassword;
+      admin.role = "admin";
+      admin.isVerified = true;
+      await admin.save();
+
+      console.log("Existing account updated and promoted to admin.");
+    } else {
+      admin = await User.create({
+        fullName,
+        email,
+        password: hashedPassword,
+        role: "admin",
+        isVerified: true,
+        provider: "local",
+      });
+
+      console.log("Admin account created successfully.");
+    }
+
+    console.log(`Admin email: ${admin.email}`);
+  } catch (error) {
+    console.error("Admin setup failed:", error.message);
+    process.exitCode = 1;
   } finally {
     await mongoose.disconnect();
-    console.log("🔌  Disconnected from MongoDB");
   }
-}
+};
 
-makeAdmin();
+createAdmin();
