@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
+    "@tsparticles/engine": "^4.6.0",
+    "@tsparticles/react": "^4.6.0",
+    "@tsparticles/slim": "^4.6.0",
     "@zegocloud/zego-uikit-prebuilt": "^2.17.2",
     "axios": "^1.7.7",
     "emoji-picker-react": "^4.18.0",
