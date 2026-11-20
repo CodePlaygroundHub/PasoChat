@@ -2,16 +2,15 @@ import { useEffect, useState } from "react";
 import { useAdminStore } from "../store/useAdminStore";
 import {
   AlertCircle,
+  ArrowRight,
   CheckCircle2,
   Eye,
+  Filter,
+  Flag,
+  Loader2,
+  MessageSquare,
   ShieldAlert,
   Trash2,
-  User,
-  ArrowRight,
-  Filter,
-  MoreVertical,
-  Flag,
-  MessageSquare,
 } from "lucide-react";
 
 const AdminReports = () => {
@@ -33,51 +32,63 @@ const AdminReports = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      pending: "badge-warning bg-warning/10 text-warning border-warning/20",
-      reviewed: "badge-info bg-info/10 text-info border-info/20",
-      resolved: "badge-success bg-success/10 text-success border-success/20",
-      rejected: "badge-error bg-error/10 text-error border-error/20",
+      pending:
+        "border-amber-200/80 bg-amber-50/70 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400",
+      reviewed:
+        "border-zinc-300 bg-zinc-100 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200",
+      resolved:
+        "border-emerald-200/80 bg-emerald-50/70 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-400",
+      rejected:
+        "border-red-200/80 bg-red-50/70 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400",
     };
+
     return (
-      <div className={`badge font-black text-[10px] uppercase tracking-wider py-3 px-4 ${styles[status] || "badge-ghost"}`}>
-        {status}
-      </div>
+      <span
+        className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium capitalize ${
+          styles[status] ||
+          "border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+        }`}
+      >
+        {status || "unknown"}
+      </span>
     );
   };
 
-  if (loading)
+  if (loading && reports.length === 0) {
     return (
-      <div className="flex flex-col justify-center items-center h-[60vh] gap-4">
-        <span className="loading loading-ring loading-lg text-primary"></span>
-        <p className="text-xs font-bold uppercase tracking-widest opacity-40">Fetching Reports...</p>
+      <div className="flex h-64 items-center justify-center text-zinc-400 dark:text-zinc-500">
+        <Loader2 className="h-5 w-5 animate-spin stroke-[1.75]" />
       </div>
     );
+  }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-error/10 text-error rounded-2xl shadow-inner">
-            <Flag size={32} />
-          </div>
+    <div className="space-y-6">
+      {/* Page Header & Status Filter */}
+      <div className="flex flex-col justify-between gap-4 border-b border-zinc-200/80 pb-5 sm:flex-row sm:items-center dark:border-zinc-800/80">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+            <Flag className="h-4 w-4 stroke-[1.75]" />
+          </span>
           <div>
-            <h1 className="text-4xl font-black tracking-tight">Reports</h1>
-            <p className="text-base-content/50 font-medium">
-              Priority moderation queue & user safety management.
+            <h1 className="text-lg font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+              Reports
+            </h1>
+            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+              Moderation queue and user safety actions.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-base-200/50 p-2 rounded-2xl border border-base-300">
-          <div className="pl-3 text-base-content/40">
-            <Filter size={16} />
-          </div>
+        <div className="relative flex items-center">
+          <Filter className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 stroke-[1.75] text-zinc-400 dark:text-zinc-500" />
           <select
-            className="select select-ghost select-sm focus:bg-transparent font-bold text-sm"
+            aria-label="Filter reports by status"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            className="h-9 cursor-pointer rounded-md border border-zinc-200 bg-white pl-8 pr-7 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-300 focus:border-zinc-400 focus:outline-none dark:border-zinc-800 dark:bg-[#141313] dark:text-zinc-200 dark:hover:border-zinc-700 dark:focus:border-zinc-600"
           >
-            <option value="">All Reports</option>
+            <option value="">All reports</option>
             <option value="pending">Pending</option>
             <option value="reviewed">Reviewed</option>
             <option value="resolved">Resolved</option>
@@ -86,151 +97,195 @@ const AdminReports = () => {
         </div>
       </div>
 
-      <div className="card bg-base-100 border border-base-300 shadow-xl rounded-[2rem] overflow-hidden">
+      {/* Reports Table Card */}
+      <div className="overflow-hidden rounded-xl border border-zinc-200/90 bg-white dark:border-zinc-800/90 dark:bg-[#141313]">
         <div className="overflow-x-auto">
-          <table className="table table-lg w-full border-separate border-spacing-0">
-            <thead className="bg-base-200/30">
-              <tr className="text-base-content/40 border-none">
-                <th className="py-6 font-black uppercase text-[11px] tracking-widest pl-8">Entities Involved</th>
-                <th className="py-6 font-black uppercase text-[11px] tracking-widest">Reason & Content</th>
-                <th className="py-6 font-black uppercase text-[11px] tracking-widest">Status</th>
-                <th className="py-6 font-black uppercase text-[11px] tracking-widest text-right pr-8">Management</th>
+          <table className="w-full border-collapse text-left">
+            <thead>
+              <tr className="border-b border-zinc-200/80 bg-zinc-50/70 text-[11px] font-medium uppercase tracking-wider text-zinc-500 dark:border-zinc-800/80 dark:bg-zinc-900/40 dark:text-zinc-400">
+                <th className="px-4 py-3">Entities</th>
+                <th className="px-4 py-3">Reason & content</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-base-200">
-              {reports.map((report) => (
-                <tr key={report._id} className="group hover:bg-base-200/40 transition-all">
-                  
-                  <td className="pl-8 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-black opacity-30 uppercase tracking-tighter">Reporter</span>
-                        <div className="flex items-center gap-2">
-                          <div className="avatar placeholder">
-                            <div className="bg-neutral text-neutral-content rounded-lg w-8">
-                              <span className="text-xs uppercase">{report.reporter?.fullName?.charAt(0)}</span>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-bold text-sm">{report.reporter?.fullName}</div>
-                            <div className="text-[10px] opacity-40 font-mono">{report.reporter?.email}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-2 bg-base-300/50 rounded-full">
-                        <ArrowRight size={14} className="opacity-40" />
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-black text-error/60 uppercase tracking-tighter">Target</span>
-                        <div className="flex items-center gap-2">
-                          <div className="avatar placeholder">
-                            <div className="bg-error/10 text-error rounded-lg w-8">
-                              <span className="text-xs font-bold uppercase">
-                                {report.reportedUser?.fullName?.charAt(0) || "M"}
-                              </span>
-                            </div>
-                          </div>
-                          <div>
-                            <div className="font-bold text-sm text-error">
-                              {report.reportedUser?.fullName || "Chat Message"}
-                            </div>
-                            <div className="text-[10px] opacity-40 font-mono">{report.reportedUser?.email || "Content Report"}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className="max-w-md py-6">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-start gap-2">
-                        <AlertCircle size={14} className="text-warning mt-1 shrink-0" />
-                        <p className="text-sm font-medium leading-relaxed">{report.reason}</p>
-                      </div>
-                      
-                      {report.reportedMessage?.text && (
-                        <div className="relative bg-base-200 rounded-2xl rounded-tl-none p-3 border border-base-300 shadow-inner group-hover:bg-base-100 transition-colors">
-                          <div className="flex items-center gap-2 text-[10px] font-bold opacity-40 mb-1">
-                            <MessageSquare size={10} /> Reported Message Snippet
-                          </div>
-                          <p className="text-xs italic opacity-70 truncate">{report.reportedMessage.text}</p>
-                        </div>
-                      )}
-                      <span className="text-[10px] font-mono opacity-25">ID: {report._id}</span>
-                    </div>
-                  </td>
-
-                  <td className="py-6">{getStatusBadge(report.status)}</td>
-
-                  <td className="text-right pr-8 py-6">
-                    <div className="flex justify-end items-center gap-2">
-                      {report.status === "pending" ? (
-                        <div className="flex gap-1 bg-base-300/30 p-1.5 rounded-2xl">
-                          <button
-                            title="Mark as Reviewed"
-                            className="btn btn-square btn-sm btn-ghost hover:bg-info/20 hover:text-info"
-                            onClick={() => updateReportStatus(report._id, "reviewed")}
-                          >
-                            <Eye size={18} />
-                          </button>
-
-                          {report.reportedMessage && (
-                            <button
-                              title="Delete Message"
-                              className="btn btn-square btn-sm btn-ghost hover:bg-warning/20 hover:text-warning"
-                              onClick={() => deleteReportedMessage(report._id)}
-                            >
-                              <Trash2 size={18} />
-                            </button>
-                          )}
-
-                          {report.reportedUser && (
-                            <button
-                              title="Ban User"
-                              className="btn btn-square btn-sm btn-ghost hover:bg-error/20 hover:text-error"
-                              onClick={() => banUserFromReport(report._id)}
-                            >
-                              <ShieldAlert size={18} />
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-success/5 border border-success/20 rounded-2xl text-success font-black text-[10px] uppercase tracking-widest">
-                          <CheckCircle2 size={14} strokeWidth={3} /> Resolution Logged
-                        </div>
-                      )}
-
-                      <div className="divider divider-horizontal mx-1 opacity-20"></div>
-
-                      <button
-                        title="Permanently Remove Report"
-                        className="btn btn-square btn-sm btn-ghost text-base-content/20 hover:text-error hover:bg-error/10"
-                        onClick={() => deleteReport(report._id)}
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {reports.length === 0 && (
+            <tbody className="divide-y divide-zinc-100 text-xs dark:divide-zinc-800/70">
+              {reports.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="py-32">
-                    <div className="flex flex-col items-center justify-center text-center space-y-4 opacity-20">
-                      <div className="p-6 bg-base-200 rounded-full">
-                        <CheckCircle2 size={64} strokeWidth={1} />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-black">All Clear</h3>
-                        <p className="font-medium uppercase tracking-widest text-xs">No pending reports found in this filter</p>
-                      </div>
+                  <td colSpan={4} className="px-4 py-14 text-center">
+                    <div className="mx-auto flex max-w-xs flex-col items-center justify-center text-center">
+                      <span className="mb-2.5 flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+                        <CheckCircle2 className="h-4 w-4 stroke-[1.75]" />
+                      </span>
+                      <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                        All clear
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+                        No reports match the selected status filter.
+                      </p>
                     </div>
                   </td>
                 </tr>
+              ) : (
+                reports.map((report) => {
+                  const reporterName = report.reporter?.fullName || "Unknown";
+                  const targetName =
+                    report.reportedUser?.fullName || "Chat message";
+                  const targetEmail =
+                    report.reportedUser?.email || "Content report";
+
+                  return (
+                    <tr
+                      key={report._id}
+                      className="transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40"
+                    >
+                      {/* Reporter -> Target */}
+                      <td className="px-4 py-3.5 align-top">
+                        <div className="flex flex-wrap items-center gap-3">
+                          {/* Reporter */}
+                          <div className="min-w-0">
+                            <span className="block text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                              Reporter
+                            </span>
+                            <div className="mt-1 flex items-center gap-2">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-zinc-100 text-[11px] font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                                {reporterName.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate font-medium text-zinc-900 dark:text-zinc-100">
+                                  {reporterName}
+                                </p>
+                                {report.reporter?.email && (
+                                  <p className="truncate font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
+                                    {report.reporter.email}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <ArrowRight className="h-3.5 w-3.5 shrink-0 stroke-[1.75] text-zinc-400 dark:text-zinc-600" />
+
+                          {/* Target */}
+                          <div className="min-w-0">
+                            <span className="block text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                              Target
+                            </span>
+                            <div className="mt-1 flex items-center gap-2">
+                              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-zinc-50 text-[11px] font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                                {targetName.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate font-medium text-zinc-900 dark:text-zinc-100">
+                                  {targetName}
+                                </p>
+                                <p className="truncate font-mono text-[10px] text-zinc-500 dark:text-zinc-400">
+                                  {targetEmail}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Reason & Message Snippet */}
+                      <td className="max-w-md px-4 py-3.5 align-top">
+                        <div className="space-y-2">
+                          <div className="flex items-start gap-1.5">
+                            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 stroke-[1.75] text-zinc-500 dark:text-zinc-400" />
+                            <p className="leading-relaxed text-zinc-800 dark:text-zinc-200">
+                              {report.reason}
+                            </p>
+                          </div>
+
+                          {report.reportedMessage?.text && (
+                            <div className="rounded-lg border border-zinc-200/80 bg-zinc-50/80 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/50">
+                              <div className="mb-1 flex items-center gap-1 text-[10px] font-medium text-zinc-400 dark:text-zinc-500">
+                                <MessageSquare className="h-3 w-3 stroke-[1.75]" />
+                                <span>Reported message</span>
+                              </div>
+                              <p className="truncate text-[11px] italic text-zinc-600 dark:text-zinc-400">
+                                "{report.reportedMessage.text}"
+                              </p>
+                            </div>
+                          )}
+
+                          <p className="font-mono text-[10px] text-zinc-400 dark:text-zinc-500">
+                            ID: {report._id}
+                          </p>
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-3.5 align-top">
+                        {getStatusBadge(report.status)}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3.5 text-right align-top">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          {report.status === "pending" ? (
+                            <div className="inline-flex items-center gap-1 rounded-lg border border-zinc-200/80 bg-zinc-50/70 p-1 dark:border-zinc-800 dark:bg-zinc-900/50">
+                              <button
+                                type="button"
+                                title="Mark as reviewed"
+                                aria-label="Mark as reviewed"
+                                onClick={() =>
+                                  updateReportStatus(report._id, "reviewed")
+                                }
+                                className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-white hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                              >
+                                <Eye className="h-3.5 w-3.5 stroke-[1.75]" />
+                              </button>
+
+                              {report.reportedMessage && (
+                                <button
+                                  type="button"
+                                  title="Delete reported message"
+                                  aria-label="Delete reported message"
+                                  onClick={() =>
+                                    deleteReportedMessage(report._id)
+                                  }
+                                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:text-zinc-400 dark:hover:bg-amber-950/30 dark:hover:text-amber-400"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 stroke-[1.75]" />
+                                </button>
+                              )}
+
+                              {report.reportedUser && (
+                                <button
+                                  type="button"
+                                  title="Ban reported user"
+                                  aria-label="Ban reported user"
+                                  onClick={() => banUserFromReport(report._id)}
+                                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-zinc-400 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                >
+                                  <ShieldAlert className="h-3.5 w-3.5 stroke-[1.75]" />
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-zinc-200/80 bg-zinc-50/70 px-2 py-1 text-[10px] font-medium text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                              <CheckCircle2 className="h-3 w-3 stroke-[1.75] text-emerald-600 dark:text-emerald-400" />
+                              Logged
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            title="Delete report"
+                            aria-label="Delete report"
+                            onClick={() => deleteReport(report._id)}
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 stroke-[1.75]" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
