@@ -1,31 +1,32 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useAdminStore } from "../store/useAdminStore";
 import {
-  Users,
-  Hash,
-  MessageSquare,
   AlertTriangle,
   Clock,
-  TrendingUp,
   Download,
   Eye,
+  Hash,
+  Loader2,
+  MessageSquare,
+  TrendingUp,
+  Users,
   X,
 } from "lucide-react";
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 
-// Optimized color palette for consistency
-const COLORS = ["#3b82f6", "#a855f7", "#22c55e", "#ef4444"];
+const PIE_COLORS = ["#18181b", "#71717a", "#d4d4d8"];
 
 const AdminDashboard = () => {
   const { dashboardStats, getDashboardStats, loading } = useAdminStore();
@@ -41,11 +42,11 @@ const AdminDashboard = () => {
     setTimeout(() => {
       const reportData = [
         ["Metric", "Value"],
-        ["Total Users", dashboardStats?.totalUsers],
-        ["Total Groups", dashboardStats?.totalGroups],
-        ["Total Messages", dashboardStats?.totalMessages],
-        ["Total Reports", dashboardStats?.totalReports],
-        ["Pending Reports", dashboardStats?.pendingReports],
+        ["Total Users", dashboardStats?.totalUsers ?? 0],
+        ["Total Groups", dashboardStats?.totalGroups ?? 0],
+        ["Total Messages", dashboardStats?.totalMessages ?? 0],
+        ["Total Reports", dashboardStats?.totalReports ?? 0],
+        ["Pending Reports", dashboardStats?.pendingReports ?? 0],
       ];
 
       const csvContent =
@@ -57,23 +58,40 @@ const AdminDashboard = () => {
       link.setAttribute("href", encodedUri);
       link.setAttribute(
         "download",
-        `admin_report_${new Date().toLocaleDateString()}.csv`
+        `admin_report_${new Date().toISOString().slice(0, 10)}.csv`,
       );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       setIsReportLoading(false);
-    }, 1000);
+    }, 600);
   };
 
   const formatGrowthData = () => {
     if (!dashboardStats?.monthlyUsers) return [];
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const userMap = {};
     const messageMap = {};
 
-    dashboardStats.monthlyUsers?.forEach((item) => { userMap[item._id] = item.users; });
-    dashboardStats.monthlyMessages?.forEach((item) => { messageMap[item._id] = item.messages; });
+    dashboardStats.monthlyUsers?.forEach((item) => {
+      userMap[item._id] = item.users;
+    });
+    dashboardStats.monthlyMessages?.forEach((item) => {
+      messageMap[item._id] = item.messages;
+    });
 
     return months.map((month, index) => ({
       name: month,
@@ -84,203 +102,384 @@ const AdminDashboard = () => {
 
   const growthData = formatGrowthData();
 
+  const pieData = [
+    { name: "Users", value: dashboardStats?.totalUsers || 0, color: PIE_COLORS[0] },
+    { name: "Groups", value: dashboardStats?.totalGroups || 0, color: PIE_COLORS[1] },
+    { name: "Reports", value: dashboardStats?.totalReports || 0, color: PIE_COLORS[2] },
+  ].filter((item) => item.value > 0);
+
+  const totalEntities =
+    (dashboardStats?.totalUsers || 0) +
+    (dashboardStats?.totalGroups || 0) +
+    (dashboardStats?.totalReports || 0);
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col justify-between gap-4 border-b border-zinc-200/80 pb-5 sm:flex-row sm:items-center dark:border-zinc-800/80">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Dashboard Overview</h1>
-          <p className="text-base-content/60 mt-1">Real-time platform statistics and metrics.</p>
+          <h1 className="text-lg font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+            Dashboard overview
+          </h1>
+          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            Real-time platform statistics and activity metrics.
+          </p>
         </div>
+
         <button
+          type="button"
           onClick={handleGenerateReport}
           disabled={isReportLoading}
-          className={`btn btn-primary btn-sm gap-2 shadow-lg shadow-primary/20 ${isReportLoading ? "loading" : ""}`}
+          className="inline-flex h-9 shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-3.5 text-xs font-medium text-white transition-colors hover:bg-zinc-800 disabled:pointer-events-none disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
         >
-          {!isReportLoading && <Download size={16} />}
-          {isReportLoading ? "Generating..." : "Generate Report"}
+          {isReportLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin stroke-[1.75]" />
+          ) : (
+            <Download className="h-3.5 w-3.5 stroke-[1.75]" />
+          )}
+          <span>{isReportLoading ? "Generating..." : "Export report"}</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        <StatCard title="Total Users" value={dashboardStats?.totalUsers} icon={<Users className="text-blue-500" />} loading={loading} trend="+12% ↑" />
-        <StatCard title="Total Groups" value={dashboardStats?.totalGroups} icon={<Hash className="text-purple-500" />} loading={loading} />
-        <StatCard title="Total Messages" value={dashboardStats?.totalMessages} icon={<MessageSquare className="text-green-500" />} loading={loading} />
-        <StatCard title="Total Reports" value={dashboardStats?.totalReports} icon={<AlertTriangle className="text-orange-500" />} loading={loading} />
-        <StatCard title="Pending Reports" value={dashboardStats?.pendingReports} icon={<Clock className="text-red-500" />} loading={loading} isWarning={dashboardStats?.pendingReports > 0} />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <StatCard
+          title="Total users"
+          value={dashboardStats?.totalUsers}
+          icon={Users}
+          loading={loading}
+          trend="+12%"
+        />
+        <StatCard
+          title="Total groups"
+          value={dashboardStats?.totalGroups}
+          icon={Hash}
+          loading={loading}
+        />
+        <StatCard
+          title="Total messages"
+          value={dashboardStats?.totalMessages}
+          icon={MessageSquare}
+          loading={loading}
+        />
+        <StatCard
+          title="Total reports"
+          value={dashboardStats?.totalReports}
+          icon={AlertTriangle}
+          loading={loading}
+        />
+        <StatCard
+          title="Pending reports"
+          value={dashboardStats?.pendingReports}
+          icon={Clock}
+          loading={loading}
+          isWarning={(dashboardStats?.pendingReports || 0) > 0}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 card bg-base-100 border border-base-300 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* User Growth Area Chart */}
+        <div className="flex flex-col rounded-xl border border-zinc-200/90 bg-white p-5 lg:col-span-2 dark:border-zinc-800/90 dark:bg-[#141313]">
+          <div className="mb-5 flex items-center justify-between gap-3">
             <div>
-              <h3 className="font-bold text-lg">User Growth</h3>
-              <p className="text-xs opacity-50">Monthly active users vs messages</p>
+              <h3 className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+                User growth
+              </h3>
+              <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                Monthly user acquisition across {new Date().getFullYear()}
+              </p>
             </div>
-            <button onClick={() => setShowDetails(true)} className="btn btn-ghost btn-xs gap-1">
-              <Eye size={14} /> View Details
+
+            <button
+              type="button"
+              onClick={() => setShowDetails(true)}
+              className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-2.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 hover:text-zinc-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+            >
+              <Eye className="h-3.5 w-3.5 stroke-[1.75]" />
+              <span>View details</span>
             </button>
           </div>
 
-          <div className="h-80 w-full">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={growthData}>
+              <AreaChart
+                data={growthData}
+                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+              >
                 <defs>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <linearGradient id="zincUsersFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#71717a" stopOpacity={0.18} />
+                    <stop offset="95%" stopColor="#71717a" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#9ca3af" }} dy={10} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#e4e4e7"
+                  strokeOpacity={0.6}
+                />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "#71717a" }}
+                  dy={8}
+                />
                 <YAxis hide />
-                <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
-                <Area type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorUsers)" />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid #27272a",
+                    backgroundColor: "#141313",
+                    color: "#fafafa",
+                    fontSize: "12px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  }}
+                  itemStyle={{ color: "#e4e4e7" }}
+                  labelStyle={{ color: "#a1a1aa", marginBottom: "2px" }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="users"
+                  stroke="#52525b"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#zincUsersFill)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="card bg-base-100 border border-base-300 shadow-sm p-6">
-          <h3 className="font-bold text-lg mb-1">Status Distribution</h3>
-          <p className="text-xs opacity-50 mb-6">Breakdown of platform activity</p>
-          <div className="h-64 w-full relative">
+        {/* Entity Distribution Donut Chart */}
+        <div className="flex flex-col rounded-xl border border-zinc-200/90 bg-white p-5 dark:border-zinc-800/90 dark:bg-[#141313]">
+          <div>
+            <h3 className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+              Platform distribution
+            </h3>
+            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+              Breakdown of active records
+            </p>
+          </div>
+
+          <div className="relative my-4 h-52 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={[
-                    { name: "Users", value: dashboardStats?.totalUsers || 0 },
-                    { name: "Groups", value: dashboardStats?.totalGroups || 0 },
-                    { name: "Reports", value: dashboardStats?.totalReports || 0 },
-                  ].filter(item => item.value > 0)}
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={5}
+                  data={pieData}
+                  innerRadius={56}
+                  outerRadius={78}
+                  paddingAngle={3}
                   dataKey="value"
                   cx="50%"
                   cy="50%"
                 >
-                  <Cell fill={COLORS[0]} stroke="transparent" />
-                  <Cell fill={COLORS[1]} stroke="transparent" />
-                  <Cell fill={COLORS[3]} stroke="transparent" />
+                  {pieData.map((entry) => (
+                    <Cell
+                      key={entry.name}
+                      fill={entry.color}
+                      stroke="transparent"
+                    />
+                  ))}
                 </Pie>
-                <Tooltip contentStyle={{ borderRadius: "12px", border: "none" }} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid #27272a",
+                    backgroundColor: "#141313",
+                    color: "#fafafa",
+                    fontSize: "12px",
+                  }}
+                  itemStyle={{ color: "#e4e4e7" }}
+                />
               </PieChart>
             </ResponsiveContainer>
+
             {!loading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-2xl font-black">
-                  {((dashboardStats?.totalUsers || 0) + (dashboardStats?.totalGroups || 0) + (dashboardStats?.totalReports || 0)).toLocaleString()}
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-xl font-semibold tracking-tight text-zinc-950 tabular-nums dark:text-zinc-50">
+                  {totalEntities.toLocaleString()}
                 </span>
-                <span className="text-[10px] uppercase font-bold opacity-30 tracking-tighter">Total Entities</span>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                  Total records
+                </span>
               </div>
             )}
           </div>
-          <div className="space-y-2 mt-4">
-            <LegendItem color={COLORS[0]} label="Users" value={dashboardStats?.totalUsers} />
-            <LegendItem color={COLORS[1]} label="Groups" value={dashboardStats?.totalGroups} />
-            <LegendItem color={COLORS[3]} label="Reports" value={dashboardStats?.totalReports} />
+
+          <div className="mt-auto space-y-2">
+            <LegendItem
+              color={PIE_COLORS[0]}
+              label="Users"
+              value={dashboardStats?.totalUsers}
+            />
+            <LegendItem
+              color={PIE_COLORS[1]}
+              label="Groups"
+              value={dashboardStats?.totalGroups}
+            />
+            <LegendItem
+              color={PIE_COLORS[2]}
+              label="Reports"
+              value={dashboardStats?.totalReports}
+            />
           </div>
         </div>
       </div>
 
-      {showDetails && (
-        <div className="modal modal-open backdrop-blur-md transition-all duration-500">
-          <div className="modal-box max-w-3xl bg-base-100/95 shadow-2xl border border-base-300 rounded-[2.5rem] p-0 overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="relative bg-gradient-to-br from-primary/20 via-base-100 to-base-100 px-8 py-10 border-b border-base-300">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-5">
-                  <div className="p-4 bg-primary text-primary-content rounded-2xl shadow-2xl shadow-primary/40 rotate-3 transition-transform">
-                    <TrendingUp size={28} strokeWidth={2.5} />
-                  </div>
+      {/* Growth Analytics Modal */}
+      {showDetails &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]"
+            onClick={() => setShowDetails(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-zinc-200/90 bg-white shadow-xl dark:border-zinc-800/90 dark:bg-[#141313]"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between gap-3 border-b border-zinc-200/80 px-5 py-4 dark:border-zinc-800/80">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
+                    <TrendingUp className="h-4 w-4 stroke-[1.75]" />
+                  </span>
                   <div>
-                    <h3 className="font-black text-3xl tracking-tight">Growth Analytics</h3>
-                    <p className="text-sm font-medium opacity-60 flex items-center gap-2">
-                      <Clock size={14} /> Monthly metrics for {new Date().getFullYear()}
+                    <h3 className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+                      Growth analytics
+                    </h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Monthly breakdown for {new Date().getFullYear()}
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setShowDetails(false)} className="btn btn-circle btn-ghost bg-base-200/50 hover:bg-error/20 hover:text-error transition-all">
-                  <X size={24} />
+
+                <button
+                  type="button"
+                  onClick={() => setShowDetails(false)}
+                  aria-label="Close modal"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-200"
+                >
+                  <X className="h-4 w-4 stroke-[1.75]" />
                 </button>
               </div>
-            </div>
 
-            <div className="p-8 max-h-[60vh] overflow-y-auto">
-              <table className="table w-full border-separate border-spacing-y-3">
-                <thead>
-                  <tr className="text-base-content/40 border-none">
-                    <th className="bg-transparent font-black uppercase text-[11px] tracking-widest pl-4">Reporting Period</th>
-                    <th className="bg-transparent font-black uppercase text-[11px] tracking-widest text-center">Acquisition</th>
-                    <th className="bg-transparent font-black uppercase text-[11px] tracking-widest text-right pr-4">Engagement</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {growthData.map((row) => (
-                    <tr key={row.name} className="group transition-all">
-                      <td className="bg-base-200/40 group-hover:bg-primary/10 rounded-l-2xl py-5 pl-6 transition-colors">
-                        <span className="text-lg font-black text-base-content group-hover:text-primary">{row.name}</span>
-                      </td>
-                      <td className="bg-base-200/40 group-hover:bg-primary/10 text-center transition-colors">
-                        <div className="flex flex-col items-center">
-                          <span className="font-mono font-bold text-lg">{row.users.toLocaleString()}</span>
-                          <span className="text-[10px] font-bold text-success uppercase">{row.users > 0 ? "▲ Growth" : "--"}</span>
-                        </div>
-                      </td>
-                      <td className="bg-base-200/40 group-hover:bg-primary/10 text-right rounded-r-2xl pr-6 transition-colors">
-                        <div className="badge badge-outline border-base-300 font-mono font-bold p-4 group-hover:border-primary/30">
-                          {row.messages.toLocaleString()} <span className="ml-2 opacity-40 text-[10px]">MSGS</span>
-                        </div>
-                      </td>
+              {/* Table */}
+              <div className="flex-1 overflow-y-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-zinc-200/80 bg-zinc-50/70 text-[11px] font-medium uppercase tracking-wider text-zinc-500 dark:border-zinc-800/80 dark:bg-zinc-900/40 dark:text-zinc-400">
+                      <th className="px-5 py-2.5">Month</th>
+                      <th className="px-5 py-2.5 text-right">New users</th>
+                      <th className="px-5 py-2.5 text-right">Messages</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="px-8 py-6 bg-base-200/50 border-t border-base-300 flex justify-between items-center">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black opacity-40 uppercase">Data Integrity</span>
-                <span className="text-xs font-bold text-success flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div> Verified Live Data
-                </span>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100 text-xs dark:divide-zinc-800/70">
+                    {growthData.map((row) => (
+                      <tr
+                        key={row.name}
+                        className="transition-colors hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40"
+                      >
+                        <td className="px-5 py-3 font-medium text-zinc-900 dark:text-zinc-100">
+                          {row.name}
+                        </td>
+                        <td className="px-5 py-3 text-right font-mono tabular-nums text-zinc-700 dark:text-zinc-300">
+                          {row.users.toLocaleString()}
+                        </td>
+                        <td className="px-5 py-3 text-right font-mono tabular-nums text-zinc-700 dark:text-zinc-300">
+                          {row.messages.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <button onClick={handleGenerateReport} className="btn btn-primary px-10 rounded-2xl shadow-xl shadow-primary/30 font-black">
-                Export CSV
-              </button>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-between gap-3 border-t border-zinc-200/80 bg-zinc-50/60 px-5 py-3 dark:border-zinc-800/80 dark:bg-zinc-900/30">
+                <span className="flex items-center gap-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Live platform telemetry
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDetails(false)}
+                    className="inline-flex h-8 cursor-pointer items-center justify-center rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateReport}
+                    className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-zinc-200"
+                  >
+                    <Download className="h-3.5 w-3.5 stroke-[1.75]" />
+                    <span>Export CSV</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="modal-backdrop bg-base-900/60 backdrop-blur-md" onClick={() => setShowDetails(false)}></div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };
 
 const LegendItem = ({ color, label, value }) => (
-  <div className="flex items-center justify-between text-sm p-2.5 bg-base-200/30 rounded-xl border border-base-300/50">
-    <div className="flex items-center gap-3">
-      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></div>
-      <span className="opacity-60 font-bold text-xs uppercase tracking-wider">{label}</span>
+  <div className="flex items-center justify-between rounded-lg border border-zinc-100 bg-zinc-50/60 px-3 py-2 text-xs dark:border-zinc-800/70 dark:bg-zinc-900/40">
+    <div className="flex items-center gap-2">
+      <span
+        className="h-2.5 w-2.5 shrink-0 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      <span className="font-medium text-zinc-600 dark:text-zinc-400">
+        {label}
+      </span>
     </div>
-    <span className="font-mono font-black">{value?.toLocaleString() ?? 0}</span>
+    <span className="font-mono font-medium tabular-nums text-zinc-900 dark:text-zinc-100">
+      {value?.toLocaleString() ?? 0}
+    </span>
   </div>
 );
 
-const StatCard = ({ title, value, icon, loading, trend, isWarning }) => {
-  if (loading) return <div className="h-32 w-full bg-base-300 animate-pulse rounded-3xl"></div>;
+const StatCard = ({ title, value, icon: Icon, loading, trend, isWarning }) => {
+  if (loading) {
+    return (
+      <div className="h-28 w-full animate-pulse rounded-xl border border-zinc-200/80 bg-zinc-100/70 dark:border-zinc-800/80 dark:bg-zinc-900/50" />
+    );
+  }
+
   return (
-    <div className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-lg transition-all duration-300 group">
-      <div className="card-body p-6">
-        <div className="flex items-start justify-between">
-          <div className="p-3 rounded-2xl bg-base-200/50 group-hover:scale-110 transition-transform">{icon}</div>
-          {trend && <span className="text-[10px] font-bold py-1 px-2 rounded-full bg-success/10 text-success">{trend}</span>}
-        </div>
-        <div className="mt-4">
-          <h2 className="text-xs font-bold text-base-content/40 uppercase tracking-widest">{title}</h2>
-          <p className={`text-3xl font-black ${isWarning ? "text-error" : "text-base-content"}`}>
-            {value?.toLocaleString() ?? 0}
-          </p>
-        </div>
+    <div className="rounded-xl border border-zinc-200/90 bg-white p-4 transition-colors hover:border-zinc-300 dark:border-zinc-800/90 dark:bg-[#141313] dark:hover:border-zinc-700">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+          <Icon className="h-4 w-4 stroke-[1.75]" />
+        </span>
+
+        {trend && (
+          <span className="rounded border border-emerald-200/80 bg-emerald-50/80 px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-400">
+            {trend}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-3">
+        <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+          {title}
+        </p>
+        <p
+          className={`mt-0.5 text-2xl font-semibold tracking-tight tabular-nums ${
+            isWarning
+              ? "text-red-600 dark:text-red-400"
+              : "text-zinc-950 dark:text-zinc-50"
+          }`}
+        >
+          {value?.toLocaleString() ?? 0}
+        </p>
       </div>
     </div>
   );
