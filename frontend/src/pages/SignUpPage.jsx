@@ -37,17 +37,32 @@ const SignUpPage = () => {
   const navigate = useNavigate();
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) return toast.error("Full name is required");
-    if (!formData.email.trim()) return toast.error("Email is required");
-    if (!/\S+@\S+\.\S+/.test(formData.email))
-      return toast.error("Invalid email format");
-    if (!formData.password) return toast.error("Password is required");
-    if (formData.password.length < 6)
-      return toast.error("Password must be at least 6 characters");
+    if (!formData.fullName.trim()) {
+      toast.error("Full name is required");
+      return false;
+    }
+    if (!formData.email.trim()) {
+      toast.error("Email is required");
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      toast.error("Invalid email format");
+      return false;
+    }
+    if (!formData.password) {
+      toast.error("Password is required");
+      return false;
+    }
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
 
-    for (let q of formData.securityQuestions) {
-      if (!q.answer.trim())
-        return toast.error("All security answers are required");
+    for (const q of formData.securityQuestions) {
+      if (!q.answer.trim()) {
+        toast.error("All security answers are required");
+        return false;
+      }
     }
 
     return true;
@@ -78,163 +93,215 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-base-200 px-4 py-8 relative overflow-hidden">
-      {/* Background Decorative Glows */}
-      <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-primary/10 blur-[100px] rounded-full animate-pulse pointer-events-none" />
-      <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-secondary/10 blur-[100px] rounded-full animate-pulse pointer-events-none" />
-
-      {/* Main Container */}
-      <div className="w-full max-w-5xl relative z-10 my-auto">
+    <div className="min-h-screen w-full flex items-center justify-center bg-zinc-50 dark:bg-[#100F0F] px-4 py-10">
+      <div className="w-full max-w-4xl">
         <form
           onSubmit={handleSubmit}
-          className="w-full rounded-2xl md:rounded-3xl bg-base-100/80 backdrop-blur-2xl shadow-2xl border border-base-content/10 overflow-hidden flex flex-col md:flex-row"
+          className="w-full rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#141313] shadow-xs overflow-hidden grid grid-cols-1 md:grid-cols-12"
         >
-          {/* Left Column: Primary Auth Details */}
-          <div className="flex-[1.2] p-6 sm:p-8 lg:p-12 flex flex-col justify-between">
+          {/* Left Column: Account Credentials & OAuth */}
+          <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
             <div>
               {/* Header */}
-              <div className="mb-6 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                  <div className="size-11 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                    <MessageSquare className="size-6 text-primary-content" />
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Create Account</h1>
+              <div className="mb-6">
+                <div className="mb-4 flex items-center gap-2.5">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200">
+                    <MessageSquare className="h-4 w-4 stroke-[1.75]" />
+                  </span>
+                  <span className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    PASO
+                  </span>
                 </div>
-                <p className="text-base-content/60 text-xs sm:text-sm font-medium">
-                  Secure your journey in a few simple steps.
+
+                <h1 className="text-xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+                  Create your account
+                </h1>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  Set up your credentials and recovery answers to get started.
                 </p>
               </div>
 
-              {/* Basic Fields */}
-              <div className="space-y-4">
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text font-bold text-xs uppercase opacity-70">Full Name</span>
+              {/* Credential Fields */}
+              <div className="space-y-3.5">
+                <div>
+                  <label
+                    htmlFor="signup-name"
+                    className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
+                  >
+                    Full name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-40" />
+                    <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500 stroke-[1.75]" />
                     <input
+                      id="signup-name"
                       type="text"
-                      className="input input-bordered w-full pl-11 bg-base-200/50 border-none focus:ring-2 ring-primary/20 h-11 text-sm transition-all"
-                      placeholder="John Doe"
+                      className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 pl-9 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:outline-none transition-colors"
+                      placeholder="Your full name"
                       value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, fullName: e.target.value })
+                      }
+                      autoComplete="name"
                     />
                   </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text font-bold text-xs uppercase opacity-70">Email</span>
+                <div>
+                  <label
+                    htmlFor="signup-email"
+                    className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
+                  >
+                    Email
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-40" />
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500 stroke-[1.75]" />
                     <input
+                      id="signup-email"
                       type="email"
-                      className="input input-bordered w-full pl-11 bg-base-200/50 border-none focus:ring-2 ring-primary/20 h-11 text-sm transition-all"
-                      placeholder="you@email.com"
+                      className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 pl-9 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:outline-none transition-colors"
+                      placeholder="name@example.com"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      autoComplete="email"
                     />
                   </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text font-bold text-xs uppercase opacity-70">Password</span>
+                <div>
+                  <label
+                    htmlFor="signup-password"
+                    className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
+                  >
+                    Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-40" />
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500 stroke-[1.75]" />
                     <input
+                      id="signup-password"
                       type={showPassword ? "text" : "password"}
-                      className="input input-bordered w-full pl-11 pr-11 bg-base-200/50 border-none focus:ring-2 ring-primary/20 h-11 text-sm transition-all"
-                      placeholder="••••••••"
+                      className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 pl-9 pr-9 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:outline-none transition-colors"
+                      placeholder="At least 6 characters"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
-                      className="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     >
-                      {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                      {showPassword ? (
+                        <EyeOff className="h-3.5 w-3.5 stroke-[1.75]" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5 stroke-[1.75]" />
+                      )}
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Social Login Divider */}
-              <div className="mt-6 mb-2">
-                <div className="divider text-xs uppercase opacity-60">OR</div>
-                <div className="flex justify-center mt-4">
-                  <GoogleLogin
-                    onSuccess={async (credentialResponse) => {
-                      if (!credentialResponse.credential) {
-                        toast.error("Google authentication failed.");
-                        return;
-                      }
-                      await googleLogin(credentialResponse.credential);
-                    }}
-                    onError={() => {
-                      toast.error("Google signup failed.");
-                    }}
-                    useOneTap={false}
-                  />
-                </div>
-
-                {isGoogleLoggingIn && (
-                  <div className="flex justify-center mt-3">
-                    <Loader2 className="size-5 animate-spin text-primary" />
-                  </div>
-                )}
+              {/* Google OAuth */}
+              <div className="my-5 flex items-center gap-3">
+                <div className="h-[1px] flex-1 bg-zinc-200/80 dark:bg-zinc-800/80" />
+                <span className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                  or
+                </span>
+                <div className="h-[1px] flex-1 bg-zinc-200/80 dark:bg-zinc-800/80" />
               </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    if (!credentialResponse.credential) {
+                      toast.error("Google authentication failed.");
+                      return;
+                    }
+                    await googleLogin(credentialResponse.credential);
+                  }}
+                  onError={() => {
+                    toast.error("Google signup failed.");
+                  }}
+                  useOneTap={false}
+                  theme="outline"
+                  size="large"
+                  shape="rectangular"
+                  width="320"
+                />
+              </div>
+
+              {isGoogleLoggingIn && (
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Connecting with Google...</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Right Column: Security Questions & Actions */}
-          <div className="flex-1 bg-base-200/30 p-6 sm:p-8 lg:p-12 flex flex-col justify-between border-t md:border-t-0 md:border-l border-base-content/5">
+          {/* Right Column: Recovery Questions & Submit */}
+          <div className="md:col-span-5 border-t md:border-t-0 md:border-l border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/60 dark:bg-zinc-900/30 p-6 sm:p-8 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-6">
-                <ShieldCheck className="size-5 text-primary" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-base-content/70">
-                  Account Recovery Questions
-                </h3>
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck className="h-4 w-4 text-zinc-500 dark:text-zinc-400 stroke-[1.75]" />
+                <h2 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                  Account recovery questions
+                </h2>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3.5">
                 {formData.securityQuestions.map((q, index) => (
-                  <div key={index} className="form-control">
-                    <label className="label py-0.5">
-                      <span className="label-text-alt text-xs font-medium text-base-content/80">
-                        {q.question}
-                      </span>
+                  <div key={index}>
+                    <label
+                      htmlFor={`recovery-q-${index}`}
+                      className="block text-xs text-zinc-600 dark:text-zinc-400 mb-1"
+                    >
+                      {q.question}
                     </label>
                     <input
+                      id={`recovery-q-${index}`}
                       type="text"
-                      className="input input-bordered w-full bg-base-100 border-base-300 focus:border-primary h-10 text-sm transition-all"
+                      className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/70 px-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:outline-none transition-colors"
                       placeholder="Your answer"
                       value={q.answer}
-                      onChange={(e) => handleAnswerChange(index, e.target.value)}
+                      onChange={(e) =>
+                        handleAnswerChange(index, e.target.value)
+                      }
                     />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="mt-8 space-y-4">
+            <div className="mt-7 space-y-3.5">
               <button
                 type="submit"
                 disabled={isSigningUp}
-                className="btn btn-primary w-full h-12 shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all font-semibold text-base"
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-md bg-zinc-900 dark:bg-zinc-100 px-4 text-xs font-medium text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
               >
-                {isSigningUp ? <Loader2 className="animate-spin size-5" /> : "Create Account"}
+                {isSigningUp ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Creating account...</span>
+                  </>
+                ) : (
+                  <span>Create account</span>
+                )}
               </button>
 
-              <p className="text-center text-xs sm:text-sm text-base-content/60">
-                Already a member?{" "}
-                <Link to="/login" className="text-primary font-bold hover:underline">
-                  Log in
+              <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-zinc-900 dark:text-zinc-100 hover:underline underline-offset-4"
+                >
+                  Sign in
                 </Link>
               </p>
             </div>
