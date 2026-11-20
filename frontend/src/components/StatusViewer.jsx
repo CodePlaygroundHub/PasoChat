@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { X, Trash2, Eye } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Eye, Trash2, X } from "lucide-react";
 import { useStatusStore } from "../store/useStatusStore";
 import StatusProgress from "./StatusProgress";
 import { useAuthStore } from "../store/useAuthStore";
-import { useChatStore } from "../store/useChatStore";
-import { useNavigate } from "react-router-dom";
 
 const StatusViewer = () => {
   const {
@@ -16,14 +15,11 @@ const StatusViewer = () => {
   } = useStatusStore();
 
   const { authUser } = useAuthStore();
-  const { createOrGetChat, sendMessage } = useChatStore();
-  const navigate = useNavigate();
 
-  const [replyText, setReplyText] = useState("");
   const [showViewers, setShowViewers] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // SAFELY GROUP USER STATUSES
+  // Safely group statuses for the selected author
   const userStatuses = useMemo(() => {
     if (!selectedStatus?.user?._id) return [];
 
@@ -32,18 +28,15 @@ const StatusViewer = () => {
     );
   }, [statuses, selectedStatus]);
 
-  // SET INDEX + REGISTER VIEW
+  // Sync active index and register view
   useEffect(() => {
     if (!selectedStatus?.user?._id) return;
 
     const index = userStatuses.findIndex((s) => s?._id === selectedStatus._id);
-
     setCurrentIndex(index === -1 ? 0 : index);
-
     viewStatus(selectedStatus);
   }, [selectedStatus, userStatuses, viewStatus]);
 
-  // HARD STOP IF NOTHING SELECTED
   if (!selectedStatus?.user?._id) return null;
 
   const status = userStatuses[currentIndex];
@@ -67,34 +60,22 @@ const StatusViewer = () => {
     }
   };
 
-  const handleSendReply = async () => {
-    if (!replyText.trim()) return;
-
-    const chat = await createOrGetChat(status.user._id);
-
-    await sendMessage(chat._id, {
-      text: replyText,
-      statusReply: {
-        statusId: status._id,
-        mediaUrl: status.mediaUrl,
-        text: status.text,
-      },
-    });
-
-    setReplyText("");
-    clearSelectedStatus();
-    navigate("/chats");
-  };
-
-  const isImage = status.mediaUrl?.match(/\.(jpg|jpeg|png|webp)$/i);
+  const isOwner = status.user._id === authUser?._id;
+  const isImage = status.mediaUrl?.match(/\.(jpg|jpeg|png|webp|gif)$/i);
   const isVideo = status.mediaUrl?.match(/\.(mp4|webm|ogg)$/i);
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      <div className="flex gap-1 px-2 pt-2">
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] flex flex-col bg-[#100F0F] text-zinc-100 select-none">
+      {/* Progress Segments */}
+      <div className="flex gap-1 px-3 pt-3 z-20">
         {userStatuses.map((_, i) => {
           if (i < currentIndex) {
-            return <div key={i} className="flex-1 h-1 bg-white rounded" />;
+            return (
+              <div
+                key={i}
+                className="h-0.5 flex-1 overflow-hidden rounded-full bg-zinc-100"
+              />
+            );
           }
 
           if (i === currentIndex) {
@@ -105,56 +86,96 @@ const StatusViewer = () => {
             );
           }
 
-          return <div key={i} className="flex-1 h-1 bg-white/30 rounded" />;
+          return (
+            <div
+              key={i}
+              className="h-0.5 flex-1 overflow-hidden rounded-full bg-zinc-700/80"
+            />
+          );
         })}
       </div>
 
-      <div className="flex items-center justify-between p-4 text-white z-20 relative">
-        <div className="flex items-center gap-3">
+      {/* Top Bar */}
+      <div className="relative z-20 flex items-center justify-between gap-3 border-b border-zinc-800/70 bg-[#100F0F]/80 px-4 py-3 backdrop-blur-sm">
+        <div className="flex min-w-0 items-center gap-3">
           <img
             src={status.user.profilePic || "/avatar.png"}
-            className="w-10 h-10 rounded-full"
-            alt={status.user.fullName}
+            alt={status.user.fullName || "User"}
+            onError={(e) => {
+              e.currentTarget.src = "/avatar.png";
+            }}
+            className="h-9 w-9 shrink-0 rounded-full border border-zinc-700/80 object-cover"
           />
-          <div>
-            <p className="font-medium">{status.user.fullName}</p>
-            <p className="text-xs opacity-70">
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-zinc-100">
+              {status.user.fullName}
+            </p>
+            <p className="truncate text-[11px] text-zinc-400 tabular-nums">
               {new Date(status.createdAt).toLocaleString()}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {status.user._id === authUser?._id && (
-            <button onClick={() => setShowViewers(true)}>
-              <Eye size={20} />
+        <div className="flex shrink-0 items-center gap-1">
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setShowViewers(true)}
+              title="Viewers"
+              aria-label="View status viewers"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-zinc-800/80 hover:text-white transition-colors cursor-pointer"
+            >
+              <Eye className="h-4 w-4 stroke-[1.75]" />
             </button>
           )}
 
-          {status.user._id === authUser?._id && (
-            <button onClick={() => deleteStatus(status._id)}>
-              <Trash2 size={20} />
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => deleteStatus(status._id)}
+              title="Delete status"
+              aria-label="Delete status"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-red-950/50 hover:text-red-400 transition-colors cursor-pointer"
+            >
+              <Trash2 className="h-4 w-4 stroke-[1.75]" />
             </button>
           )}
 
-          <button onClick={clearSelectedStatus}>
-            <X />
+          <button
+            type="button"
+            onClick={clearSelectedStatus}
+            title="Close"
+            aria-label="Close status viewer"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-zinc-800/80 hover:text-white transition-colors cursor-pointer"
+          >
+            <X className="h-4 w-4 stroke-[1.75]" />
           </button>
         </div>
       </div>
 
-      {/* CLICK ZONES */}
-      <div className="absolute inset-x-0 top-20 bottom-0 flex z-10">
-        <div className="w-1/2" onClick={prevStatus} />
-        <div className="w-1/2" onClick={nextStatus} />
+      {/* Tap Navigation Zones */}
+      <div className="absolute inset-x-0 top-16 bottom-0 z-10 flex">
+        <button
+          type="button"
+          onClick={prevStatus}
+          aria-label="Previous status"
+          className="h-full w-1/2 cursor-default focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={nextStatus}
+          aria-label="Next status"
+          className="h-full w-1/2 cursor-default focus:outline-none"
+        />
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 flex items-center justify-center">
+      {/* Media / Text Content */}
+      <div className="relative z-10 pointer-events-none flex flex-1 items-center justify-center overflow-hidden p-4">
         {isImage && (
           <img
             src={status.mediaUrl}
-            className="max-h-full max-w-full object-contain"
+            alt={status.text || "Status media"}
+            className="max-h-full max-w-full rounded-lg border border-zinc-800/80 object-contain"
           />
         )}
 
@@ -162,46 +183,73 @@ const StatusViewer = () => {
           <video
             src={status.mediaUrl}
             autoPlay
-            className="max-h-full max-w-full"
+            controls
+            className="pointer-events-auto max-h-full max-w-full rounded-lg border border-zinc-800/80 object-contain"
           />
         )}
 
-        {!status.mediaUrl && (
-          <div className="text-white text-xl px-6 text-center">
+        {!status.mediaUrl && status.text && (
+          <div className="max-w-lg rounded-xl border border-zinc-800/90 bg-[#141313] px-6 py-5 text-center text-base sm:text-lg font-medium leading-relaxed text-zinc-100">
             {status.text}
           </div>
         )}
       </div>
 
+      {/* Viewers Sheet */}
       {showViewers && (
-        <div className="absolute inset-0 bg-black/60 z-30 flex items-end">
-          <div className="w-full bg-base-100 rounded-t-xl p-4 max-h-[60%] overflow-y-auto">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-medium">
+        <div
+          className="fixed inset-0 z-30 flex items-end justify-center bg-black/60 backdrop-blur-[2px] p-4"
+          onClick={() => setShowViewers(false)}
+        >
+          <div
+            className="max-h-[60vh] w-full max-w-md overflow-y-auto rounded-xl border border-zinc-800 bg-[#141313] shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+              <p className="text-xs font-semibold text-zinc-100 tabular-nums">
                 Viewed by {status.viewers?.length || 0}
               </p>
-              <button onClick={() => setShowViewers(false)}>
-                <X />
+              <button
+                type="button"
+                onClick={() => setShowViewers(false)}
+                aria-label="Close viewers list"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4 stroke-[1.75]" />
               </button>
             </div>
 
-            {status.viewers?.length === 0 && (
-              <p className="text-sm opacity-60">No views yet</p>
-            )}
+            <div className="divide-y divide-zinc-800/70 px-4 py-2">
+              {(!status.viewers || status.viewers.length === 0) && (
+                <p className="py-6 text-center text-xs text-zinc-400">
+                  No views yet
+                </p>
+              )}
 
-            {status.viewers?.map((viewer) => (
-              <div key={viewer._id} className="flex items-center gap-3 py-2">
-                <img
-                  src={viewer.profilePic || "/avatar.png"}
-                  className="w-9 h-9 rounded-full"
-                />
-                <p className="font-medium">{viewer.fullName}</p>
-              </div>
-            ))}
+              {status.viewers?.map((viewer) => (
+                <div
+                  key={viewer._id}
+                  className="flex items-center gap-3 py-2.5"
+                >
+                  <img
+                    src={viewer.profilePic || "/avatar.png"}
+                    alt={viewer.fullName || "Viewer"}
+                    onError={(e) => {
+                      e.currentTarget.src = "/avatar.png";
+                    }}
+                    className="h-8 w-8 shrink-0 rounded-full border border-zinc-800 object-cover"
+                  />
+                  <p className="truncate text-xs font-medium text-zinc-200">
+                    {viewer.fullName}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body,
   );
 };
 
