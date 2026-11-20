@@ -54,84 +54,80 @@ const ProfilePage = () => {
   return (
     <div className="flex h-full w-full bg-base-200 overflow-hidden items-center justify-center p-0 md:p-3 lg:p-4">
       <div className="flex flex-col h-full w-full max-w-6xl bg-base-100 md:rounded-2xl shadow-xl overflow-hidden border border-base-300">
-        
+
         {/* Top Navbar */}
         <Navbar />
 
         {/* Scrollable Main Area */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-8 bg-zinc-50 dark:bg-[#100F0F] custom-scrollbar">
           <div className="mx-auto max-w-2xl space-y-6">
-            
             {/* Header Action Bar */}
-            <div className="flex items-center justify-between border-b border-base-200 pb-4">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-4 border-b border-zinc-200/80 dark:border-zinc-800/80 pb-4">
+              <div className="flex items-center gap-3 min-w-0">
                 <button
+                  type="button"
                   onClick={() => navigate("/")}
-                  className="btn btn-ghost btn-sm btn-circle text-base-content/70 hover:text-base-content hover:bg-base-200"
+                  aria-label="Back to App"
                   title="Back to App"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors cursor-pointer"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-4 w-4 stroke-[1.75]" />
                 </button>
-                <div>
-                  <h1 className="text-xl font-extrabold tracking-tight text-base-content flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    Account Profile
+
+                <div className="min-w-0">
+                  <h1 className="text-lg font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
+                    Account profile
                   </h1>
-                  <p className="text-xs text-base-content/60">
-                    Update your public identity and profile picture
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
+                    Manage your display name and profile picture.
                   </p>
                 </div>
               </div>
 
               {isDirty && (
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={isUpdatingProfile}
-                  className="btn btn-primary btn-sm gap-2 shadow-md shadow-primary/20 animate-in fade-in zoom-in rounded-xl"
+                  className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md bg-zinc-900 dark:bg-zinc-100 px-3 text-xs font-medium text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
                 >
                   {isUpdatingProfile ? (
-                    <span className="loading loading-spinner loading-xs"></span>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <Save className="h-4 w-4" />
+                    <Save className="h-3.5 w-3.5 stroke-[1.75]" />
                   )}
-                  <span>Save Changes</span>
+                  <span>Save changes</span>
                 </button>
               )}
             </div>
 
-            {/* Profile Avatar Card */}
-            <div className="bg-base-200/40 border border-base-300 rounded-2xl p-6 sm:p-8 space-y-8">
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative group">
-                  <div className="relative h-28 w-28 sm:h-36 sm:w-36">
-                    <img
-                      src={selectedImg || authUser?.profilePic || "/avatar.png"}
-                      alt={`${authUser?.fullName || "User"} profile`}
-                      onError={(e) => {
-                        e.currentTarget.src = "/avatar.png";
-                      }}
-                      className={`h-full w-full rounded-full object-cover ring-4 ring-primary/20 shadow-xl transition-all duration-300 ${
-                        isUpdatingProfile
-                          ? "opacity-50 blur-[2px]"
-                          : "group-hover:brightness-95"
+            {/* Profile Avatar & Details */}
+            <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#141313] p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-5 pb-6 border-b border-zinc-100 dark:border-zinc-800/70">
+                <div className="relative mx-auto sm:mx-0 h-20 w-20 shrink-0">
+                  <img
+                    src={selectedImg || authUser?.profilePic || "/avatar.png"}
+                    alt={`${authUser?.fullName || "User"} profile`}
+                    onError={(e) => {
+                      e.currentTarget.src = "/avatar.png";
+                    }}
+                    className={`h-20 w-20 rounded-full object-cover border border-zinc-200 dark:border-zinc-700 transition-opacity ${isUpdatingProfile ? "opacity-40" : "opacity-100"
                       }`}
-                    />
+                  />
 
-                    {isUpdatingProfile && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="loading loading-spinner loading-lg text-primary"></span>
-                      </div>
-                    )}
-                  </div>
+                  {isUpdatingProfile && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-zinc-700 dark:text-zinc-200" />
+                    </div>
+                  )}
 
                   <label
                     htmlFor="avatar-upload"
-                    className={`absolute bottom-1 right-1 p-2.5 rounded-full bg-primary text-primary-content cursor-pointer shadow-lg transition-all duration-200 hover:scale-110 active:scale-95 ring-2 ring-base-100 ${
-                      isUpdatingProfile ? "opacity-50 pointer-events-none" : ""
-                    }`}
                     title="Upload new image"
+                    className={`absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer ${isUpdatingProfile ? "opacity-50 pointer-events-none" : ""
+                      }`}
                   >
-                    <Camera className="h-4 w-4" />
+                    <Camera className="h-3.5 w-3.5 stroke-[1.75]" />
                     <input
                       id="avatar-upload"
                       type="file"
@@ -143,88 +139,98 @@ const ProfilePage = () => {
                   </label>
                 </div>
 
-                <div className="text-center space-y-1">
-                  <p className="text-xs font-medium text-base-content/70 flex items-center justify-center gap-1">
-                    Click camera icon to change avatar
+                <div className="text-center sm:text-left space-y-1">
+                  <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
+                    Profile photo
                   </p>
-                  <p className="text-[10px] text-base-content/40">
-                    Supports PNG, JPG, or GIF (max 5MB)
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Select a square image for the sharpest display across chats.
+                  </p>
+                  <p className="text-[11px] text-zinc-400 dark:text-zinc-500">
+                    PNG, JPG, or GIF up to 5MB
                   </p>
                 </div>
               </div>
 
               {/* Form Input Fields */}
-              <div className="space-y-4 pt-2">
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text flex items-center gap-2 font-semibold text-xs text-base-content/80">
-                      <User className="h-3.5 w-3.5 text-primary" /> Full Name
-                    </span>
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="profile-fullname"
+                    className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5"
+                  >
+                    Full name
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={fullName}
-                    onChange={(e) => {
-                      setFullName(e.target.value);
-                      setIsDirty(true);
-                    }}
-                    className="input input-bordered bg-base-100 focus:input-primary transition-all w-full text-sm rounded-xl"
-                  />
+                  <div className="relative">
+                    <User className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500 stroke-[1.75]" />
+                    <input
+                      id="profile-fullname"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                        setIsDirty(true);
+                      }}
+                      className="h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 pl-9 pr-3 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:border-zinc-400 dark:focus:border-zinc-600 focus:outline-none transition-colors"
+                    />
+                  </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label py-1">
-                    <span className="label-text flex items-center gap-2 font-semibold text-xs text-base-content/80">
-                      <Mail className="h-3.5 w-3.5 text-primary" /> Email Address
-                    </span>
+                <div>
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                    Email address
                   </label>
-                  <div className="input input-bordered bg-base-100/60 flex items-center justify-between text-sm rounded-xl text-base-content/70 cursor-not-allowed">
+                  <div className="relative flex h-9 w-full items-center justify-between rounded-md border border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-900/40 pl-9 pr-3 text-xs text-zinc-500 dark:text-zinc-400">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 dark:text-zinc-500 stroke-[1.75]" />
                     <span className="truncate">{authUser?.email}</span>
-                    <span className="badge badge-xs badge-ghost text-[10px] opacity-60">Read only</span>
+                    <span className="ml-2 shrink-0 text-[11px] text-zinc-400 dark:text-zinc-500">
+                      Read only
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Account Status Card */}
-            <div className="bg-base-200/40 border border-base-300 rounded-2xl p-6">
-              <h2 className="text-base font-bold mb-4 flex items-center gap-2 text-base-content">
-                <ShieldCheck className="w-5 h-5 text-success" />
-                Verification Status
-              </h2>
+            {/* Account Status */}
+            <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#141313] p-6 shadow-xs">
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck className="h-4 w-4 text-zinc-500 dark:text-zinc-400 stroke-[1.75]" />
+                <h2 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                  Verification status
+                </h2>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-base-100 border border-base-200 flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
-                    <Calendar className="w-4 h-4" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="rounded-lg border border-zinc-200/70 dark:border-zinc-800/70 bg-zinc-50/70 dark:bg-zinc-900/40 p-3.5 flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400">
+                    <Calendar className="h-4 w-4 stroke-[1.75]" />
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-base-content/50">
-                      Member Since
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      Member since
                     </p>
-                    <p className="font-semibold text-sm text-base-content">
+                    <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100 tabular-nums mt-0.5">
                       {authUser?.createdAt?.split("T")[0] || "N/A"}
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-base-100 border border-base-200 flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-success/10 text-success">
-                    <CheckCircle2 className="w-4 h-4" />
+                <div className="rounded-lg border border-zinc-200/70 dark:border-zinc-800/70 bg-zinc-50/70 dark:bg-zinc-900/40 p-3.5 flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="h-4 w-4 stroke-[1.75]" />
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-base-content/50">
-                      Account Status
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      Account status
                     </p>
-                    <p className="text-success font-bold text-sm">
-                      Active Member
+                    <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100 mt-0.5">
+                      Active member
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
